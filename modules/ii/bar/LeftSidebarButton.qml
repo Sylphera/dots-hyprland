@@ -13,7 +13,7 @@ RippleButton {
     property bool contentColorOverridden: false
     property bool vertical: Config.options.bar.vertical
     property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
-    readonly property bool customIcon: Config.options.custom.distroIcon !== ""
+    readonly property bool customIcon: Config.options.bar.topLeftIcon == 'distro' && Config.options.custom.distroIcon !== ""
     readonly property string customFolder: {
         if (!root.customIcon)
             return "";
