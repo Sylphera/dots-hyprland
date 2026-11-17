@@ -70,7 +70,7 @@
     {"namespace": "quickshell:wStartMenu", "animation": "noAnim"},
     {"namespace": "quickshell:wTaskView", "animation": "noAnim", "ignoreAlpha": 0},
 
-    {"namespace": "quickshell:(spotlight|settings|nowPlaying|popup|colorPicker|screenframe|dropover|background|backgroundWidgets)", "animation": "noAnim"},
+    {"namespace": "quickshell:(spotlight|settings|nowPlaying|colorPicker|screenframe|dropover|background|backgroundWidgets)", "animation": "noAnim"},
 
     {"namespace": "quickshell:background", "blur": false},
     {"namespace": "quickshell:nabyIsland", "blur": false, "animation": "noAnim"},
