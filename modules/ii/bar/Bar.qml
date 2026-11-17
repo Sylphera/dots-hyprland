@@ -13,6 +13,26 @@ import qs.modules.common.widgets
 Scope {
     id: bar
     property bool showBarBackground: Config.options.bar.showBackground
+    property bool requestedOpen: GlobalStates.barOpen
+    readonly property int showDuration: 160
+    readonly property int hideDuration: 140
+
+    function setOpen(isOpen) {
+        if (!Platform.isWindows) {
+            GlobalStates.barOpen = isOpen;
+            return;
+        }
+        if (requestedOpen === isOpen) return;
+        requestedOpen = isOpen;
+        commitToggle.restart();
+    }
+
+    Timer {
+        id: commitToggle
+        interval: (bar.requestedOpen ? bar.showDuration : bar.hideDuration) + 20
+        repeat: false
+        onTriggered: GlobalStates.barOpen = bar.requestedOpen
+    }
 
     Variants {
         // For each monitor
@@ -25,11 +45,21 @@ Scope {
         }
         LazyLoader {
             id: barLoader
-            active: GlobalStates.barOpen && !GlobalStates.screenLocked
+            active: (Platform.isWindows || bar.requestedOpen) && !GlobalStates.screenLocked
             required property ShellScreen modelData
-            component: PanelWindow { // Bar window
+            component: Scope {
+            PanelWindow { // Bar visuals
                 id: barRoot
                 screen: barLoader.modelData
+
+                property real toggleOffset: bar.requestedOpen
+                    ? 0 : (Config.options.bar.bottom ? implicitHeight : -implicitHeight)
+                Behavior on toggleOffset {
+                    NumberAnimation {
+                        duration: bar.requestedOpen ? bar.showDuration : bar.hideDuration
+                        easing.type: Easing.OutCubic
+                    }
+                }
 
                 Timer {
                     id: showBarTimer
@@ -74,9 +104,10 @@ Scope {
                 readonly property int normalExclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 :
                     Appearance.sizes.baseBarHeight + BarLayouts.styleZone
                 exclusionMode: ExclusionMode.Ignore
-                exclusiveZone: (barContent.centerOnly && Config.options.bar.showFrame && Config.options.bar.centerOnlyReserveFrame)
+                readonly property int reservedZone: (barContent.centerOnly && Config.options.bar.showFrame && Config.options.bar.centerOnlyReserveFrame)
                     ? Config.options.bar.frameThickness
                     : normalExclusiveZone + barRoot.frameInset
+                exclusiveZone: Platform.isWindows ? -1 : reservedZone
                 WlrLayershell.namespace: "quickshell:bar"
                 implicitHeight: Appearance.sizes.barHeight + Appearance.rounding.screenRounding
                 readonly property bool pillMask: barContent.item?.pillMask ?? false
@@ -122,6 +153,9 @@ Scope {
                 MouseArea  {
                     id: hoverRegion
                     hoverEnabled: true
+                    transform: Translate {
+                        y: Platform.isWindows ? barRoot.toggleOffset : 0
+                    }
                     anchors {
                         fill: parent
                         rightMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * 1
@@ -291,22 +325,41 @@ Scope {
                     }
                 }
             }
+
+            // This surface reserves the same space as the original bar, after the slide.
+            PanelWindow {
+                screen: barLoader.modelData
+                visible: Platform.isWindows && GlobalStates.barOpen
+                WlrLayershell.namespace: "quickshell:bar-reservation"
+                color: "transparent"
+                implicitHeight: 1
+                implicitWidth: 1
+                exclusiveZone: barRoot.reservedZone
+                mask: Region {}
+                anchors {
+                    top: !Config.options.bar.bottom
+                    bottom: Config.options.bar.bottom
+                    left: true
+                    right: true
+                }
+            }
         }
+    }
     }
 
     IpcHandler {
         target: "bar"
 
         function toggle(): void {
-            GlobalStates.barOpen = !GlobalStates.barOpen
+            bar.setOpen(!bar.requestedOpen)
         }
 
         function close(): void {
-            GlobalStates.barOpen = false
+            bar.setOpen(false)
         }
 
         function open(): void {
-            GlobalStates.barOpen = true
+            bar.setOpen(true)
         }
     }
 
@@ -315,7 +368,7 @@ Scope {
         description: "Toggles bar on press"
 
         onPressed: {
-            GlobalStates.barOpen = !GlobalStates.barOpen;
+            bar.setOpen(!bar.requestedOpen);
         }
     }
 
@@ -324,7 +377,7 @@ Scope {
         description: "Opens bar on press"
 
         onPressed: {
-            GlobalStates.barOpen = true;
+            bar.setOpen(true);
         }
     }
 
@@ -333,7 +386,7 @@ Scope {
         description: "Closes bar on press"
 
         onPressed: {
-            GlobalStates.barOpen = false;
+            bar.setOpen(false);
         }
     }
 }
