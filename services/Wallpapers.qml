@@ -535,7 +535,6 @@ Singleton {
         const wn = WindowsNative.wallpaper;
         if (!wn || !Config.ready || !root._shellProcess) return;
         const active = root.desktopWallpapersActive;
-        if (!active && !root._desktopWallpapersSynced) return;
         const main = root.stillPath;
         if (!main || root.isVideoPath(main)) return;
         root._nativeDesktopWallpapers = wn.setDesktopWallpapers(root._systemDesktopPaths, main);
