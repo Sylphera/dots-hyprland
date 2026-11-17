@@ -75,11 +75,89 @@ Scope {
             screen: modelData.screen
             visible: !GlobalStates.screenLocked
 
+            // Dock actions can open QuickShell overlays. The native focus
+            // grab must consider the dock an internal surface, otherwise its
+            // initial click dismisses an overlay before the QML toggle runs.
+            Component.onCompleted: {
+                if (Platform.isWindows) GlobalFocusGrab.addPersistent(dockRoot);
+            }
+            Component.onDestruction: {
+                if (Platform.isWindows) GlobalFocusGrab.removePersistent(dockRoot);
+            }
+
             readonly property bool hug: DockStyle.hug
             readonly property string position: DockStyle.position
             readonly property bool vertical: position !== "bottom"
             readonly property real gap: Appearance.sizes.hyprlandGapsOut
             readonly property real shadowMargin: Appearance.sizes.elevationMargin
+            // Windows' input mask follows dockMouseArea while it is animated.
+            // Cursor hit-testing against that moving mask causes alternating
+            // enter/leave events as the dock slides into or out of view.
+            // Use the existing native GetCursorPos-backed API instead, with
+            // a stationary screen-edge trigger and a short leave grace period.
+            readonly property bool stableWindowsHover: Platform.isWindows
+                && Config.options.windowsPort.dockStableHover
+                && Config.options.dock.hoverToReveal
+            property bool nativePointerInside: false
+            property double nativeHoverDeadline: 0
+            // The native workspace model tracks windows independently of the
+            // foreground HWND. A temporary focus gap during a desktop switch
+            // must never reveal the dock if the destination has windows.
+            // An actually empty destination, however, can reveal immediately.
+            readonly property bool nativeWorkspaceEmpty:
+                Hyprland.focusedWorkspace != null
+                && !(Hyprland.focusedWorkspace.toplevels?.values ?? []).some(t => !(t.wayland?.minimized ?? false))
+            Timer {
+                interval: 16
+                repeat: true
+                triggeredOnStart: true
+                running: dockRoot.stableWindowsHover && dockRoot.visible && !root.pinned
+                onTriggered: {
+                    const screen = dockRoot.screen;
+                    const cursor = WindowsNative.input?.cursorPosition();
+                    let onEdge = false;
+                    let inExpandedDock = false;
+                    if (screen && cursor?.screen === screen.name) {
+                        const x = cursor.x;
+                        const y = cursor.y;
+                        // Sample slightly inside the physical trigger as
+                        // well: fast motion can cross a 2px strip between
+                        // two frames, even when QML never receives onEntered.
+                        const edge = Math.max(6, Config.options.dock.hoverRegionHeight ?? 2);
+                        if (dockRoot.vertical) {
+                            const halfHeight = dockMouseArea.implicitHeight / 2;
+                            const yWithin = y >= (screen.height / 2 - halfHeight)
+                                && y < (screen.height / 2 + halfHeight);
+                            const atLeft = dockRoot.position === "left";
+                            const sideDistance = atLeft ? x : screen.width - x;
+                            onEdge = yWithin && sideDistance >= 0 && sideDistance <= edge;
+                            inExpandedDock = yWithin && sideDistance >= 0
+                                && sideDistance <= dockRoot.width;
+                        } else {
+                            const halfWidth = dockMouseArea.implicitWidth / 2;
+                            const xWithin = x >= (screen.width / 2 - halfWidth)
+                                && x < (screen.width / 2 + halfWidth);
+                            const bottomDistance = screen.height - y;
+                            onEdge = xWithin && bottomDistance >= 0 && bottomDistance <= edge;
+                            inExpandedDock = xWithin && bottomDistance >= 0
+                                && bottomDistance <= dockRoot.height;
+                        }
+                    }
+                    const now = Date.now();
+                    if (onEdge || (dockRoot.nativePointerInside && inExpandedDock)) {
+                        dockRoot.nativeHoverDeadline = now + 250;
+                        dockRoot.nativePointerInside = true;
+                    } else if (now >= dockRoot.nativeHoverDeadline) {
+                        dockRoot.nativePointerInside = false;
+                    }
+                }
+                onRunningChanged: {
+                    if (!running) {
+                        dockRoot.nativePointerInside = false;
+                        dockRoot.nativeHoverDeadline = 0;
+                    }
+                }
+            }
             readonly property color backgroundColor: (hug && Config.options.dock.followFrameColor && Config.options.bar?.showFrame && Config.options.bar?.frameColor)
                 ? root.colorFromName(Config.options.bar.frameColor)
                 : root.colorFromName(Config.options.dock.backgroundColor)
@@ -91,13 +169,25 @@ Scope {
                 if (root.pinned)
                     return true;
                 if (Config.options?.dock.hoverToReveal) {
-                    const frameHovered = typeof GlobalStates.isFrameHovered === "function"
-                        && GlobalStates.isFrameHovered(dockRoot.screen?.name, dockRoot.position);
-                    if (dockMouseArea.containsMouse || frameHovered)
-                        return true;
+                    // In stable mode the pointer state never depends on the
+                    // position of the dock's animated QML input region.
+                    if (dockRoot.stableWindowsHover) {
+                        if (dockRoot.nativePointerInside)
+                            return true;
+                    } else {
+                        const frameHovered = typeof GlobalStates.isFrameHovered === "function"
+                            && GlobalStates.isFrameHovered(dockRoot.screen?.name, dockRoot.position);
+                        if (dockMouseArea.containsMouse || frameHovered)
+                            return true;
+                    }
                 }
                 if (dockApps.requestDockShow)
                     return true;
+                // The focused workspace's actual window list is authoritative;
+                // don't wait for transient foreground focus to settle.
+                if (dockRoot.stableWindowsHover) {
+                    return dockRoot.nativeWorkspaceEmpty;
+                }
                 return !ToplevelManager.activeToplevel?.activated;
             }
 
@@ -119,7 +209,54 @@ Scope {
             WlrLayershell.namespace: "quickshell:dock"
             color: "transparent"
 
-            mask: Region { item: dockMouseArea }
+            mask: Region {
+                // On Windows, dockMouseArea extends over the bottom screen
+                // edge even while the floating dock is hidden. That let
+                // invisible app buttons receive hover/clicks through the
+                // animated input mask. Keep the *original MouseArea* available
+                // as soon as the dock is revealed: a visual-only Rectangle
+                // is not a substitute for the interactive button hit area.
+                // When hidden, only the fixed edge strip remains interactive.
+                item: dockRoot.stableWindowsHover
+                    ? (dockRoot.reveal ? dockMouseArea : null)
+                    : dockMouseArea
+                Region {
+                    item: dockEdgeTrigger.visible ? dockEdgeTrigger : null
+                }
+            }
+
+            // The animated dock moves almost completely outside its own
+            // PanelWindow when hidden. A MouseArea inside that moving item
+            // cannot reliably receive Windows hover events. Keep a fixed
+            // narrow hit target at the physical screen edge and combine its
+            // input mask with the dock's existing animated input region.
+            MouseArea {
+                id: dockEdgeTrigger
+                visible: Platform.isWindows && Config.options.windowsPort.dockStableHover
+                    && Config.options.dock.hoverToReveal && !root.pinned
+                hoverEnabled: true
+                // The final two pixels reveal the dock, but must never
+                // forward a click or hover to a partly hidden app button.
+                acceptedButtons: Qt.AllButtons
+                onEntered: {
+                    if (dockRoot.stableWindowsHover) {
+                        dockRoot.nativePointerInside = true;
+                        dockRoot.nativeHoverDeadline = Date.now() + 250;
+                    }
+                }
+                z: 1
+                width: dockRoot.vertical ? Math.max(2, Config.options.dock.hoverRegionHeight)
+                    : Math.min(dockRoot.width, dockMouseArea.implicitWidth)
+                height: dockRoot.vertical ? Math.min(dockRoot.height, dockMouseArea.implicitHeight)
+                    : Math.max(2, Config.options.dock.hoverRegionHeight)
+                anchors {
+                    bottom: dockRoot.vertical ? undefined : parent.bottom
+                    horizontalCenter: dockRoot.vertical ? undefined : parent.horizontalCenter
+                    verticalCenter: dockRoot.vertical ? parent.verticalCenter : undefined
+                    left: dockRoot.position === "left" ? parent.left : undefined
+                    right: dockRoot.position === "right" ? parent.right : undefined
+                }
+            }
 
             MouseArea {
                 id: dockMouseArea
