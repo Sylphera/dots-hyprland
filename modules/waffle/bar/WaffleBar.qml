@@ -13,13 +13,14 @@ Scope {
     
     LazyLoader {
         id: barLoader
-        active: GlobalStates.barOpen
+        active: GlobalStates.barOpen || Platform.isWindows
         component: Variants {
             model: Quickshell.screens
             delegate: PanelWindow { // Bar window
                 id: barRoot
                 required property var modelData
                 screen: modelData
+                visible: GlobalStates.barOpen
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: implicitHeight
                 WlrLayershell.namespace: "quickshell:bar"
