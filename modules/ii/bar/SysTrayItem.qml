@@ -108,6 +108,7 @@ MouseArea {
 
     PopupToolTip {
         id: tooltip
+        opacityOnly: Platform.isWindows
         extraVisibleCondition: root.containsMouse
         alternativeVisibleCondition: extraVisibleCondition
         anchorEdges: (!Config.options.bar.bottom && !Config.options.bar.vertical) ? Edges.Bottom : Edges.Top
