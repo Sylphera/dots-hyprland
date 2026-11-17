@@ -11,7 +11,9 @@ NestableObject {
     readonly property var liveMonitorData: HyprlandData.monitors.find(m => m.id === monitor?.id)
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
     readonly property int activeWorkspace: monitor?.activeWorkspace?.id ?? 1
-    readonly property bool currentWorkspaceNotFake: C.Platform.isWindows ? (monitor?.activeWorkspace?.toplevels?.values?.length ?? 0) > 0 : activeWindow?.activated ?? false // Active empty workspace = fake. At least, that's how I like to call it.
+    readonly property bool currentWorkspaceNotFake: C.Platform.isWindows
+        ? HyprlandData.hyprlandClientsForWorkspace(root.activeWorkspace).some(w => !HyprlandData.isSpecialWindow(w))
+        : (activeWindow?.activated ?? false) // Active empty workspace = fake. At least, that's how I like to call it.
     readonly property int fakeWorkspace: currentWorkspaceNotFake ? -9999 : activeWorkspace
     readonly property int shownCount: C.Config.options.bar.workspaces.shown
     readonly property int group: Math.floor((activeWorkspace - 1) / shownCount)
@@ -39,6 +41,8 @@ NestableObject {
             length: root.shownCount
         }, (_, i) => {
             const thisWorkspaceId = getWorkspaceId(root.group, i);
+            if (C.Platform.isWindows)
+                return HyprlandData.hyprlandClientsForWorkspace(thisWorkspaceId).some(w => !HyprlandData.isSpecialWindow(w));
             return Hyprland.workspaces.values.some(ws => ws.id === thisWorkspaceId);
         });
     }
@@ -49,6 +53,12 @@ NestableObject {
         target: Hyprland.workspaces
         function onValuesChanged() {
             root.updateWorkspaceOccupied();
+        }
+    }
+    Connections {
+        target: HyprlandData
+        function onWindowListChanged() {
+            if (C.Platform.isWindows) root.updateWorkspaceOccupied();
         }
     }
     Connections {
