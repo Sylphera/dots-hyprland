@@ -1710,6 +1710,8 @@
   "Slightly rounded": "Pouco arredondados",
   "Square": "Retos",
   "Switching to the current workspace goes back": "Ir para o workspace atual volta ao anterior",
+  "Hide the desktop switch popup": "Ocultar o aviso de troca de área de trabalho",
+  "Hides the \"Desktop N\" label that Windows 11 shows after switching virtual desktops": "Oculta o rótulo \"Área de trabalho N\" que o Windows 11 mostra ao trocar de área de trabalho virtual",
   "Move cursor to the new workspace": "Mover o cursor para o novo workspace",
   "After a workspace switch from a shortcut, the cursor jumps to the focused window. Not when the switch came from a click on the bar or the overview.": "Depois de trocar de workspace por atalho, o cursor pula para a janela em foco. Não quando a troca veio de um clique na barra ou no overview.",
   "Built-in": "Integrada",

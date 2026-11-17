@@ -210,6 +210,12 @@ ShellRoot {
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.windowManager
+        property: "hideDesktopPopup"
+        value: Config.options.windowsPort.hideDesktopPopup
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
         property: "activeOpacity"
         value: Config.options.windowsPort.decoration.activeOpacity
     }
