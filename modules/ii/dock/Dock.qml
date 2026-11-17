@@ -80,6 +80,7 @@ Scope {
             // initial click dismisses an overlay before the QML toggle runs.
             Component.onCompleted: {
                 if (Platform.isWindows) GlobalFocusGrab.addPersistent(dockRoot);
+                dockRoot.settleAutoReveal();
             }
             Component.onDestruction: {
                 if (Platform.isWindows) GlobalFocusGrab.removePersistent(dockRoot);
@@ -107,6 +108,22 @@ Scope {
             readonly property bool nativeWorkspaceEmpty:
                 Hyprland.focusedWorkspace != null
                 && !(Hyprland.focusedWorkspace.toplevels?.values ?? []).some(t => !(t.wayland?.minimized ?? false))
+            readonly property bool nativeAutoRevealCandidate: dockRoot.stableWindowsHover
+                ? dockRoot.nativeWorkspaceEmpty
+                : !ToplevelManager.activeToplevel?.activated
+            property bool settledAutoReveal: false
+            function settleAutoReveal() {
+                emptyWorkspaceSettle.stop();
+                dockRoot.settledAutoReveal = false;
+                if (dockRoot.nativeAutoRevealCandidate)
+                    emptyWorkspaceSettle.restart();
+            }
+            onNativeAutoRevealCandidateChanged: settleAutoReveal()
+            Timer {
+                id: emptyWorkspaceSettle
+                interval: 550
+                onTriggered: dockRoot.settledAutoReveal = dockRoot.nativeAutoRevealCandidate
+            }
             Timer {
                 interval: 16
                 repeat: true
@@ -183,11 +200,9 @@ Scope {
                 }
                 if (dockApps.requestDockShow)
                     return true;
-                // The focused workspace's actual window list is authoritative;
-                // don't wait for transient foreground focus to settle.
-                if (dockRoot.stableWindowsHover) {
-                    return dockRoot.nativeWorkspaceEmpty;
-                }
+                // Ignore brief empty states while Windows switches workspaces.
+                if (Platform.isWindows)
+                    return dockRoot.settledAutoReveal;
                 return !ToplevelManager.activeToplevel?.activated;
             }
 
