@@ -522,6 +522,17 @@ ContentPage {
             title: Translation.tr("Workspaces")
 
             ConfigSwitch {
+                buttonIcon: "visibility_off"
+                text: Translation.tr("Hide the desktop switch popup")
+                checked: Config.options.windowsPort.hideDesktopPopup
+                onCheckedChanged: {
+                    Config.options.windowsPort.hideDesktopPopup = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Hides the \"Desktop N\" label that Windows 11 shows after switching virtual desktops")
+                }
+            }
+            ConfigSwitch {
                 buttonIcon: "swap_horiz"
                 text: Translation.tr("Switching to the current workspace goes back")
                 checked: Config.options.windowsPort.binds.workspaceBackAndForth
