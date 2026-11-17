@@ -34,6 +34,22 @@ Scope {
         onTriggered: GlobalStates.barOpen = bar.requestedOpen
     }
 
+    // The Windows AppBar reservation can change without Qt reporting a new
+    // availableGeometry. Recompute tiling after the reservation has settled.
+    Timer {
+        id: relayoutAfterReservation
+        interval: 120
+        repeat: false
+        onTriggered: WindowsNative.tiling?.relayout()
+    }
+    Connections {
+        target: GlobalStates
+        function onBarOpenChanged() {
+            if (Platform.isWindows)
+                relayoutAfterReservation.restart();
+        }
+    }
+
     Variants {
         // For each monitor
         model: {
