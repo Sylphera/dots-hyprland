@@ -44,7 +44,8 @@
     {"namespace": "osk[0-9]*", "blur": true, "ignoreAlpha": 0.6},
 
     {"namespace": "quickshell:.*", "blur": true, "ignoreAlpha": 0.79},
-    {"namespace": "quickshell:bar", "animation": "slide"},
+    {"namespace": "quickshell:bar", "animation": "slide", "expressive": "standard"},
+    {"namespace": "quickshell:bar-reservation", "animation": "noAnim"},
     {"namespace": "quickshell:actionCenter", "animation": "noAnim"},
     {"namespace": "quickshell:cheatsheet", "animation": "slide bottom"},
     {"namespace": "quickshell:dock", "animation": "slide"},
