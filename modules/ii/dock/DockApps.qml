@@ -279,7 +279,7 @@ Item {
             implicitWidth: popupBackground.implicitWidth + Appearance.sizes.elevationMargin * 2
             implicitHeight: DockStyle.vertical
                 ? popupBackground.implicitHeight + Appearance.sizes.elevationMargin * 2
-                : root.maxWindowPreviewHeight + root.windowControlsHeight + Appearance.sizes.elevationMargin * 2
+                : Math.max(root.maxWindowPreviewHeight + root.windowControlsHeight, popupBackground.implicitHeight) + Appearance.sizes.elevationMargin * 2
             hoverEnabled: true
             x: DockStyle.vertical ? 0 : previewPopup.cachedCenter - width / 2
             y: DockStyle.vertical
@@ -359,10 +359,12 @@ Item {
                                     windowButton.modelData?.activate();
                                 }
                                 contentItem: ColumnLayout {
+                                    id: previewColumn
                                     implicitWidth: previewHolder.preview?.implicitWidth ?? 0
-                                    implicitHeight: previewHolder.preview?.implicitHeight ?? 0
+                                    implicitHeight: (previewHolder.preview?.implicitHeight ?? 0) + previewTitle.implicitHeight + previewColumn.spacing
 
                                     ButtonGroup {
+                                        id: previewTitle
                                         contentWidth: parent.width - anchors.margins * 2
                                         StyledText {
                                             Layout.margins: 5
