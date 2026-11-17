@@ -468,7 +468,13 @@ q="$1"; h="$2"
                     root.setMode(GlobalStates.spotlightMode);
             }
             function onSpotlightOpenChanged() {
+                // The window hides at once on close, so a fade-out would stall
+                // and replay on the next open. Snap back and only animate in.
+                content.animateShow = false;
+                content.shown = false;
                 if (GlobalStates.spotlightOpen) {
+                    content.animateShow = true;
+                    content.shown = true;
                     GlobalStates.overviewOpen = false;
                     root.setMode(GlobalStates.spotlightMode);
                     GlobalFocusGrab.addDismissable(panelWindow);
@@ -510,14 +516,26 @@ q="$1"; h="$2"
             y: panelWindow.areaPadding
             width: root.expanded ? content.maxWidth : panel.pillWidth + 10 + idleRow.implicitWidth
             height: panel.height
-            opacity: GlobalStates.spotlightOpen ? 1 : 0
-            scale: GlobalStates.spotlightOpen ? 1 : 0.96
+            property bool shown: false
+            property bool animateShow: false
+            opacity: content.shown ? 1 : 0
+            scale: content.shown ? 1 : 0.96
 
             Behavior on opacity {
-                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                enabled: content.animateShow
+                NumberAnimation {
+                    duration: Appearance.animation.elementMoveFast.duration
+                    easing.type: Appearance.animation.elementMoveFast.type
+                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                }
             }
             Behavior on scale {
-                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                enabled: content.animateShow
+                NumberAnimation {
+                    duration: Appearance.animation.elementMoveFast.duration
+                    easing.type: Appearance.animation.elementMoveFast.type
+                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                }
             }
 
             StyledRectangularShadow {
