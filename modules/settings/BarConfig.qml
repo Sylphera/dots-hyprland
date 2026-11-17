@@ -405,8 +405,8 @@ ContentPage {
 
             ConfigRow {
                 CustomIcon {
-                    source: Config.options.custom.distroIcon || (Config.options.bar.topLeftIcon == "distro" ? SystemInfo.distroIcon : `${Config.options.bar.topLeftIcon}-symbolic`)
-                    customFolder: Config.options.custom.distroIcon !== "" ? Config.options.custom.iconsPath : ""
+                    source: Config.options.bar.topLeftIcon == "distro" ? (Config.options.custom.distroIcon || SystemInfo.distroIcon) : `${Config.options.bar.topLeftIcon}-symbolic`
+                    customFolder: Config.options.bar.topLeftIcon == "distro" && Config.options.custom.distroIcon !== "" ? Config.options.custom.iconsPath : ""
                     colorize: Config.options.custom.colorizeIcon
                     color: page.leftIconColor
                     width: Appearance.font.pixelSize.larger
