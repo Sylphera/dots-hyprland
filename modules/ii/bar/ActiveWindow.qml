@@ -25,12 +25,13 @@ Item {
         const active = root.activeWindow;
         if (!Platform.isWindows)
             return active?.activated && root.biggestWindow ? active : null;
-        return active?.activated && active.HyprlandToplevel?.workspace?.id === root.currentWorkspaceId ? active : null;
+        return active?.activated && active.HyprlandToplevel?.workspace?.id === root.currentWorkspaceId
+            && !HyprlandData.isSpecialWindow(HyprlandData.clientForToplevel(active)) ? active : null;
     }
     readonly property var expectedWindow: {
         if (!Platform.isWindows || !root.justSwitched || root.shownWindow)
             return null;
-        const candidates = HyprlandData.windowList.filter(w => w.workspace?.id === root.currentWorkspaceId && !w.minimized && (w.focusHistoryID ?? -1) >= 0);
+        const candidates = HyprlandData.windowList.filter(w => w.workspace?.id === root.currentWorkspaceId && !w.minimized && !HyprlandData.isSpecialWindow(w) && (w.focusHistoryID ?? -1) >= 0);
         if (candidates.length === 0)
             return null;
         return candidates.reduce((best, w) => w.focusHistoryID < best.focusHistoryID ? w : best);
@@ -48,7 +49,7 @@ Item {
         onTriggered: root.justSwitched = false
     }
 
-    readonly property string activeAppClass: (root.focusingThisMonitor && root.activeWindow?.activated) ? (root.activeWindow?.appId ?? root.biggestWindow?.class ?? "") : (root.biggestWindow?.class ?? "")
+    readonly property string activeAppClass: (root.focusingThisMonitor && (Platform.isWindows ? !!root.shownWindow : !!root.activeWindow?.activated)) ? (root.activeWindow?.appId ?? root.biggestWindow?.class ?? "") : (root.biggestWindow?.class ?? "")
 
     implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : root.classic ? colLayout.implicitWidth : Math.min(colLayout.implicitWidth + 12, 280)
     implicitHeight: root.vertical ? 22 : root.classic ? 0 : Appearance.sizes.barHeight
