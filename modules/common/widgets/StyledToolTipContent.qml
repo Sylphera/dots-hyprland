@@ -8,6 +8,7 @@ Item {
     id: root
     required property string text
     property bool shown: false
+    property bool opacityOnly: false
     property real horizontalPadding: 10
     property real verticalPadding: 5
     property alias font: tooltipTextObject.font
@@ -25,8 +26,8 @@ Item {
         color: Appearance?.colors.colTooltip ?? "#3C4043"
         radius: Appearance?.rounding.verysmall ?? 7
         opacity: shown ? 1 : 0
-        implicitWidth: shown ? (tooltipTextObject.implicitWidth + 2 * root.horizontalPadding) : 0
-        implicitHeight: shown ? (tooltipTextObject.implicitHeight + 2 * root.verticalPadding) : 0
+        implicitWidth: (root.opacityOnly || shown) ? (tooltipTextObject.implicitWidth + 2 * root.horizontalPadding) : 0
+        implicitHeight: (root.opacityOnly || shown) ? (tooltipTextObject.implicitHeight + 2 * root.verticalPadding) : 0
         clip: true
 
         Behavior on implicitWidth {

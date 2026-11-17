@@ -11,6 +11,8 @@ Item {
     property string text: ""
     property bool extraVisibleCondition: true
     property bool alternativeVisibleCondition: false
+    property bool opacityOnly: false
+    property bool popupActive: false
     property real horizontalPadding: 10
     property real verticalPadding: 5
     property real horizontalMargin: horizontalPadding
@@ -29,6 +31,7 @@ Item {
         anchors.centerIn: parent
         text: root.text
         shown: false
+        opacityOnly: root.opacityOnly
         horizontalPadding: root.horizontalPadding
         verticalPadding: root.verticalPadding
     }
@@ -38,12 +41,17 @@ Item {
         if (!root.internalVisibleCondition) {
             if (animated)
                 root.contentItem.shown = false;
+            if (root.opacityOnly && root.contentItem)
+                dismissTimer.restart();
             return;
         }
+        dismissTimer.stop();
         if (!root.contentItem)
             root.contentItem = root.defaultContentComponent.createObject(root, {
                 "parent": null
             });
+        if (root.opacityOnly)
+            root.popupActive = true;
         if (root.contentItem && "shown" in root.contentItem) {
             Qt.callLater(() => {
                 if (root.internalVisibleCondition && root.contentItem)
@@ -52,10 +60,18 @@ Item {
         }
     }
 
+    Timer {
+        id: dismissTimer
+        interval: Appearance.animation.elementMoveFast.duration
+        repeat: false
+        onTriggered: root.popupActive = false
+    }
+
     Loader {
         id: tooltipLoader
         anchors.fill: parent
-        active: root.internalVisibleCondition && root.contentItem !== null
+        active: (root.opacityOnly ? root.popupActive : root.internalVisibleCondition)
+            && root.contentItem !== null
         sourceComponent: PopupWindow {
             visible: true
             anchor {
