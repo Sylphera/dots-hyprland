@@ -26,11 +26,12 @@ Scope {
         }
         LazyLoader {
             id: barLoader
-            active: GlobalStates.barOpen && !GlobalStates.screenLocked
+            active: (GlobalStates.barOpen || Platform.isWindows) && !GlobalStates.screenLocked
             required property ShellScreen modelData
             component: PanelWindow { // Bar window
                 id: barRoot
                 screen: barLoader.modelData
+                visible: GlobalStates.barOpen
 
                 property var brightnessMonitor: Brightness.getMonitorForScreen(barLoader.modelData)
                 

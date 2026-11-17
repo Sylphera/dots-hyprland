@@ -44,7 +44,7 @@
     {"namespace": "osk[0-9]*", "blur": true, "ignoreAlpha": 0.6},
 
     {"namespace": "quickshell:.*", "blur": true, "ignoreAlpha": 0.79},
-    {"namespace": "quickshell:bar", "animation": "slide"},
+    {"namespace": "quickshell:bar", "animation": "slide", "expressive": "standard"},
     {"namespace": "quickshell:actionCenter", "animation": "noAnim"},
     {"namespace": "quickshell:cheatsheet", "animation": "slide bottom"},
     {"namespace": "quickshell:dock", "animation": "slide"},
@@ -63,7 +63,7 @@
     {"namespace": "quickshell:session", "blur": true, "animation": "noAnim", "ignoreAlpha": 0},
     {"namespace": "quickshell:sidebarRight", "animation": "slide right"},
     {"namespace": "quickshell:sidebarLeft", "animation": "slide left"},
-    {"namespace": "quickshell:verticalBar", "animation": "slide"},
+    {"namespace": "quickshell:verticalBar", "animation": "slide", "expressive": "standard"},
     {"namespace": "quickshell:wallpaperSelector", "animation": "slide top"},
     {"namespace": "quickshell:wNotificationCenter", "animation": "noAnim"},
     {"namespace": "quickshell:wOnScreenDisplay", "animation": "noAnim"},
