@@ -95,12 +95,11 @@ Scope {
             // Cursor hit-testing against that moving mask causes alternating
             // enter/leave events as the dock slides into or out of view.
             // Use the existing native GetCursorPos-backed API instead, with
-            // a stationary screen-edge trigger and a short leave grace period.
+            // a stationary screen-edge trigger and immediate exit detection.
             readonly property bool stableWindowsHover: Platform.isWindows
                 && Config.options.windowsPort.dockStableHover
                 && Config.options.dock.hoverToReveal
             property bool nativePointerInside: false
-            property double nativeHoverDeadline: 0
             // The native workspace model tracks windows independently of the
             // foreground HWND. A temporary focus gap during a desktop switch
             // must never reveal the dock if the destination has windows.
@@ -160,18 +159,15 @@ Scope {
                                 && bottomDistance <= dockRoot.height;
                         }
                     }
-                    const now = Date.now();
                     if (onEdge || (dockRoot.nativePointerInside && inExpandedDock)) {
-                        dockRoot.nativeHoverDeadline = now + 250;
                         dockRoot.nativePointerInside = true;
-                    } else if (now >= dockRoot.nativeHoverDeadline) {
+                    } else {
                         dockRoot.nativePointerInside = false;
                     }
                 }
                 onRunningChanged: {
                     if (!running) {
                         dockRoot.nativePointerInside = false;
-                        dockRoot.nativeHoverDeadline = 0;
                     }
                 }
             }
@@ -256,7 +252,6 @@ Scope {
                 onEntered: {
                     if (dockRoot.stableWindowsHover) {
                         dockRoot.nativePointerInside = true;
-                        dockRoot.nativeHoverDeadline = Date.now() + 250;
                     }
                 }
                 z: 1
