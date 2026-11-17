@@ -28,16 +28,28 @@ Item {
     property Component defaultContentComponent: StyledToolTipContent {
         anchors.centerIn: parent
         text: root.text
-        shown: true
+        shown: false
         horizontalPadding: root.horizontalPadding
         verticalPadding: root.verticalPadding
     }
 
     onInternalVisibleConditionChanged: {
-        if (root.internalVisibleCondition && !root.contentItem)
+        const animated = root.contentItem && "shown" in root.contentItem;
+        if (!root.internalVisibleCondition) {
+            if (animated)
+                root.contentItem.shown = false;
+            return;
+        }
+        if (!root.contentItem)
             root.contentItem = root.defaultContentComponent.createObject(root, {
                 "parent": null
             });
+        if (root.contentItem && "shown" in root.contentItem) {
+            Qt.callLater(() => {
+                if (root.internalVisibleCondition && root.contentItem)
+                    root.contentItem.shown = true;
+            });
+        }
     }
 
     Loader {
