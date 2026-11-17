@@ -80,7 +80,6 @@ Scope {
             // initial click dismisses an overlay before the QML toggle runs.
             Component.onCompleted: {
                 if (Platform.isWindows) GlobalFocusGrab.addPersistent(dockRoot);
-                dockRoot.settleAutoReveal();
             }
             Component.onDestruction: {
                 if (Platform.isWindows) GlobalFocusGrab.removePersistent(dockRoot);
@@ -104,24 +103,17 @@ Scope {
             // foreground HWND. A temporary focus gap during a desktop switch
             // must never reveal the dock if the destination has windows.
             // An actually empty destination, however, can reveal immediately.
-            readonly property bool nativeWorkspaceEmpty:
-                Hyprland.focusedWorkspace != null
-                && !(Hyprland.focusedWorkspace.toplevels?.values ?? []).some(t => !(t.wayland?.minimized ?? false))
-            readonly property bool nativeAutoRevealCandidate: dockRoot.stableWindowsHover
-                ? dockRoot.nativeWorkspaceEmpty
-                : !ToplevelManager.activeToplevel?.activated
-            property bool settledAutoReveal: false
-            function settleAutoReveal() {
-                emptyWorkspaceSettle.stop();
-                dockRoot.settledAutoReveal = false;
-                if (dockRoot.nativeAutoRevealCandidate)
-                    emptyWorkspaceSettle.restart();
-            }
-            onNativeAutoRevealCandidateChanged: settleAutoReveal()
-            Timer {
-                id: emptyWorkspaceSettle
-                interval: 550
-                onTriggered: dockRoot.settledAutoReveal = dockRoot.nativeAutoRevealCandidate
+            readonly property bool nativeWorkspaceEmpty: {
+                const workspace = Hyprland.focusedWorkspace;
+                if (!workspace)
+                    return false;
+                const hasToplevel = (workspace.toplevels?.values ?? []).some(t =>
+                    !(t.wayland?.minimized ?? false)
+                    && !HyprlandData.isSpecialWindow(HyprlandData.clientForToplevel(t)));
+                const hasTrackedWindow = HyprlandData.windowList.some(w =>
+                    w.workspace?.id === workspace.id && !w.minimized
+                    && !HyprlandData.isSpecialWindow(w));
+                return !hasToplevel && !hasTrackedWindow;
             }
             Timer {
                 interval: 16
@@ -196,9 +188,9 @@ Scope {
                 }
                 if (dockApps.requestDockShow)
                     return true;
-                // Ignore brief empty states while Windows switches workspaces.
+                // Both window sources must agree before considering a workspace empty.
                 if (Platform.isWindows)
-                    return dockRoot.settledAutoReveal;
+                    return dockRoot.nativeWorkspaceEmpty;
                 return !ToplevelManager.activeToplevel?.activated;
             }
 
