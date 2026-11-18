@@ -108,6 +108,12 @@ ShellRoot {
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.tiling
+        property: "animateMoves"
+        value: Config.options.windowsPort.tiling.animateMoves
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
         property: "gapsOut"
         value: Config.options.windowsPort.tiling.gapsOut
     }

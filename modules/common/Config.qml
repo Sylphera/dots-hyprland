@@ -755,6 +755,7 @@ Singleton {
                 property JsonObject tiling: JsonObject {
                     property bool enable: false
                     property int gapsIn: 4
+                    property bool animateMoves: true // end-4's windowsMove: tiled windows slide to a new tile
                     property int gapsOut: 5
                     property bool preserveSplit: true
                     property list<string> excluded: [
