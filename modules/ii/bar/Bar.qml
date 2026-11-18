@@ -377,10 +377,10 @@ Scope {
                 Connections {
                     target: bar
                     function onRequestedOpenChanged() {
-                        if (!Platform.isWindows || barRoot.reservedZone <= 0)
+                        if (!Platform.isWindows)
                             return;
                         WindowsNative.tiling?.expectBarSpace(barLoader.modelData.name, !Config.options.bar.bottom,
-                            bar.requestedOpen ? barRoot.reservedZone : -barRoot.reservedZone);
+                            bar.requestedOpen ? barRoot.reservedZone : 0);
                     }
                 }
                 WlrLayershell.namespace: "quickshell:bar-reservation"
