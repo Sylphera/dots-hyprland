@@ -49,6 +49,15 @@ Singleton {
         return Platform.isWindows && (window?.tags?.includes("quickshell:scratchpad") ?? false);
     }
 
+    // The toplevel carries the tag itself, so this works before the client list catches up.
+    function isSpecialToplevel(toplevel) {
+        if (!Platform.isWindows || !toplevel)
+            return false;
+        if ((toplevel.lastIpcObject?.tags ?? []).includes("quickshell:scratchpad"))
+            return true;
+        return root.isSpecialWindow(root.clientForToplevel(toplevel));
+    }
+
     // Internals
 
     function updateWindowList() {
