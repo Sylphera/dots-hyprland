@@ -152,25 +152,55 @@ Scope {
             property var activeWorkspaceWithFullscreen: workspacesForMonitor.filter(workspace => ((workspace.toplevels.values.filter(window => window.wayland?.fullscreen)[0] != undefined) && workspace.active))[0]
             property bool fullscreen: activeWorkspaceWithFullscreen != undefined
 
-            CornerPanelWindow {
-                screen: modelData
-                corner: RoundCorner.CornerEnum.TopLeft
-                fullscreen: monitorScope.fullscreen
+            // Windows draws the same corners natively (NativeCorners.qml).
+            LazyLoader {
+                id: nativeCorners
+                active: Platform.isWindows
+                source: "NativeCorners.qml"
             }
-            CornerPanelWindow {
-                screen: modelData
-                corner: RoundCorner.CornerEnum.TopRight
-                fullscreen: monitorScope.fullscreen
+            Binding {
+                when: nativeCorners.item !== null
+                target: nativeCorners.item
+                property: "screenName"
+                value: monitorScope.modelData.name
             }
-            CornerPanelWindow {
-                screen: modelData
-                corner: RoundCorner.CornerEnum.BottomLeft
-                fullscreen: monitorScope.fullscreen
+            Binding {
+                when: nativeCorners.item !== null
+                target: nativeCorners.item
+                property: "fullscreen"
+                value: monitorScope.fullscreen
             }
-            CornerPanelWindow {
-                screen: modelData
-                corner: RoundCorner.CornerEnum.BottomRight
-                fullscreen: monitorScope.fullscreen
+            Binding {
+                when: nativeCorners.item !== null
+                target: nativeCorners.item
+                property: "actionForCorner"
+                value: screenCorners.actionForCorner
+            }
+
+            LazyLoader {
+                active: !Platform.isWindows
+                Scope {
+                    CornerPanelWindow {
+                        screen: monitorScope.modelData
+                        corner: RoundCorner.CornerEnum.TopLeft
+                        fullscreen: monitorScope.fullscreen
+                    }
+                    CornerPanelWindow {
+                        screen: monitorScope.modelData
+                        corner: RoundCorner.CornerEnum.TopRight
+                        fullscreen: monitorScope.fullscreen
+                    }
+                    CornerPanelWindow {
+                        screen: monitorScope.modelData
+                        corner: RoundCorner.CornerEnum.BottomLeft
+                        fullscreen: monitorScope.fullscreen
+                    }
+                    CornerPanelWindow {
+                        screen: monitorScope.modelData
+                        corner: RoundCorner.CornerEnum.BottomRight
+                        fullscreen: monitorScope.fullscreen
+                    }
+                }
             }
         }
     }
