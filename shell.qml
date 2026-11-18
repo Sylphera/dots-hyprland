@@ -90,6 +90,12 @@ ShellRoot {
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.tiling
+        property: "suppressWindowShadows"
+        value: true
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
         property: "enabled"
         value: Config.options.windowsPort.tiling.enable
     }

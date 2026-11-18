@@ -26,6 +26,8 @@ FloatingWindow {
             root.minimized = false;
         const backingWindow = content.Window.window;
         if (backingWindow) {
+            if (Platform.isWindows)
+                WindowsNative.windowFrame?.ensureVisible(backingWindow);
             backingWindow.raise();
             backingWindow.requestActivate();
         }
@@ -50,7 +52,7 @@ FloatingWindow {
         if (!root.visible || root.shownOnce)
             return;
         root.shownOnce = true;
-        root.activate();
+        Qt.callLater(root.activate);
     }
 
     Timer {
