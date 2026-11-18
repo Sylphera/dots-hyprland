@@ -45,7 +45,7 @@ Scope {
     // nudged as soon as Explorer has applied it, and once more to be sure.
     Timer {
         id: reservationDelay
-        interval: 360
+        interval: 150
         repeat: false
         onTriggered: bar.reservationOpen = bar.requestedOpen
     }
