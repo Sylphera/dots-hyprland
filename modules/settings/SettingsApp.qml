@@ -64,6 +64,12 @@ Singleton {
     }
 
     function close() {
+        // Pop the window out first; it asks to close again once that is done.
+        const item = windowLoader.item;
+        if (!root.pcLayout && item && typeof item.animatedClose === "function" && !item.popping && item.visible) {
+            item.animatedClose();
+            return;
+        }
         root.handoff = false;
         root.isOpen = false;
         root.target = null;

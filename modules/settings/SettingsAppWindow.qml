@@ -19,6 +19,26 @@ FloatingWindow {
 
     signal closeRequested
 
+    // end-4's windowsIn/windowsOut: Hyprland pops every window in and out.
+    // On Windows the shell does it for its own settings window.
+    property bool popping: false
+    function animatedClose() {
+        if (root.popping)
+            return;
+        const ms = (Platform.isWindows && WindowsNative.windowFrame) ? WindowsNative.windowFrame.popOut(content.Window.window) : 0;
+        if (ms <= 0) {
+            root.closeRequested();
+            return;
+        }
+        root.popping = true;
+        popOutTimer.interval = ms;
+        popOutTimer.restart();
+    }
+    Timer {
+        id: popOutTimer
+        onTriggered: root.closeRequested()
+    }
+
     function activate() {
         if (!root.visible)
             return;
@@ -49,6 +69,8 @@ FloatingWindow {
     onVisibleChanged: {
         if (root.visible)
             root.applyTitleBar();
+        if (root.visible && Platform.isWindows && WindowsNative.windowFrame)
+            WindowsNative.windowFrame.popIn(content.Window.window);
         if (!root.visible || root.shownOnce)
             return;
         root.shownOnce = true;
@@ -65,7 +87,7 @@ FloatingWindow {
         id: content
         anchors.fill: parent
         windowControls: root.ownTitleBar
-        onCloseRequested: root.closeRequested()
+        onCloseRequested: root.animatedClose()
     }
 
     Repeater {
