@@ -65,6 +65,15 @@ ShellRoot {
         property: "hoverOnly"
         value: Config.options.windowsPort.taskbarHoverOnly && !Config.options.windowsPort.nativeTaskbar
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.taskbar
+        property: "alwaysHidden"
+        value: Config.options.panelFamily === "ii"
+            && Config.options.dock.enable
+            && Config.options.windowsPort.taskbarHoverOnly
+            && !Config.options.windowsPort.nativeTaskbar
+    }
     readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
         if (root.nativeTaskbarTakesOver)
