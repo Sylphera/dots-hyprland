@@ -4,7 +4,7 @@
     "ii keybinds for Windows, ported from dots/.config/hypr/hyprland/keybinds.lua.",
     "Customize in %LOCALAPPDATA%\\illogical-impulse\\keybinds.json (Ctrl+Super+/ or the pencil on the cheatsheet opens a keybind editor that writes it); it is reloaded on save. With \"extends\": \"defaults\" it only lists changes: {\"base\": id, \"keys\": ...} moves a default bind, {\"base\": id, \"disabled\": true} gives its keys back to Windows, and binds without \"base\" are added. The id is the action and its argument (global:quickshell:name, dispatch:..., exec:..., ipc:target:function, key:...), plus @keys when several defaults share it. Without \"extends\" the file replaces this one, and removing a bind gives its keys back to Windows.",
     "keys: Ctrl+Alt+Shift+Super+<key>, or a lone modifier (\"Super\"): with onRelease it fires when tapped alone, otherwise on press and release.",
-    "action: global (GlobalShortcut name, appid:name), dispatch (Hyprland.dispatch), exec (command; %SHELL% = config dir, %VAR% = environment; \"cmd1 || cmd2\" tries cmd2 if cmd1 isn't found, e.g. for a program missing on older Windows versions; console programs open in a console window of their own, `conhost.exe --headless <command>` runs one hidden), ipc (target, function, args), key (inject a key), reload, native (Windows or Quickshell handles it; listed for the cheatsheet only; keys may name a mouse button such as mouse:272).",
+    "action: global (GlobalShortcut name, appid:name), dispatch (Hyprland.dispatch), exec (command; %SHELL% = config dir, %BROWSER% = default browser, %VAR% = environment; \"cmd1 || cmd2\" tries cmd2 if cmd1 isn't found, e.g. for a program missing on older Windows versions; console programs open in a console window of their own, `conhost.exe --headless <command>` runs one hidden), ipc (target, function, args), key (inject a key), reload, native (Windows or Quickshell handles it; listed for the cheatsheet only; keys may name a mouse button such as mouse:272).",
     "repeat: fire again on key auto-repeat. description: \"Section: text\" shows in the cheatsheet. since: version that added a global bind; such binds are added to a custom keybinds.json that doesn't use their name or keys yet."
   ],
   "binds": [
@@ -120,6 +120,7 @@
     {"keys": "Shift+Super+L", "action": "exec", "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0", "description": "Session: Sleep"},
     {"keys": "Super+Return", "action": "exec", "command": "wt.exe || powershell.exe", "description": "App: Terminal"},
     {"keys": "Super+T", "action": "exec", "command": "wt.exe || powershell.exe"},
+    {"keys": "Super+W", "action": "exec", "command": "\"%BROWSER%\" || msedge.exe", "description": "App: Browser"},
     {"keys": "Ctrl+Alt+T", "action": "exec", "command": "wt.exe || powershell.exe"},
     {"keys": "Super+E", "action": "native", "description": "App: File manager"},
     {"keys": "Super+X", "action": "exec", "command": "notepad.exe", "description": "App: Text editor"},
@@ -138,7 +139,7 @@
     {"keys": "Super+Shift+Alt+mouse:273/275/276, Super+mouse wheel", "hyprland": "AI summary, playerctl, workspace scroll", "reason": "mouse binds are not supported (Super+left/right drag to move/resize windows is built in, see windowsPort.superDrag)"},
     {"keys": "Super+Shift+Alt+Q", "hyprland": "hyprctl kill (click a window to kill it)", "reason": "no kill mode, and the Windows Hyprland module has no forcekillactive dispatcher yet"},
     {"keys": "Super+Alt+F", "hyprland": "fullscreenstate (spoof)", "reason": "no equivalent"},
-    {"keys": "Super+W, Super+C, Ctrl+Shift+Alt+Super+W", "hyprland": "browser / code editor / office", "reason": "no default browser launcher or editor ships with Windows; add your own exec binds (Super+C centers the window, or its column in the scrolling layout)"},
+    {"keys": "Super+C, Ctrl+Shift+Alt+Super+W", "hyprland": "code editor / office", "reason": "no default editor ships with Windows; add your own exec binds (Super+C centers the window, or its column in the scrolling layout)"},
     {"keys": "Super+code:N, Super+Alt+code:N (number row and keypad keycodes)", "hyprland": "workspace binds", "reason": "virtual keys for the number row are layout independent already; keypad digits are not bound"},
     {"keys": "Super+Alt+F1", "hyprland": "virtual-machine submap", "reason": "submaps are not supported"},
     {"keys": "Super+Alt+F11/F12/Equal, Alt+F4", "hyprland": "test notifications / close hint", "reason": "Linux notification tests; Alt+F4 closes windows natively"},
