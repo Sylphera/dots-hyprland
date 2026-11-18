@@ -107,6 +107,11 @@ Scope {
                 const workspace = Hyprland.focusedWorkspace;
                 if (!workspace)
                     return false;
+                // An open special workspace covers the desktop: the dock only
+                // comes up on hover, like over any window.
+                const monitor = HyprlandData.monitors.find(m => m.name === dockRoot.screen?.name);
+                if ((monitor?.specialWorkspace?.name ?? "") !== "")
+                    return false;
                 const hasToplevel = (workspace.toplevels?.values ?? []).some(t =>
                     !(t.wayland?.minimized ?? false)
                     && !HyprlandData.isSpecialToplevel(t));
