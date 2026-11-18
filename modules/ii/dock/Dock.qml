@@ -66,7 +66,9 @@ Scope {
         model: !root.ready ? [] : root.screensForDock().map(screen => ({
             screen: screen,
             position: Config.options.dock.position,
-            layout: `${Config.options.dock.position}|${Config.options.dock.style}|${Config.options.dock.height}|${root.barState}`
+            // Not the bar's state: a new key rebuilds the dock, which then jumps and
+            // replays its animation every time the bar toggles (Super+J).
+            layout: `${Config.options.dock.position}|${Config.options.dock.style}|${Config.options.dock.height}`
         }))
 
         PanelWindow {
