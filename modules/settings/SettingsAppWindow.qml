@@ -34,20 +34,8 @@ FloatingWindow {
         popOutTimer.interval = ms;
         popOutTimer.restart();
     }
-    // The window is cloaked before it first shows, so it only appears
-    // popping in: it stays hidden until popIn has run on it.
-    readonly property bool wantsShown: content.pageShown || root.forceShown
-    property bool popArmed: !Platform.isWindows
-    onWantsShownChanged: root.armPop()
-    function armPop() {
-        if (!root.wantsShown || root.popArmed)
-            return;
-        const backingWindow = content.Window.window;
-        if (backingWindow && WindowsNative.windowFrame)
-            WindowsNative.windowFrame.popIn(backingWindow);
-        root.popArmed = true;
-    }
-    Component.onCompleted: root.armPop()
+    // Quickshell cloaks it right before it first shows, and it pops in.
+    property bool popIn: Platform.isWindows
     Timer {
         id: popOutTimer
         onTriggered: root.closeRequested()
@@ -71,7 +59,7 @@ FloatingWindow {
         }
     }
 
-    visible: root.wantsShown && root.popArmed
+    visible: content.pageShown || root.forceShown
     title: "illogical-impulse Settings"
     implicitWidth: 1100
     implicitHeight: 750
