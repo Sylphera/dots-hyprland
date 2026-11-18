@@ -34,11 +34,20 @@ FloatingWindow {
         popOutTimer.interval = ms;
         popOutTimer.restart();
     }
-    // Cloak the window before it first shows, so it only appears popping in.
-    Component.onCompleted: {
-        if (Platform.isWindows && WindowsNative.windowFrame && content.Window.window)
-            WindowsNative.windowFrame.popIn(content.Window.window);
+    // The window is cloaked before it first shows, so it only appears
+    // popping in: it stays hidden until popIn has run on it.
+    readonly property bool wantsShown: content.pageShown || root.forceShown
+    property bool popArmed: !Platform.isWindows
+    onWantsShownChanged: root.armPop()
+    function armPop() {
+        if (!root.wantsShown || root.popArmed)
+            return;
+        const backingWindow = content.Window.window;
+        if (backingWindow && WindowsNative.windowFrame)
+            WindowsNative.windowFrame.popIn(backingWindow);
+        root.popArmed = true;
     }
+    Component.onCompleted: root.armPop()
     Timer {
         id: popOutTimer
         onTriggered: root.closeRequested()
@@ -62,7 +71,7 @@ FloatingWindow {
         }
     }
 
-    visible: content.pageShown || root.forceShown
+    visible: root.wantsShown && root.popArmed
     title: "illogical-impulse Settings"
     implicitWidth: 1100
     implicitHeight: 750
