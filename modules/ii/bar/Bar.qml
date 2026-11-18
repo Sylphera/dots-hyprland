@@ -14,8 +14,9 @@ Scope {
     id: bar
     property bool showBarBackground: Config.options.bar.showBackground
     property bool requestedOpen: GlobalStates.barOpen
-    // The space reserved for the bar follows requestedOpen a moment later, once
-    // tiling has started sliding windows toward their new tiles.
+    // The space reserved for the bar follows requestedOpen once windows have
+    // slid to their new tiles (windowsMove, 300 ms): apps that react to a work
+    // area change on their own (Chromium) then find nothing to fix.
     property bool reservationOpen: GlobalStates.barOpen
     readonly property int showDuration: 160
     readonly property int hideDuration: 140
@@ -44,7 +45,7 @@ Scope {
     // nudged as soon as Explorer has applied it, and once more to be sure.
     Timer {
         id: reservationDelay
-        interval: 40
+        interval: 360
         repeat: false
         onTriggered: bar.reservationOpen = bar.requestedOpen
     }
