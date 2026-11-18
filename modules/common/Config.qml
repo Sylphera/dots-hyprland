@@ -749,6 +749,7 @@ Singleton {
                 property bool backgroundBehindIcons: true
                 property bool ownWallpaper: false
                 property bool superDrag: true
+                property bool focusFollowsMouse: true // end-4's follow_mouse = 1: moving the pointer focuses the app window under it
                 property bool panelAnimations: true
                 property string panelAnimationStyle: "standard"
                 property JsonObject tiling: JsonObject {

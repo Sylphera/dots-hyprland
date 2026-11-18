@@ -256,6 +256,12 @@ ShellRoot {
         value: Config.options.windowsPort.superDrag
     }
     Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.superDrag
+        property: "focusFollowsMouse"
+        value: Config.options.windowsPort.focusFollowsMouse
+    }
+    Binding {
         when: Platform.isWindows && WindowsNative.ready
         target: WindowsNative.desktopLayer
         property: "aboveIcons"
