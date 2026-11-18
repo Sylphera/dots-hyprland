@@ -898,7 +898,7 @@ Singleton {
                 property list<var> clipboardPins: []
                 property bool clipboardPreviewPopup: false
                 property bool sloppy: false // Uses levenshtein distance based scoring instead of fuzzy sort. Very weird.
-                property bool spotlight: true // Super opens a Spotlight-like search; Super+Tab opens the workspaces overview without search
+                property bool spotlight: false // Super opens a Spotlight-like search instead of end-4's overview; Super+Tab opens the workspaces overview without search
                 property JsonObject prefix: JsonObject {
                     property bool showDefaultActionsWithoutPrefix: true
                     property string action: "/"
