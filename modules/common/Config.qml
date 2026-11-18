@@ -744,7 +744,7 @@ Singleton {
                 property int pinsVersion: 0
                 property bool taskbarHoverOnly: true
                 property bool nativeTaskbar: false
-                property bool hideDesktopPopup: false
+                property bool hideDesktopPopup: true
                 property bool dockStableHover: true
                 property bool backgroundBehindIcons: true
                 property bool ownWallpaper: false
