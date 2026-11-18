@@ -18,7 +18,10 @@ Scope {
     // slid to their new tiles (windowsMove, 300 ms). Changed earlier, apps that
     // fit themselves into the work area (Chromium) jump back on screen while they
     // wait to land.
-    property bool reservationOpen: GlobalStates.barOpen
+    // Set once at start, not bound: a binding would follow barOpen, which
+    // changes as soon as the bar's slide ends, before windows have landed.
+    property bool reservationOpen
+    Component.onCompleted: reservationOpen = GlobalStates.barOpen
     readonly property int showDuration: 160
     readonly property int hideDuration: 140
 
@@ -30,7 +33,6 @@ Scope {
         if (requestedOpen === isOpen) return;
         requestedOpen = isOpen;
         commitToggle.restart();
-        reservationDelay.restart();
     }
 
     Timer {
@@ -67,6 +69,7 @@ Scope {
             return;
         relayoutSoon.restart();
         relayoutAfterReservation.restart();
+        reservationDelay.restart();
     }
     Connections {
         target: GlobalStates
