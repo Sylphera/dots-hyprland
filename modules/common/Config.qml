@@ -745,6 +745,7 @@ Singleton {
                 property bool taskbarHoverOnly: true
                 property bool nativeTaskbar: false
                 property bool hideDesktopPopup: false
+                property bool dockStableHover: true
                 property bool backgroundBehindIcons: true
                 property bool ownWallpaper: false
                 property bool superDrag: true
