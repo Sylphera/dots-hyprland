@@ -14,6 +14,9 @@ Scope {
     id: bar
     property bool showBarBackground: Config.options.bar.showBackground
     property bool requestedOpen: GlobalStates.barOpen
+    // The space reserved for the bar follows requestedOpen a moment later, once
+    // tiling has started sliding windows toward their new tiles.
+    property bool reservationOpen: GlobalStates.barOpen
     readonly property int showDuration: 160
     readonly property int hideDuration: 140
 
@@ -25,6 +28,7 @@ Scope {
         if (requestedOpen === isOpen) return;
         requestedOpen = isOpen;
         commitToggle.restart();
+        reservationDelay.restart();
     }
 
     Timer {
@@ -38,6 +42,12 @@ Scope {
     // availableGeometry. As in Hyprland, the reservation follows the toggle at
     // once, so windows slide (windowsMove) while the bar slides; tiling is
     // nudged as soon as Explorer has applied it, and once more to be sure.
+    Timer {
+        id: reservationDelay
+        interval: 40
+        repeat: false
+        onTriggered: bar.reservationOpen = bar.requestedOpen
+    }
     Timer {
         id: relayoutSoon
         interval: 30
@@ -360,7 +370,18 @@ Scope {
             // moment it is toggled, as Hyprland's exclusive zone does.
             PanelWindow {
                 screen: barLoader.modelData
-                visible: Platform.isWindows && bar.requestedOpen
+                visible: Platform.isWindows && bar.reservationOpen
+                // Windows start sliding as the bar is toggled, before the work
+                // area changes and apps react to it on their own.
+                Connections {
+                    target: bar
+                    function onRequestedOpenChanged() {
+                        if (!Platform.isWindows || barRoot.reservedZone <= 0)
+                            return;
+                        WindowsNative.tiling?.expectBarSpace(barLoader.modelData.name, !Config.options.bar.bottom,
+                            bar.requestedOpen ? barRoot.reservedZone : -barRoot.reservedZone);
+                    }
+                }
                 WlrLayershell.namespace: "quickshell:bar-reservation"
                 color: "transparent"
                 implicitHeight: 1
