@@ -34,6 +34,11 @@ FloatingWindow {
         popOutTimer.interval = ms;
         popOutTimer.restart();
     }
+    // Cloak the window before it first shows, so it only appears popping in.
+    Component.onCompleted: {
+        if (Platform.isWindows && WindowsNative.windowFrame && content.Window.window)
+            WindowsNative.windowFrame.popIn(content.Window.window);
+    }
     Timer {
         id: popOutTimer
         onTriggered: root.closeRequested()
@@ -69,8 +74,7 @@ FloatingWindow {
     onVisibleChanged: {
         if (root.visible)
             root.applyTitleBar();
-        if (root.visible && Platform.isWindows && WindowsNative.windowFrame)
-            WindowsNative.windowFrame.popIn(content.Window.window);
+
         if (!root.visible || root.shownOnce)
             return;
         root.shownOnce = true;
