@@ -109,7 +109,7 @@ Scope {
                     return false;
                 const hasToplevel = (workspace.toplevels?.values ?? []).some(t =>
                     !(t.wayland?.minimized ?? false)
-                    && !HyprlandData.isSpecialWindow(HyprlandData.clientForToplevel(t)));
+                    && !HyprlandData.isSpecialToplevel(t));
                 const hasTrackedWindow = HyprlandData.windowList.some(w =>
                     w.workspace?.id === workspace.id && !w.minimized
                     && !HyprlandData.isSpecialWindow(w));
