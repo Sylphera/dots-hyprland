@@ -35,12 +35,26 @@ Scope {
     }
 
     // The Windows AppBar reservation can change without Qt reporting a new
-    // availableGeometry. Recompute tiling after the reservation has settled.
+    // availableGeometry. As in Hyprland, the reservation follows the toggle at
+    // once, so windows slide (windowsMove) while the bar slides; tiling is
+    // nudged as soon as Explorer has applied it, and once more to be sure.
     Timer {
-        id: relayoutAfterReservation
-        interval: 120
+        id: relayoutSoon
+        interval: 30
         repeat: false
         onTriggered: WindowsNative.tiling?.relayout()
+    }
+    Timer {
+        id: relayoutAfterReservation
+        interval: 150
+        repeat: false
+        onTriggered: WindowsNative.tiling?.relayout()
+    }
+    onRequestedOpenChanged: {
+        if (!Platform.isWindows)
+            return;
+        relayoutSoon.restart();
+        relayoutAfterReservation.restart();
     }
     Connections {
         target: GlobalStates
@@ -342,10 +356,11 @@ Scope {
                 }
             }
 
-            // This surface reserves the same space as the original bar, after the slide.
+            // This surface reserves the same space as the original bar, from the
+            // moment it is toggled, as Hyprland's exclusive zone does.
             PanelWindow {
                 screen: barLoader.modelData
-                visible: Platform.isWindows && GlobalStates.barOpen
+                visible: Platform.isWindows && bar.requestedOpen
                 WlrLayershell.namespace: "quickshell:bar-reservation"
                 color: "transparent"
                 implicitHeight: 1
