@@ -430,7 +430,16 @@ q="$1"; h="$2"
 
     PanelWindow {
         id: panelWindow
-        visible: GlobalStates.spotlightOpen
+        visible: GlobalStates.spotlightOpen || panelWindow.clearing
+        // Windows shows a window's last frame again when it reappears, so the
+        // window stays up for a transparent frame before it hides.
+        property bool clearing: false
+
+        Timer {
+            id: clearTimer
+            interval: 50
+            onTriggered: panelWindow.clearing = false
+        }
         screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? null
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
@@ -468,11 +477,15 @@ q="$1"; h="$2"
                     root.setMode(GlobalStates.spotlightMode);
             }
             function onSpotlightOpenChanged() {
-                // The window hides at once on close, so a fade-out would stall
-                // and replay on the next open. Snap back and only animate in.
                 content.animateShow = false;
                 content.shown = false;
+                content.animateSize = false;
+                sizeSettleTimer.stop();
+                clearTimer.stop();
+                panelWindow.clearing = !GlobalStates.spotlightOpen;
+                if (panelWindow.clearing) clearTimer.start();
                 if (GlobalStates.spotlightOpen) {
+                    sizeSettleTimer.start();
                     content.animateShow = true;
                     content.shown = true;
                     GlobalStates.overviewOpen = false;
@@ -518,6 +531,13 @@ q="$1"; h="$2"
             height: panel.height
             property bool shown: false
             property bool animateShow: false
+            property bool animateSize: false
+
+            Timer {
+                id: sizeSettleTimer
+                interval: Appearance.animation.elementMoveFast.duration
+                onTriggered: content.animateSize = true
+            }
             opacity: content.shown ? 1 : 0
             scale: content.shown ? 1 : 0.96
 
@@ -564,9 +584,11 @@ q="$1"; h="$2"
                 clip: true
 
                 Behavior on width {
+                    enabled: content.animateSize
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
                 Behavior on height {
+                    enabled: content.animateSize
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
 
