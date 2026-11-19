@@ -38,6 +38,7 @@ Singleton {
     readonly property QtObject screenRecorder: _impl ? _impl.screenRecorder : null
     readonly property QtObject terminalColors: _impl ? _impl.terminalColors : null
     readonly property QtObject tiling: _impl ? _impl.tiling : null
+    readonly property QtObject gestures: _impl ? _impl.gestures : null
     readonly property QtObject windowManager: _impl ? _impl.windowManager : null
     readonly property QtObject superDrag: _impl ? _impl.superDrag : null
     readonly property QtObject audioVisualizer: _impl ? _impl.audioVisualizer : null
