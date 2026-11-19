@@ -72,6 +72,8 @@
     {"keys": "Super+Q", "action": "dispatch", "dispatch": "killactive", "description": "Window: Close"},
     {"keys": "Super+D", "action": "dispatch", "dispatch": "fullscreen 1", "description": "Window: Maximize"},
     {"keys": "Super+F", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen"},
+    {"keys": "F11", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen (the shell's, in place of the app's own)"},
+    {"keys": "Shift+Super+Return", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen (in place of Windows' full screen for Store apps)"},
     {"keys": "Super+P", "action": "dispatch", "dispatch": "pin", "description": "Window: Pin"},
     {"keys": "Alt+Super+Space", "action": "dispatch", "dispatch": "togglefloating", "description": "Window: Float/Tile"},
     {"keys": "Super+S", "action": "dispatch", "dispatch": "togglespecialworkspace", "description": "Workspace: Toggle scratchpad"},
