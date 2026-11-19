@@ -17,6 +17,7 @@ Item {
     // in end-4's config); Windows doesn't. With this set the tooltip's window
     // fades over these ms, and a closing one keeps fading while another shows.
     property int compositorFadeMs: 0
+    property int compositorFadeInMs: compositorFadeMs
     readonly property bool keepsAlive: root.opacityOnly || root.compositorFadeMs > 0
     property real horizontalPadding: 10
     property real verticalPadding: 5
@@ -48,6 +49,7 @@ Item {
                 compositorFade.stop();
                 compositorFade.from = root.contentItem.opacity;
                 compositorFade.to = 0;
+                compositorFade.duration = root.compositorFadeMs;
                 compositorFade.start();
                 return;
             }
@@ -70,6 +72,7 @@ Item {
                 root.contentItem.opacity = 0;
             compositorFade.from = root.contentItem.opacity;
             compositorFade.to = 1;
+            compositorFade.duration = root.compositorFadeInMs;
             compositorFade.start();
         }
         if (root.contentItem && "shown" in root.contentItem) {
@@ -84,7 +87,6 @@ Item {
         id: compositorFade
         target: root.contentItem
         property: "opacity"
-        duration: root.compositorFadeMs
         easing.type: Easing.OutCubic
         onFinished: {
             if (compositorFade.to !== 0)
