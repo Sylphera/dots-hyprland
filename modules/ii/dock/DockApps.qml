@@ -137,6 +137,8 @@ Item {
         }
         readonly property bool hasContent: previewPopup.show || body.opacity > 0
         property real cachedCenter: 0
+        readonly property bool fitsCard: Platform.isWindows && !DockStyle.vertical
+        readonly property real cardWindowX: Math.max(0, Math.min((root.QsWindow.window?.width ?? 0) - popupMouseArea.implicitWidth, previewPopup.cachedCenter - popupMouseArea.implicitWidth / 2))
         readonly property real shiftX: DockStyle.position === "left" ? -12 : DockStyle.position === "right" ? 12 : 0
         readonly property real shiftY: DockStyle.vertical ? 0 : 12
 
@@ -261,15 +263,17 @@ Item {
                 ? DockStyle.zone + Appearance.sizes.hyprlandGapsOut - Appearance.sizes.elevationMargin
                 : DockStyle.position === "right"
                     ? (root.QsWindow.window?.width ?? 0) - DockStyle.zone - Appearance.sizes.hyprlandGapsOut + Appearance.sizes.elevationMargin
-                    : 0
+                    : previewPopup.fitsCard ? previewPopup.cardWindowX : 0
         }
 
         visible: body.opacity > 0
         color: "transparent"
-        implicitWidth: DockStyle.vertical ? popupMouseArea.implicitWidth : (root.QsWindow.window?.width ?? 1)
+        implicitWidth: DockStyle.vertical || previewPopup.fitsCard ? popupMouseArea.implicitWidth : (root.QsWindow.window?.width ?? 1)
         implicitHeight: DockStyle.vertical
             ? (root.QsWindow.window?.height ?? 1)
-            : popupMouseArea.implicitHeight + root.windowControlsHeight + Appearance.sizes.elevationMargin * 2
+            : previewPopup.fitsCard
+                ? popupMouseArea.implicitHeight
+                : popupMouseArea.implicitHeight + root.windowControlsHeight + Appearance.sizes.elevationMargin * 2
 
         MouseArea {
             id: popupMouseArea
@@ -277,11 +281,11 @@ Item {
             anchors.left: DockStyle.position === "left" ? parent.left : undefined
             anchors.right: DockStyle.position === "right" ? parent.right : undefined
             implicitWidth: popupBackground.implicitWidth + Appearance.sizes.elevationMargin * 2
-            implicitHeight: DockStyle.vertical
+            implicitHeight: DockStyle.vertical || previewPopup.fitsCard
                 ? popupBackground.implicitHeight + Appearance.sizes.elevationMargin * 2
                 : root.maxWindowPreviewHeight + root.windowControlsHeight + Appearance.sizes.elevationMargin * 2
             hoverEnabled: true
-            x: DockStyle.vertical ? 0 : previewPopup.cachedCenter - width / 2
+            x: DockStyle.vertical || previewPopup.fitsCard ? 0 : previewPopup.cachedCenter - width / 2
             y: DockStyle.vertical
                 ? Math.max(0, Math.min((root.QsWindow.window?.height ?? 0) - height, previewPopup.cachedCenter - height / 2))
                 : 0
@@ -314,7 +318,6 @@ Item {
                 Rectangle {
                     id: popupBackground
                     property real padding: 5
-                    clip: true
                     color: Appearance.m3colors.m3surfaceContainer
                     radius: Appearance.rounding.normal
                     SekaiShadow {
@@ -340,91 +343,96 @@ Item {
                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                     }
 
-                    RowLayout {
-                        id: previewRowLayout
-                        anchors.centerIn: parent
-                        Repeater {
-                            model: ScriptModel {
-                                values: previewPopup.hasContent ? (previewPopup.appTopLevel?.toplevels ?? []) : []
-                            }
-                            RippleButton {
-                                id: windowButton
-                                Layout.fillHeight: true
-                                required property var modelData
-                                padding: 0
-                                middleClickAction: () => {
-                                    windowButton.modelData?.close();
-                                }
-                                onClicked: {
-                                    windowButton.modelData?.activate();
-                                }
-                                contentItem: ColumnLayout {
-                                    implicitWidth: previewHolder.preview?.implicitWidth ?? 0
-                                    implicitHeight: previewHolder.preview?.implicitHeight ?? 0
+                    Item {
+                        anchors.fill: parent
+                        clip: true
 
-                                    ButtonGroup {
-                                        contentWidth: parent.width - anchors.margins * 2
-                                        StyledText {
-                                            Layout.margins: 5
-                                            Layout.fillWidth: true
-                                            font.pixelSize: Appearance.font.pixelSize.small
-                                            text: windowButton.modelData?.title
-                                            elide: Text.ElideRight
-                                            color: Appearance.m3colors.m3onSurface
-                                        }
-                                        GroupButton {
-                                            id: closeButton
-                                            colBackground: ColorUtils.transparentize(Appearance.colors.colSurfaceContainer)
-                                            baseWidth: root.windowControlsHeight
-                                            baseHeight: root.windowControlsHeight
-                                            buttonRadius: Appearance.rounding.full
-                                            contentItem: MaterialSymbol {
-                                                anchors.centerIn: parent
-                                                horizontalAlignment: Text.AlignHCenter
-                                                text: "close"
-                                                iconSize: Appearance.font.pixelSize.normal
+                        RowLayout {
+                            id: previewRowLayout
+                            anchors.centerIn: parent
+                            Repeater {
+                                model: ScriptModel {
+                                    values: previewPopup.hasContent ? (previewPopup.appTopLevel?.toplevels ?? []) : []
+                                }
+                                RippleButton {
+                                    id: windowButton
+                                    Layout.fillHeight: true
+                                    required property var modelData
+                                    padding: 0
+                                    middleClickAction: () => {
+                                        windowButton.modelData?.close();
+                                    }
+                                    onClicked: {
+                                        windowButton.modelData?.activate();
+                                    }
+                                    contentItem: ColumnLayout {
+                                        implicitWidth: previewHolder.preview?.implicitWidth ?? 0
+                                        implicitHeight: previewHolder.preview?.implicitHeight ?? 0
+
+                                        ButtonGroup {
+                                            contentWidth: parent.width - anchors.margins * 2
+                                            StyledText {
+                                                Layout.margins: 5
+                                                Layout.fillWidth: true
+                                                font.pixelSize: Appearance.font.pixelSize.small
+                                                text: windowButton.modelData?.title
+                                                elide: Text.ElideRight
                                                 color: Appearance.m3colors.m3onSurface
                                             }
-                                            onClicked: {
-                                                windowButton.modelData?.close();
-                                            }
-                                        }
-                                    }
-                                    Item {
-                                        id: previewHolder
-                                        readonly property Item preview: Platform.isWindows ? windowsPreview.item : screencopyLoader.item
-                                        Layout.fillWidth: true
-                                        Layout.fillHeight: true
-                                        implicitHeight: previewHolder.preview?.height ?? 0
-                                        implicitWidth: previewHolder.preview?.width ?? 0
-                                        Loader {
-                                            id: screencopyLoader
-                                            anchors.centerIn: parent
-                                            active: !Platform.isWindows
-                                            sourceComponent: ScreencopyView {
-                                                id: screencopyView
-                                                captureSource: windowButton.modelData
-                                                live: true
-                                                paintCursor: true
-                                                constraintSize: Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight)
-                                                layer.enabled: true
-                                                layer.effect: OpacityMask {
-                                                    maskSource: Rectangle {
-                                                        width: screencopyView.width
-                                                        height: screencopyView.height
-                                                        radius: Appearance.rounding.small
-                                                    }
+                                            GroupButton {
+                                                id: closeButton
+                                                colBackground: ColorUtils.transparentize(Appearance.colors.colSurfaceContainer)
+                                                baseWidth: root.windowControlsHeight
+                                                baseHeight: root.windowControlsHeight
+                                                buttonRadius: Appearance.rounding.full
+                                                contentItem: MaterialSymbol {
+                                                    anchors.centerIn: parent
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    text: "close"
+                                                    iconSize: Appearance.font.pixelSize.normal
+                                                    color: Appearance.m3colors.m3onSurface
+                                                }
+                                                onClicked: {
+                                                    windowButton.modelData?.close();
                                                 }
                                             }
                                         }
-                                        Loader {
-                                            id: windowsPreview
-                                            anchors.centerIn: parent
-                                            active: Platform.isWindows
-                                            source: "DockWindowThumbnail.qml"
-                                            onLoaded: {
-                                                item.captureSource = Qt.binding(() => windowButton.modelData);
-                                                item.constraintSize = Qt.binding(() => Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight));
+                                        Item {
+                                            id: previewHolder
+                                            readonly property Item preview: Platform.isWindows ? windowsPreview.item : screencopyLoader.item
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+                                            implicitHeight: previewHolder.preview?.height ?? 0
+                                            implicitWidth: previewHolder.preview?.width ?? 0
+                                            Loader {
+                                                id: screencopyLoader
+                                                anchors.centerIn: parent
+                                                active: !Platform.isWindows
+                                                sourceComponent: ScreencopyView {
+                                                    id: screencopyView
+                                                    captureSource: windowButton.modelData
+                                                    live: true
+                                                    paintCursor: true
+                                                    constraintSize: Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight)
+                                                    layer.enabled: true
+                                                    layer.effect: OpacityMask {
+                                                        maskSource: Rectangle {
+                                                            width: screencopyView.width
+                                                            height: screencopyView.height
+                                                            radius: Appearance.rounding.small
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            Loader {
+                                                id: windowsPreview
+                                                anchors.centerIn: parent
+                                                active: Platform.isWindows
+                                                source: "DockWindowThumbnail.qml"
+                                                onLoaded: {
+                                                    item.captureSource = Qt.binding(() => windowButton.modelData);
+                                                    item.constraintSize = Qt.binding(() => Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight));
+                                                }
                                             }
                                         }
                                     }
