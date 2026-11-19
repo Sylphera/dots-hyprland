@@ -24,10 +24,12 @@ QSWin.NativeScreenCorners {
         return corner === 0 || corner === 1;
     }
 
-    shown: root.showFakeRounding
+    // Stacked over the region selector, the corners would open the sidebars
+    // from under a snip (and show in it), so they step aside meanwhile.
+    shown: root.showFakeRounding && !GlobalStates.regionSelectorOpen
     color: "#000000"
     radius: Appearance.rounding.screenRounding
-    hotEnabled: Config.options.sidebar.cornerOpen.enable && !root.fullscreen
+    hotEnabled: Config.options.sidebar.cornerOpen.enable && !root.fullscreen && !GlobalStates.regionSelectorOpen
     hotBottom: Config.options.sidebar.cornerOpen.bottom
     hotWidth: Config.options.sidebar.cornerOpen.cornerRegionWidth
     hotHeight: Config.options.sidebar.cornerOpen.cornerRegionHeight
