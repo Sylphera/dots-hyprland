@@ -719,7 +719,8 @@ Singleton {
                 // Attempt to remove dupes (the aggregator playerctl one and browsers' native ones when there's plasma browser integration)
                 property bool filterDuplicatePlayers: true
                 property JsonObject nowPlaying: JsonObject {
-                    property bool enable: true
+                    // Off by default: end-4 has no such pill.
+                    property bool enable: false
                     property int duration: 2000
                     property int openDuration: 1000
                     property int closeDuration: 600
