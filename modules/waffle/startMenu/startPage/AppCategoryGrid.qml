@@ -12,9 +12,6 @@ import qs.modules.waffle.looks
 
 Rectangle {
     id: root
-    // Windows gives apps no categories: a folder with none is left out, as
-    // Windows' own Start menu shows only categories that have apps.
-    visible: !Platform.isWindows || root.desktopEntries.length > 0
     property AggregatedAppCategoryModel aggregatedCategory
     property list<DesktopEntry> desktopEntries: [...DesktopEntries.applications.values.filter(app => {
         const appCategories = app.categories;

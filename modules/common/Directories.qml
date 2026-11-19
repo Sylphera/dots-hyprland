@@ -128,7 +128,8 @@ Singleton {
         // Public\AccountPictures\<account SID>. With one account there is one
         // folder there, which can only be this one's; the largest size wins.
         const pub = `${(Quickshell.env("PUBLIC") || "C:/Users/Public").replace(/\\/g, "/")}/AccountPictures`;
-        const accounts = fs.listDir(pub).filter(name => name.startsWith("S-1-5-21-"));
+        if (typeof fs.listDirs !== "function") return "";
+        const accounts = fs.listDirs(pub).filter(name => name.startsWith("S-1-5-21-"));
         if (accounts.length !== 1) return "";
         const sizes = fs.listDir(`${pub}/${accounts[0]}`)
             .map(name => ({ name, size: Number((name.match(/-Image(\d+)\.(jpe?g|png)$/i) || [])[1] || 0) }))
