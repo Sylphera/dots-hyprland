@@ -69,8 +69,10 @@ ShellRoot {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.taskbar
         property: "alwaysHidden"
-        value: Config.options.panelFamily === "ii"
-            && Config.options.dock.enable
+        // waffle's own taskbar sits where Windows' would pop up on hover, and it
+        // would come up over it on every use and take its clicks.
+        value: ((Config.options.panelFamily === "ii" && Config.options.dock.enable)
+                || Config.options.panelFamily === "waffle")
             && Config.options.windowsPort.taskbarHoverOnly
             && !Config.options.windowsPort.nativeTaskbar
     }
