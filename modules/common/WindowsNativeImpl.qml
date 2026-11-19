@@ -35,6 +35,7 @@ QtObject {
     readonly property QtObject screenRecorder: (root.full || root.process === "settings") ? QSWin.ScreenRecorder : null
     readonly property QtObject terminalColors: root.full ? QSWin.TerminalColors : null
     readonly property QtObject tiling: root.full ? QSWin.Tiling : null
+    readonly property QtObject gestures: root.full ? QSWin.TouchpadGestures : null
     readonly property QtObject windowManager: root.full ? QSWin.WindowManager : null
     readonly property QtObject superDrag: root.full ? QSWin.SuperDrag : null
     readonly property QtObject audioVisualizer: root.full ? QSWin.AudioVisualizer : null

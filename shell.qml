@@ -335,6 +335,16 @@ ShellRoot {
     }
 
 
+    // Touchpad gestures without a touchpad: `gesture swipe 1 400` swipes one
+    // desktop width toward the next desktop in 400 ms (negative: previous).
+    IpcHandler {
+        target: "gesture"
+
+        function swipe(distance: real, durationMs: int): void {
+            WindowsNative.gestures?.simulateSwipe(distance, durationMs)
+        }
+    }
+
     // Shortcuts
     IpcHandler {
         target: "panelFamily"
