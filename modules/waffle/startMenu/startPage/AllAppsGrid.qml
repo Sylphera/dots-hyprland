@@ -33,7 +33,9 @@ GridLayout {
             categories: ["Settings", "System"]
         }), aggAppCatComp.createObject(null, {
             name: Translation.tr("Other"),
-            categories: ["Game"]
+            categories: ["Game"],
+            catchesRest: Platform.isWindows,
+            otherCategories: ["Development", "Education", "Network", "Office", "Utility", "Science", "AudioVideo", "Graphics", "Settings", "System"]
         }), 
     ]
 

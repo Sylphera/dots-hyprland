@@ -16,7 +16,10 @@ Rectangle {
     property list<DesktopEntry> desktopEntries: [...DesktopEntries.applications.values.filter(app => {
         const appCategories = app.categories;
         const gridCategories = root.aggregatedCategory.categories;
-        return appCategories.some(cat => gridCategories.indexOf(cat) !== -1);
+        if (appCategories.some(cat => gridCategories.indexOf(cat) !== -1))
+            return true;
+        return root.aggregatedCategory.catchesRest
+            && !appCategories.some(cat => root.aggregatedCategory.otherCategories.indexOf(cat) !== -1);
     })].sort((a, b) => a.name.localeCompare(b.name));
 
     property Item windowRootItem: {
