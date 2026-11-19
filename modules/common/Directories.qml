@@ -131,7 +131,7 @@ Singleton {
         if (typeof fs.listDirs !== "function") return "";
         const accounts = fs.listDirs(pub).filter(name => name.startsWith("S-1-5-21-"));
         if (accounts.length !== 1) return "";
-        const sizes = fs.listDir(`${pub}/${accounts[0]}`)
+        const sizes = fs.listDir(`${pub}/${accounts[0]}`, true)
             .map(name => ({ name, size: Number((name.match(/-Image(\d+)\.(jpe?g|png)$/i) || [])[1] || 0) }))
             .filter(entry => entry.size > 0)
             .sort((a, b) => b.size - a.size);
