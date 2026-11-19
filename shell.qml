@@ -11,6 +11,7 @@ import "modules/common"
 import "services"
 import "panelFamilies"
 import "modules/settings"
+import "modules/common/utils"
 
 import QtQuick
 import QtQuick.Window
@@ -356,6 +357,19 @@ ShellRoot {
         description: "Cycles panel family"
 
         onPressed: root.cyclePanelFamily()
+    }
+
+    // end-4's Ctrl+Alt+R and Super+Shift+Alt+R (record.sh --fullscreen
+    // [--sound]), with the native recorder: pressed again, they stop it.
+    GlobalShortcut {
+        name: "screenRecordFullscreen"
+        description: "Records the focused screen (toggle)"
+        onPressed: if (Platform.isWindows) ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, false)
+    }
+    GlobalShortcut {
+        name: "screenRecordFullscreenWithSound"
+        description: "Records the focused screen with sound (toggle)"
+        onPressed: if (Platform.isWindows) ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, true, Config.options.screenRecord.microphone)
     }
 }
 
