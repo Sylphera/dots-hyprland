@@ -13,6 +13,11 @@ Item {
     property bool alternativeVisibleCondition: false
     property bool opacityOnly: false
     property bool popupActive: false
+    // Hyprland fades a popup's window in and out (fadePopups, its slow default
+    // in end-4's config); Windows doesn't. With this set the tooltip's window
+    // fades over these ms, and a closing one keeps fading while another shows.
+    property int compositorFadeMs: 0
+    readonly property bool keepsAlive: root.opacityOnly || root.compositorFadeMs > 0
     property real horizontalPadding: 10
     property real verticalPadding: 5
     property real horizontalMargin: horizontalPadding
@@ -39,6 +44,13 @@ Item {
     onInternalVisibleConditionChanged: {
         const animated = root.contentItem && "shown" in root.contentItem;
         if (!root.internalVisibleCondition) {
+            if (root.compositorFadeMs > 0 && root.contentItem) {
+                compositorFade.stop();
+                compositorFade.from = root.contentItem.opacity;
+                compositorFade.to = 0;
+                compositorFade.start();
+                return;
+            }
             if (animated)
                 root.contentItem.shown = false;
             if (root.opacityOnly && root.contentItem)
@@ -50,13 +62,36 @@ Item {
             root.contentItem = root.defaultContentComponent.createObject(root, {
                 "parent": null
             });
-        if (root.opacityOnly)
+        if (root.keepsAlive)
             root.popupActive = true;
+        if (root.compositorFadeMs > 0 && root.contentItem) {
+            compositorFade.stop();
+            if (!compositorFade.running && root.contentItem.opacity >= 1)
+                root.contentItem.opacity = 0;
+            compositorFade.from = root.contentItem.opacity;
+            compositorFade.to = 1;
+            compositorFade.start();
+        }
         if (root.contentItem && "shown" in root.contentItem) {
             Qt.callLater(() => {
                 if (root.internalVisibleCondition && root.contentItem)
                     root.contentItem.shown = true;
             });
+        }
+    }
+
+    NumberAnimation {
+        id: compositorFade
+        target: root.contentItem
+        property: "opacity"
+        duration: root.compositorFadeMs
+        easing.type: Easing.OutCubic
+        onFinished: {
+            if (compositorFade.to !== 0)
+                return;
+            if (root.contentItem && "shown" in root.contentItem)
+                root.contentItem.shown = false;
+            root.popupActive = false;
         }
     }
 
@@ -70,7 +105,7 @@ Item {
     Loader {
         id: tooltipLoader
         anchors.fill: parent
-        active: (root.opacityOnly ? root.popupActive : root.internalVisibleCondition)
+        active: (root.keepsAlive ? root.popupActive : root.internalVisibleCondition)
             && root.contentItem !== null
         sourceComponent: PopupWindow {
             visible: true

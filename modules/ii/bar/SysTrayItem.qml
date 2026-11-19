@@ -108,6 +108,7 @@ MouseArea {
 
     PopupToolTip {
         id: tooltip
+        compositorFadeMs: Platform.isWindows ? 800 : 0
         extraVisibleCondition: root.containsMouse
         alternativeVisibleCondition: extraVisibleCondition
         anchorEdges: (!Config.options.bar.bottom && !Config.options.bar.vertical) ? Edges.Bottom : Edges.Top
