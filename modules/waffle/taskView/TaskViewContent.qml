@@ -257,6 +257,19 @@ Rectangle {
                     positionViewAtIndex(HyprlandData.activeWorkspace.id - 1, ListView.Contain);
                 }
 
+                // A mouse wheel only scrolls vertically; on Windows, where most
+                // scroll with one, it moves the desktops along too.
+                WheelHandler {
+                    enabled: Platform.isWindows && workspaceListView.interactive
+                    acceptedDevices: PointerDevice.Mouse
+                    onWheel: event => {
+                        const list = workspaceListView;
+                        const delta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
+                        const end = list.contentWidth - list.width + list.rightMargin;
+                        list.contentX = Math.max(-list.leftMargin, Math.min(list.contentX - delta, end));
+                    }
+                }
+
                 Connections {
                     target: HyprlandData
                     function onActiveWorkspaceChanged() {
