@@ -43,9 +43,16 @@ Item {
         root.justSwitched = true;
         switchSettle.restart();
     }
+    // Until Windows focuses a window on the new desktop. Behind the desktop
+    // slide the real switch only happens 400 ms in, so a fixed wait ran out
+    // just before it and the title showed something else in between.
+    onShownWindowChanged: {
+        if (root.shownWindow)
+            root.justSwitched = false;
+    }
     Timer {
         id: switchSettle
-        interval: 400
+        interval: 1500
         onTriggered: root.justSwitched = false
     }
 
