@@ -299,14 +299,9 @@ ShellRoot {
 
     // Panel families
     property list<string> families: ["ii", "waffle"]
+    // As in end-4, between ii and waffle; the Windows taskbar instead of ii's
+    // bar stays a setting (windowsPort.nativeTaskbar).
     function cyclePanelFamily() {
-        if (Platform.isWindows) {
-            if (Config.options.panelFamily !== "ii")
-                Config.options.panelFamily = "ii";
-            else
-                Config.options.windowsPort.nativeTaskbar = !Config.options.windowsPort.nativeTaskbar;
-            return;
-        }
         const currentIndex = families.indexOf(Config.options.panelFamily)
         const nextIndex = (currentIndex + 1) % families.length
         Config.options.panelFamily = families[nextIndex]
