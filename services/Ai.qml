@@ -22,6 +22,7 @@ Singleton {
     property Component aiModelComponent: AiModel {}
     property Component geminiApiStrategy: GeminiApiStrategy {}
     property Component openaiApiStrategy: OpenAiApiStrategy {}
+    property Component groqApiStrategy: OpenAiApiStrategy { browserSearch: true }
     property Component mistralApiStrategy: MistralApiStrategy {}
     readonly property string interfaceRole: "interface"
     readonly property string apiKeyEnvVarName: "API_KEY"
@@ -236,7 +237,7 @@ Singleton {
             "none": [],
         }
     }
-    property list<var> availableTools: Object.keys(root.tools[models[currentModelId]?.api_format])
+    property list<var> availableTools: Object.keys(root.tools[models[currentModelId]?.api_format] ?? {})
     property var toolDescriptions: {
         "functions": Translation.tr("Commands, edit configs, search.\nTakes an extra turn to switch to search mode if that's needed"),
         "search": Translation.tr("Gives the model search capabilities (immediately)"),
@@ -295,6 +296,23 @@ Singleton {
             "key_get_description": Translation.tr("**Instructions**: Log into Mistral account, go to Keys on the sidebar, click Create new key"),
             "api_format": "mistral",
         }),
+        "groq-gpt-oss-20b": aiModelComponent.createObject(this, {
+            "name": "GPT-OSS 20B (Groq)",
+            "icon": "openai-symbolic",
+            "description": Translation.tr("Online | Groq model with built-in web search"),
+            "homepage": "https://console.groq.com",
+            "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+            "model": "openai/gpt-oss-20b",
+            "requires_key": true,
+            "key_id": "groq",
+            "key_get_link": "https://console.groq.com/keys",
+            "key_get_description": Translation.tr("Create a Groq API key and use it here to chat and search the web."),
+            "api_format": "groq",
+            "extraParams": {
+                "stream": false,
+                "reasoning_effort": "low",
+            },
+        }),
     }
     property var modelList: Object.keys(root.models)
     property var currentModelId: Persistent.states?.ai?.model || modelList[0]
@@ -305,6 +323,7 @@ Singleton {
         "openai": openaiApiStrategy.createObject(this),
         "gemini": geminiApiStrategy.createObject(this),
         "mistral": mistralApiStrategy.createObject(this),
+        "groq": groqApiStrategy.createObject(this),
     }
     property ApiStrategy currentApiStrategy: apiStrategies[models[currentModelId]?.api_format || "openai"]
 
@@ -775,7 +794,8 @@ Singleton {
             const endpoint = root.currentApiStrategy.buildEndpoint(model);
             const messageArray = root.messageIDs.map(id => root.messageByID[id]);
             const filteredMessageArray = messageArray.filter(message => message.role !== Ai.interfaceRole);
-            const data = root.currentApiStrategy.buildRequestData(model, filteredMessageArray, root.systemPrompt, root.temperature, root.tools[model.api_format][root.currentTool], root.pendingFilePath);
+            const activeTools = root.tools[model.api_format]?.[root.currentTool] ?? [];
+            const data = root.currentApiStrategy.buildRequestData(model, filteredMessageArray, root.systemPrompt, root.temperature, activeTools, root.pendingFilePath);
             // console.log("[Ai] Request data: ", JSON.stringify(data, null, 2));
 
             let requestHeaders = {
