@@ -15,12 +15,15 @@ Scope {
 
     PanelWindow {
         id: root
+        readonly property bool fullscreenOnScreen: Notifications.hasFullscreenOnScreen(root.screen?.name ?? "")
         visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked
         screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? null
 
         WlrLayershell.namespace: "quickshell:notificationPopup"
         WlrLayershell.layer: WlrLayer.Overlay
         exclusiveZone: 0
+        exclusionMode: root.fullscreenOnScreen
+            ? ExclusionMode.Ignore : ExclusionMode.Normal
 
         anchors {
             top: true
@@ -29,7 +32,7 @@ Scope {
         }
 
         mask: Region {
-            item: listview.contentItem
+            item: Platform.isWindows && root.fullscreenOnScreen && !Notifications.popupCursorVisible ? null : listview.contentItem
         }
 
         color: "transparent"

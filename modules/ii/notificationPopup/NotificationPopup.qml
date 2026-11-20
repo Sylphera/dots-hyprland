@@ -14,6 +14,7 @@ Scope {
     PanelWindow {
         id: root
         readonly property string targetScreenName: Config.options.notifications.forceMonitor.enable ? Config.options.notifications.forceMonitor.name : (Hyprland.focusedMonitor?.name ?? "")
+        readonly property bool fullscreenOnScreen: Notifications.hasFullscreenOnScreen(root.targetScreenName)
         visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.islandShownOn(root.targetScreenName) && !GlobalStates.nabyIslandTakes("notifications", root.targetScreenName)
         screen: Quickshell.screens.find(s => s.name === root.targetScreenName) ?? null
 
@@ -33,7 +34,8 @@ Scope {
         WlrLayershell.namespace: "quickshell:notificationPopup"
         WlrLayershell.layer: WlrLayer.Overlay
         exclusiveZone: 0
-        exclusionMode: SekaiTheme.active ? ExclusionMode.Ignore : ExclusionMode.Normal
+        exclusionMode: SekaiTheme.active || root.fullscreenOnScreen
+            ? ExclusionMode.Ignore : ExclusionMode.Normal
 
         anchors {
             top: true
@@ -43,7 +45,7 @@ Scope {
         }
 
         mask: Region {
-            item: listview.contentItem
+            item: Platform.isWindows && root.fullscreenOnScreen && !Notifications.popupCursorVisible ? null : listview.contentItem
         }
 
         color: "transparent"

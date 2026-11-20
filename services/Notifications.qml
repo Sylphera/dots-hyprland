@@ -6,6 +6,7 @@ import qs
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 import Quickshell.Services.Notifications
 
 /**
@@ -85,6 +86,7 @@ Singleton {
     property var filePath: Directories.notificationsPath
     property list<Notif> list: []
     property var popupList: list.filter((notif) => notif.popup);
+    readonly property bool popupCursorVisible: popupCursorPoll.running && popupCursorPoll.cursorVisible
     property bool popupInhibited: (GlobalStates?.sidebarRightOpen ?? false) || silent
     property var latestTimeForApp: ({})
     Component {
@@ -94,6 +96,35 @@ Singleton {
     Component {
         id: notifTimerComponent
         NotifTimer {}
+    }
+
+    Timer {
+        id: popupCursorPoll
+        property bool cursorVisible: false
+        interval: 16
+        running: Platform.isWindows && root.popupList.length > 0
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: cursorVisible = WindowsNative.input?.isCursorVisible?.() ?? false
+    }
+
+    function hasFullscreenOnScreen(screenName) {
+        if (!screenName)
+            return false;
+
+        const monitor = Hyprland.monitors.values.find(monitor => monitor.name === screenName);
+        const specialWorkspaceId = monitor?.lastIpcObject?.specialWorkspace?.id ?? 0;
+        const workspaceId = specialWorkspaceId !== 0 ? specialWorkspaceId : monitor?.activeWorkspace?.id;
+        if (workspaceId === undefined)
+            return false;
+
+        return Hyprland.toplevels.values.some(window => {
+            if (window.monitor?.name !== screenName || window.wayland?.minimized)
+                return false;
+            const data = window.lastIpcObject;
+            const fullscreen = window.wayland?.fullscreen ?? (data?.fullscreen === 2);
+            return fullscreen && (data?.workspace?.id ?? window.workspace?.id) === workspaceId;
+        });
     }
 
     function stringifyList(list) {
