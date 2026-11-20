@@ -51,7 +51,7 @@ StyledPopup {
 
             StyledPopupHeaderRow {
                 icon: "swap_horiz"
-                label: Platform.isWindows ? "WinPageFile" : "Swap"
+                label: "Swap"
             }
             Column {
                 spacing: 4

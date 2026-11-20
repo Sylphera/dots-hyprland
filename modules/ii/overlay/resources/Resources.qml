@@ -30,7 +30,7 @@ StyledOverlayWidget {
         },
         {
             "icon": "swap_horiz",
-            "name": Platform.isWindows ? Translation.tr("WinPageFile") : Translation.tr("Swap"),
+            "name": Translation.tr("Swap"),
             "history": ResourceUsage.swapUsageHistory,
             "maxAvailableString": ResourceUsage.maxAvailableSwapString
         },
