@@ -98,7 +98,10 @@ Singleton {
     }
 
     function refresh() {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            WindowsNative.clipboard?.refresh?.();
+            return;
+        }
         readProc.buffer = []
         readProc.running = true
     }
