@@ -66,7 +66,11 @@ MouseArea {
         if (event.key === Qt.Key_Control) {
             root.ctrlHeld = true;
         }
-        if (event.key === Qt.Key_Escape) { // Esc to clear
+        if (event.key === Qt.Key_Escape) { // Esc to clear; it leaves a trial run
+            if (GlobalStates.lockPreview) {
+                root.context.unlocked(LockContext.ActionEnum.Unlock);
+                return;
+            }
             root.context.currentText = "";
         } 
         forceFieldFocus();
@@ -131,7 +135,16 @@ MouseArea {
         ToolbarTextField {
             id: passwordBox
             Layout.rightMargin: -Layout.leftMargin
-            placeholderText: GlobalStates.screenUnlockFailed ? Translation.tr("Incorrect password") : Translation.tr("Enter password")
+            placeholderText: {
+                if (root.context.setupNeeded) {
+                    if (root.setupMismatched)
+                        return Translation.tr("They don't match, try again");
+                    return root.context.setupConfirming ? Translation.tr("Repeat it") : Translation.tr("New password");
+                }
+                if (root.context.attemptsExhausted)
+                    return Translation.tr("Too many attempts");
+                return GlobalStates.screenUnlockFailed ? Translation.tr("Incorrect password") : Translation.tr("Enter password");
+            }
 
             // Style
             clip: true
@@ -140,7 +153,7 @@ MouseArea {
             selectionColor: materialShapeChars ? "transparent" : Appearance.colors.colSecondaryContainer
 
             // Password
-            enabled: !root.context.unlockInProgress
+            enabled: !root.context.unlockInProgress && !root.context.attemptsExhausted
             echoMode: TextInput.Password
             inputMethodHints: Qt.ImhSensitiveData
 
@@ -180,6 +193,17 @@ MouseArea {
                     if (GlobalStates.screenUnlockFailed) wrongPasswordShakeAnim.restart();
                 }
             }
+            Connections {
+                target: root.context
+                function onSetupMismatch() {
+                    root.setupMismatched = true;
+                    wrongPasswordShakeAnim.restart();
+                }
+                function onCurrentTextChanged() {
+                    if (root.context.currentText.length > 0)
+                        root.setupMismatched = false;
+                }
+            }
 
             // We're drawing dots manually
             property bool materialShapeChars: Config.options.lock.materialShapeChars
@@ -204,7 +228,7 @@ MouseArea {
             id: confirmButton
             implicitWidth: height
             toggled: true
-            enabled: !root.context.unlockInProgress
+            enabled: !root.context.unlockInProgress && !root.context.attemptsExhausted
             colBackgroundToggled: Appearance.colors.colPrimary
 
             onClicked: root.context.tryUnlock()
@@ -215,6 +239,8 @@ MouseArea {
                 verticalAlignment: Text.AlignVCenter
                 iconSize: 24
                 text: {
+                    if (root.context.setupNeeded)
+                        return root.context.setupConfirming ? "check" : "arrow_right_alt";
                     if (root.context.targetAction === LockContext.ActionEnum.Unlock) {
                         return root.ctrlHeld ? "coffee" : "arrow_right_alt";
                     } else if (root.context.targetAction === LockContext.ActionEnum.Poweroff) {
@@ -224,6 +250,145 @@ MouseArea {
                     }
                 }
                 color: confirmButton.enabled ? Appearance.colors.colOnPrimary : Appearance.colors.colSubtext
+            }
+        }
+    }
+
+    // Windows: the first lock sets the lock screen's password
+    property bool setupMismatched: false
+    Item {
+        id: setupCardWrapper
+        visible: root.context.setupNeeded
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: mainIsland.top
+            bottomMargin: 16
+        }
+        implicitWidth: setupCard.implicitWidth
+        implicitHeight: setupCard.implicitHeight
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
+
+        StyledRectangularShadow {
+            target: setupCard
+        }
+        Rectangle {
+            id: setupCard
+            color: Appearance.m3colors.m3surfaceContainer
+            radius: Appearance.rounding.large
+            implicitWidth: 380
+            implicitHeight: setupColumn.implicitHeight + 24 * 2
+
+            ColumnLayout {
+                id: setupColumn
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    margins: 24
+                }
+                spacing: 10
+
+                MaterialSymbol {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: root.context.setupConfirming ? "password" : "lock"
+                    fill: 1
+                    iconSize: 36
+                    color: Appearance.colors.colPrimary
+                    animateChange: true
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.context.setupConfirming ? Translation.tr("Type it once more") : Translation.tr("Set a lock screen password")
+                    font.pixelSize: Appearance.font.pixelSize.larger
+                    color: Appearance.colors.colOnSurface
+                    animateChange: true
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                    text: Translation.tr("It only unlocks this screen. Set it within a minute of locking; an empty field always opens Windows Hello.")
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: Appearance.colors.colSubtext
+                }
+                IconAndTextToolbarButton {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 4
+                    iconText: "passkey"
+                    text: Translation.tr("Use Windows Hello instead")
+                    onClicked: root.context.useWindowsHello()
+                }
+            }
+        }
+    }
+
+    // Windows: after too many wrong passwords
+    Item {
+        id: attemptsCardWrapper
+        visible: root.context.attemptsExhausted
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: mainIsland.top
+            bottomMargin: 16
+        }
+        implicitWidth: attemptsCard.implicitWidth
+        implicitHeight: attemptsCard.implicitHeight
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
+
+        StyledRectangularShadow {
+            target: attemptsCard
+        }
+        Rectangle {
+            id: attemptsCard
+            color: Appearance.m3colors.m3surfaceContainer
+            radius: Appearance.rounding.large
+            implicitWidth: 380
+            implicitHeight: attemptsColumn.implicitHeight + 24 * 2
+
+            ColumnLayout {
+                id: attemptsColumn
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    margins: 24
+                }
+                spacing: 10
+
+                MaterialSymbol {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "lock_clock"
+                    fill: 1
+                    iconSize: 36
+                    color: Appearance.colors.colPrimary
+                    animateChange: true
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    text: Translation.tr("Too many attempts")
+                    font.pixelSize: Appearance.font.pixelSize.larger
+                    color: Appearance.colors.colOnSurface
+                    animateChange: true
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                    text: Translation.tr("No more passwords are taken here. Unlock with Windows to continue.")
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: Appearance.colors.colSubtext
+                }
+                IconAndTextToolbarButton {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 4
+                    iconText: "lock_open"
+                    text: Translation.tr("Unlock with Windows")
+                    onClicked: root.context.handOverToWindows()
+                }
             }
         }
     }

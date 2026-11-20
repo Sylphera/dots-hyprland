@@ -78,6 +78,7 @@ Scope {
 
             // Reset
             lockContext.reset();
+            GlobalStates.lockPreview = false;
 
             // Post-unlock actions
             if (lockContext.alsoInhibitIdle) {
@@ -92,12 +93,14 @@ Scope {
         locked: GlobalStates.screenLocked
         surface: root.sessionLockSurface
     }
+    Binding {
+        when: Platform.isWindows
+        target: lock
+        property: "preview"
+        value: GlobalStates.lockPreview
+    }
 
     function lock() {
-        if (Platform.isWindows) {
-            Session.lock();
-            return;
-        }
         if (Config.options.lock.useHyprlock && !Platform.isWindows) {
             Quickshell.execDetached(["bash", "-c", "pidof hyprlock || hyprlock"]);
             return;
@@ -110,6 +113,14 @@ Scope {
 
         function activate(): void {
             root.lock();
+        }
+        function preview(): void {
+            GlobalStates.lockPreview = true;
+            root.lock();
+        }
+        function endPreview(): void {
+            if (GlobalStates.lockPreview)
+                lockContext.unlocked(LockContext.ActionEnum.Unlock);
         }
         function focus(): void {
             lockContext.shouldReFocus();

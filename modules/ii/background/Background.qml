@@ -136,7 +136,8 @@ Variants {
         readonly property bool previewActive: Wallpapers.previewPath !== ""
         property bool nativePreviewHold: false
         readonly property bool nativePreviewShown: nativeWallpaper && (previewActive || nativePreviewHold)
-        readonly property bool drawsWallpaper: !nativeWallpaper || nativePreviewShown
+        // Locked, it covers the screen itself: Windows' wallpaper is behind it.
+        readonly property bool drawsWallpaper: !nativeWallpaper || nativePreviewShown || GlobalStates.screenLocked
 
         readonly property real splitFraction: {
             switch (Config.options.background.splitRatio) {
@@ -173,7 +174,12 @@ Variants {
         // Layer props
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
+        // Locked, it covers everything but the lock screen: on Windows the lock
+        // screen's windows are Overlay too and could end up under it, so it
+        // stops at Top there (still over windows and the bar, raised last).
+        WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running)
+            ? (Platform.isWindows ? WlrLayer.Top : WlrLayer.Overlay)
+            : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
         // WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:background"
         WlrLayershell.keyboardFocus: GlobalStates.desktopWidgetKeyboardFocus ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
@@ -523,7 +529,9 @@ Variants {
                 StyledImage {
                     id: wallpaper
                     visible: opacity > 0 && !blurLoader.active && !centeredWallpaper.centeredHidesFullWallpaper
-                    opacity: ((status === Image.Ready || bgRoot.transitionLive) && (!bgRoot.wallpaperIsVideo || bgRoot.showVideoFrame))
+                    // A video's still stands in for it while locked: the lock blur
+                    // works on this image, and the video layer can't be blurred.
+                    opacity: ((status === Image.Ready || bgRoot.transitionLive) && (!bgRoot.wallpaperIsVideo || bgRoot.showVideoFrame || GlobalStates.screenLocked))
                         ? centeredWallpaper.centeredFullWallpaperOpacity() : 0
                     cache: false
                     smooth: false
@@ -659,7 +667,7 @@ Variants {
                     id: videoWallpaperLoader
                     anchors.fill: parent
                     active: bgRoot.videoLayerActive || bgRoot.videoLayerParked
-                    visible: bgRoot.videoLayerActive
+                    visible: bgRoot.videoLayerActive && !GlobalStates.screenLocked
                     source: "VideoWallpaperLayer.qml"
                 }
 

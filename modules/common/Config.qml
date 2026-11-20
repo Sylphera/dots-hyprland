@@ -700,6 +700,9 @@ Singleton {
             property JsonObject lock: JsonObject {
                 property bool useHyprlock: false
                 property bool launchOnStartup: false
+                // Windows: "" asks for a lock screen password the first time
+                // it locks, "password" uses that one, "hello" Windows Hello.
+                property string windowsUnlock: ""
                 property JsonObject blur: JsonObject {
                     property bool enable: true
                     property real radius: 100

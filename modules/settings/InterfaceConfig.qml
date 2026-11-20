@@ -917,6 +917,30 @@ ContentPage {
                 }
             }
 
+            ConfigSwitch {
+                visible: Platform.isWindows
+                buttonIcon: "passkey"
+                text: Translation.tr("Unlock with Windows Hello instead of a password")
+                checked: Config.options.lock.windowsUnlock === "hello"
+                onCheckedChanged: {
+                    if (checked)
+                        Config.options.lock.windowsUnlock = "hello";
+                    else if (Config.options.lock.windowsUnlock === "hello")
+                        Config.options.lock.windowsUnlock = WindowsNative.session?.hasLockPassword() ? "password" : "";
+                }
+            }
+
+            RippleButtonWithIcon {
+                visible: Platform.isWindows && Config.options.lock.windowsUnlock === "password"
+                Layout.fillWidth: true
+                materialIcon: "password"
+                mainText: Translation.tr("Change the lock screen password (asked on the next lock)")
+                onClicked: {
+                    WindowsNative.session?.clearLockPassword();
+                    Config.options.lock.windowsUnlock = "";
+                }
+            }
+
             ContentSubsection {
                 title: Translation.tr("Security")
 
