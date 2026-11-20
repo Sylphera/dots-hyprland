@@ -80,7 +80,10 @@ Scope {
         }
 
         HyprlandFocusGrab {
-            windows: [panelWindow]
+            // The bar and the dock belong to the grab, as in the shared one:
+            // a click on their overview button otherwise dismissed it and the
+            // same click opened it again.
+            windows: [panelWindow, ...GlobalFocusGrab.persistent]
             active: Platform.isWindows && GlobalStates.overviewOpen
             onCleared: GlobalStates.overviewOpen = false
         }
