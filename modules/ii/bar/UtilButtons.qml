@@ -300,37 +300,49 @@ Item {
         }
 
         Loader {
+            id: performanceButton
             active: Config.options.bar.utilButtons.showPerformanceProfileToggle
             visible: Config.options.bar.utilButtons.showPerformanceProfileToggle
             sourceComponent: root.isMaterial ? perfM3 : legacyPerf
+
+            readonly property string profileIcon: {
+                if (!active)
+                    return "";
+                const profile = Platform.isWindows ? PowerProfiles.activePlanProfile : PowerProfiles.profile;
+                switch (profile) {
+                case PowerProfile.PowerSaver: return "energy_savings_leaf";
+                case PowerProfile.Balanced: return "airwave";
+                case PowerProfile.Performance: return "local_fire_department";
+                default: return "bolt";
+                }
+            }
+
+            function cycleProfile(): void {
+                if (Platform.isWindows) {
+                    PowerProfiles.cyclePowerPlan();
+                    return;
+                }
+                if (!PowerProfiles.hasPerformanceProfile) {
+                    PowerProfiles.profile = PowerProfiles.profile === PowerProfile.Balanced ? PowerProfile.PowerSaver : PowerProfile.Balanced;
+                    return;
+                }
+                switch (PowerProfiles.profile) {
+                case PowerProfile.PowerSaver: PowerProfiles.profile = PowerProfile.Balanced; break;
+                case PowerProfile.Balanced: PowerProfiles.profile = PowerProfile.Performance; break;
+                case PowerProfile.Performance: PowerProfiles.profile = PowerProfile.PowerSaver; break;
+                }
+            }
         }
 
         Component {
             id: legacyPerf
             CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: event => {
-                    if (PowerProfiles.hasPerformanceProfile) {
-                        switch(PowerProfiles.profile) {
-                            case PowerProfile.PowerSaver: PowerProfiles.profile = PowerProfile.Balanced
-                            break;
-                            case PowerProfile.Balanced: PowerProfiles.profile = PowerProfile.Performance
-                            break;
-                            case PowerProfile.Performance: PowerProfiles.profile = PowerProfile.PowerSaver
-                            break;
-                        }
-                    } else {
-                        PowerProfiles.profile = PowerProfiles.profile == PowerProfile.Balanced ? PowerProfile.PowerSaver : PowerProfile.Balanced
-                    }
-                }
+                onClicked: performanceButton.cycleProfile()
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 0
-                    text: switch(PowerProfiles.profile) {
-                        case PowerProfile.PowerSaver: return "energy_savings_leaf"
-                        case PowerProfile.Balanced: return "airwave"
-                        case PowerProfile.Performance: return "local_fire_department"
-                    }
+                    text: performanceButton.profileIcon
                     iconSize: Appearance.font.pixelSize.large
                     color: root.contentColor
                 }
@@ -341,25 +353,8 @@ Item {
             id: perfM3
             UtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                iconText: switch(PowerProfiles.profile) {
-                    case PowerProfile.PowerSaver: return "energy_savings_leaf"
-                    case PowerProfile.Balanced: return "airwave"
-                    case PowerProfile.Performance: return "local_fire_department"
-                }
-                onClicked: event => {
-                    if (PowerProfiles.hasPerformanceProfile) {
-                        switch(PowerProfiles.profile) {
-                            case PowerProfile.PowerSaver: PowerProfiles.profile = PowerProfile.Balanced
-                            break;
-                            case PowerProfile.Balanced: PowerProfiles.profile = PowerProfile.Performance
-                            break;
-                            case PowerProfile.Performance: PowerProfiles.profile = PowerProfile.PowerSaver
-                            break;
-                        }
-                    } else {
-                        PowerProfiles.profile = PowerProfiles.profile == PowerProfile.Balanced ? PowerProfile.PowerSaver : PowerProfile.Balanced
-                    }
-                }
+                iconText: performanceButton.profileIcon
+                onClicked: performanceButton.cycleProfile()
             }
         }
     }
