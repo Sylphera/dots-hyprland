@@ -120,17 +120,28 @@ Rectangle {
                                 visible: messageData?.role == 'assistant' && Ai.models[messageData?.model].icon
                                 width: Appearance.font.pixelSize.large
                                 height: Appearance.font.pixelSize.large
-                                source: messageData?.role == 'assistant' ? Ai.models[messageData?.model].icon :
-                                    messageData?.role == 'user' ? 'linux-symbolic' : 'desktop-symbolic'
+                                source: messageData?.role == 'assistant' ? Ai.models[messageData?.model].icon : ""
 
                                 colorize: true
                                 color: Appearance.m3colors.m3onSecondaryContainer
                             }
 
+                            Loader {
+                                id: avatarLoader
+                                anchors.centerIn: parent
+                                // The size of end-4's "person" glyph it stands in for,
+                                // square: sized to the glyph's box it was an oval.
+                                width: Appearance.font.pixelSize.larger
+                                height: Appearance.font.pixelSize.larger
+                                active: Platform.isWindows && messageData?.role === 'user'
+                                visible: item?.imageReady ?? false
+                                sourceComponent: UserAvatar {}
+                            }
+
                             MaterialSymbol {
                                 id: roleIcon
                                 anchors.centerIn: parent
-                                visible: !modelIcon.visible
+                                visible: !modelIcon.visible && !avatarLoader.visible
                                 iconSize: Appearance.font.pixelSize.larger
                                 color: Appearance.m3colors.m3onSecondaryContainer
                                 text: messageData?.role == 'user' ? 'person' : 
