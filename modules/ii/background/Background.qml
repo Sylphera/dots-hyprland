@@ -177,7 +177,10 @@ Variants {
         // Locked, it covers everything but the lock screen: on Windows the lock
         // screen's windows are Overlay too and could end up under it, so it
         // stops at Top there (still over windows and the bar, raised last).
-        WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running)
+        // On Windows it comes over the windows once the locked wallpaper and the
+        // windows' copies are ready (lockSlideLayer.started), so nothing shows
+        // through it before.
+        WlrLayershell.layer: GlobalStates.screenLocked && (Platform.isWindows ? lockSlideLayer.started : !scaleAnim.running)
             ? (Platform.isWindows ? WlrLayer.Top : WlrLayer.Overlay)
             : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
         // WlrLayershell.layer: WlrLayer.Bottom
@@ -1050,6 +1053,93 @@ Variants {
             Component {
                 id: controlMaskRegionComponent
                 ControlMaskRegion {}
+            }
+        }
+
+        // end-4 locks by moving to an empty workspace with a vertical slide: the
+        // windows go down off the screen while the wallpaper zooms and blurs
+        // behind them. Windows has no such workspace, so live copies of the
+        // windows stand where they are and slide down over the locked desktop.
+        Item {
+            id: lockSlideLayer
+            anchors.fill: parent
+            z: 1000
+            readonly property bool armed: Platform.isWindows && GlobalStates.screenLocked
+            property bool started: false
+            property bool finished: false
+            visible: lockSlideLayer.armed && !lockSlideLayer.finished
+            property real offset: 0
+            property int capturesReady: 0
+            readonly property bool wallpaperReady: wallpaper.status === Image.Ready
+            readonly property bool ready: lockSlideLayer.wallpaperReady
+                && lockSlideLayer.capturesReady >= lockSlideLayer.slidingWindows.length
+            onArmedChanged: {
+                lockSlideLayer.started = false;
+                lockSlideLayer.finished = false;
+                lockSlideLayer.offset = 0;
+                lockSlideLayer.capturesReady = 0;
+                if (lockSlideLayer.armed)
+                    lockSlideFallback.restart();
+                else
+                    lockSlideFallback.stop();
+            }
+            onReadyChanged: if (lockSlideLayer.ready) lockSlideLayer.start()
+            function start() {
+                if (!lockSlideLayer.armed || lockSlideLayer.started)
+                    return;
+                lockSlideFallback.stop();
+                lockSlideLayer.started = true;
+                lockSlideAnim.restart();
+            }
+            Timer {
+                id: lockSlideFallback
+                interval: 300
+                onTriggered: lockSlideLayer.start()
+            }
+            readonly property var slidingWindows: {
+                if (!lockSlideLayer.armed)
+                    return [];
+                const monitorId = bgRoot.monitor?.id;
+                const workspaceId = bgRoot.monitor?.activeWorkspace?.id;
+                return ToplevelManager.toplevels.values.map(toplevel => {
+                    const win = HyprlandData.windowByAddress[`0x${toplevel.HyprlandToplevel?.address}`];
+                    return { toplevel: toplevel, win: win };
+                }).filter(entry => entry.win && entry.win.monitor === monitorId && entry.win.workspace?.id === workspaceId && !entry.win.minimized)
+                  .sort((a, b) => (b.win.focusHistoryID ?? 0) - (a.win.focusHistoryID ?? 0));
+            }
+
+            Repeater {
+                model: lockSlideLayer.slidingWindows
+                delegate: ScreencopyView {
+                    required property var modelData
+                    required property int index
+                    z: index
+                    captureSource: modelData.toplevel
+                    live: true
+                    property bool counted: false
+                    onHasContentChanged: {
+                        if (hasContent && !counted) {
+                            counted = true;
+                            lockSlideLayer.capturesReady += 1;
+                        }
+                    }
+                    x: modelData.win.at[0] - bgRoot.modelData.x
+                    y: modelData.win.at[1] - bgRoot.modelData.y + lockSlideLayer.offset
+                    width: modelData.win.size[0]
+                    height: modelData.win.size[1]
+                }
+            }
+
+            NumberAnimation {
+                id: lockSlideAnim
+                target: lockSlideLayer
+                property: "offset"
+                from: 0
+                to: bgRoot.modelData.height
+                duration: 700 * Appearance.animationScale
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: [0.1, 1, 0, 1, 1, 1] // end-4's menu_decel
+                onFinished: lockSlideLayer.finished = true
             }
         }
     }
