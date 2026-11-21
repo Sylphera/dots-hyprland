@@ -83,12 +83,61 @@ Scope {
         }
     }
 
+    property bool overlayShortcutDown: false
+    property bool closeOnShortcutRelease: false
+
+    function scheduleShortcutClose(): void {
+        if (!closeOnShortcutRelease || overlayShortcutDown || GlobalStates.superDown)
+            return;
+
+        shortcutCloseTimer.interval = 16;
+        shortcutCloseTimer.restart();
+    }
+
+    Timer {
+        id: shortcutCloseTimer
+        interval: 16
+        onTriggered: {
+            if (!root.closeOnShortcutRelease)
+                return;
+
+            root.closeOnShortcutRelease = false;
+            GlobalStates.overlayOpen = false;
+        }
+    }
+
+    Connections {
+        enabled: Platform.isWindows
+        target: GlobalStates
+
+        function onSuperDownChanged() {
+            root.scheduleShortcutClose();
+        }
+
+        function onOverlayOpenChanged() {
+            if (!GlobalStates.overlayOpen)
+                root.closeOnShortcutRelease = false;
+        }
+    }
+
     GlobalShortcut {
         name: "overlayToggle"
-        description: "Toggles overlay on press"
+        description: "Toggles overlay"
 
         onPressed: {
-            GlobalStates.overlayOpen = !GlobalStates.overlayOpen;
+            if (Platform.isWindows && GlobalStates.overlayOpen) {
+                root.overlayShortcutDown = true;
+                root.closeOnShortcutRelease = true;
+                shortcutCloseTimer.interval = 350;
+                shortcutCloseTimer.restart();
+            } else {
+                GlobalStates.overlayOpen = !GlobalStates.overlayOpen;
+            }
+        }
+
+        onReleased: {
+            root.overlayShortcutDown = false;
+            root.scheduleShortcutClose();
         }
     }
 }
