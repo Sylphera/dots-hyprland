@@ -45,7 +45,6 @@ Singleton {
     property bool regionSelectorOpen: false
     property bool searchOpen: false
     property bool screenLocked: false
-    // A trial run of the lock screen: Esc leaves it, nothing is held.
     property bool lockPreview: false
     property bool screenLockContainsCharacters: false
     property bool screenUnlockFailed: false

@@ -40,8 +40,6 @@ Singleton {
     property int manualActiveMinute
 
     onClockMinuteChanged: reEvaluate()
-    // `automatic` also turns on as the config finishes loading at startup;
-    // only a change made after that drops a night light switched by hand.
     property bool configLoaded: false
     Connections {
         target: Config
@@ -58,8 +56,6 @@ Singleton {
         reEvaluate();
     }
 
-    // A night light switched by hand stays so across shell restarts, until the
-    // schedule's next from/to time, as it does while the shell keeps running.
     readonly property real manualMaxAgeMs: 24 * 60 * 60 * 1000
     function saveManual() {
         if (!Persistent.ready) return;
@@ -106,8 +102,6 @@ Singleton {
         const to = toHour * 60 + toMinute;
         const manualActive = manualActiveHour * 60 + manualActiveMinute;
 
-        // In the minute it was switched no schedule time has passed yet; from
-        // equal to `t` reads as a whole day gone round.
         if (root.manualActive !== undefined && manualActive !== t
             && (inBetween(from, manualActive, t) || inBetween(to, manualActive, t))) {
             root.manualActive = undefined;

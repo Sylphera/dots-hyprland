@@ -700,8 +700,6 @@ Singleton {
             property JsonObject lock: JsonObject {
                 property bool useHyprlock: false
                 property bool launchOnStartup: false
-                // Windows: "" asks for a lock screen password the first time
-                // it locks, "password" uses that one, "hello" Windows Hello.
                 property string windowsUnlock: ""
                 property JsonObject blur: JsonObject {
                     property bool enable: true
@@ -722,7 +720,6 @@ Singleton {
                 // Attempt to remove dupes (the aggregator playerctl one and browsers' native ones when there's plasma browser integration)
                 property bool filterDuplicatePlayers: true
                 property JsonObject nowPlaying: JsonObject {
-                    // Off by default: end-4 has no such pill.
                     property bool enable: false
                     property int duration: 2000
                     property int openDuration: 1000
@@ -753,7 +750,7 @@ Singleton {
                 property bool backgroundBehindIcons: true
                 property bool ownWallpaper: false
                 property bool superDrag: true
-                property bool focusFollowsMouse: true // end-4's follow_mouse = 1: moving the pointer focuses the app window under it
+                property bool focusFollowsMouse: true
                 property bool panelAnimations: true
                 property string panelAnimationStyle: "standard"
                 property JsonObject tiling: JsonObject {
@@ -903,7 +900,7 @@ Singleton {
                 property list<var> clipboardPins: []
                 property bool clipboardPreviewPopup: false
                 property bool sloppy: false // Uses levenshtein distance based scoring instead of fuzzy sort. Very weird.
-                property bool spotlight: false // Super opens a Spotlight-like search instead of end-4's overview; Super+Tab opens the workspaces overview without search
+                property bool spotlight: false
                 property JsonObject prefix: JsonObject {
                     property bool showDefaultActionsWithoutPrefix: true
                     property string action: "/"

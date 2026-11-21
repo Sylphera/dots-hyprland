@@ -136,7 +136,6 @@ Variants {
         readonly property bool previewActive: Wallpapers.previewPath !== ""
         property bool nativePreviewHold: false
         readonly property bool nativePreviewShown: nativeWallpaper && (previewActive || nativePreviewHold)
-        // Locked, it covers the screen itself: Windows' wallpaper is behind it.
         readonly property bool drawsWallpaper: !nativeWallpaper || nativePreviewShown || GlobalStates.screenLocked
 
         readonly property real splitFraction: {
@@ -174,12 +173,6 @@ Variants {
         // Layer props
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
-        // Locked, it covers everything but the lock screen: on Windows the lock
-        // screen's windows are Overlay too and could end up under it, so it
-        // stops at Top there (still over windows and the bar, raised last).
-        // On Windows it comes over the windows once the locked wallpaper and the
-        // windows' copies are ready (lockSlideLayer.started), so nothing shows
-        // through it before.
         WlrLayershell.layer: GlobalStates.screenLocked && (Platform.isWindows ? lockSlideLayer.started : !scaleAnim.running)
             ? (Platform.isWindows ? WlrLayer.Top : WlrLayer.Overlay)
             : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
@@ -532,8 +525,6 @@ Variants {
                 StyledImage {
                     id: wallpaper
                     visible: opacity > 0 && !blurLoader.active && !centeredWallpaper.centeredHidesFullWallpaper
-                    // A video's still stands in for it while locked: the lock blur
-                    // works on this image, and the video layer can't be blurred.
                     opacity: ((status === Image.Ready || bgRoot.transitionLive) && (!bgRoot.wallpaperIsVideo || bgRoot.showVideoFrame || GlobalStates.screenLocked))
                         ? centeredWallpaper.centeredFullWallpaperOpacity() : 0
                     cache: false
@@ -1056,10 +1047,6 @@ Variants {
             }
         }
 
-        // end-4 locks by moving to an empty workspace with a vertical slide: the
-        // windows go down off the screen while the wallpaper zooms and blurs
-        // behind them. Windows has no such workspace, so live copies of the
-        // windows stand where they are and slide down over the locked desktop.
         Item {
             id: lockSlideLayer
             anchors.fill: parent
@@ -1138,7 +1125,7 @@ Variants {
                 to: bgRoot.modelData.height
                 duration: 700 * Appearance.animationScale
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.1, 1, 0, 1, 1, 1] // end-4's menu_decel
+                easing.bezierCurve: [0.1, 1, 0, 1, 1, 1]
                 onFinished: lockSlideLayer.finished = true
             }
         }

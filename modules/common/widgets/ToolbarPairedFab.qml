@@ -16,9 +16,6 @@ Item {
     }
     implicitWidth: fabWidget.implicitWidth
     implicitHeight: fabWidget.implicitHeight
-    // As Toolbar does: the shadow can't anchor to the button from inside the
-    // Loader (it isn't a sibling), and an unanchored one shows as a thin
-    // sliver at the button's edge. The Loader sizes it to the button instead.
     Loader {
         active: root.enableShadow
         anchors.fill: fabWidget

@@ -18,10 +18,6 @@ Singleton {
         return xhr;
     }
 
-    // Several texts in one request, each with its own detected language: joined
-    // into one text, a source of "auto" takes the language of most of it and
-    // leaves lines in any other untouched. `done` gets the translations in
-    // order, or [] if the request failed.
     function translateMany(sourceLanguage: string, targetLanguage: string, texts: var, done: var): var {
         const xhr = new XMLHttpRequest();
         xhr.onreadystatechange = () => {
@@ -40,7 +36,6 @@ Singleton {
         try {
             const data = JSON.parse(raw.trim());
             if (!Array.isArray(data) || data.length !== count) return [];
-            // With "auto", each entry is [translation, detected language].
             return data.map(entry => Array.isArray(entry) ? (entry[0] ?? "") : (entry ?? ""));
         } catch (e) {
             console.warn("[GoogleTranslateFree] Failed to parse response:", e, raw);

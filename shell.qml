@@ -59,7 +59,6 @@ ShellRoot {
         onTriggered: FirstRunExperience.launchWelcome()
     }
 
-
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.taskbar
@@ -70,8 +69,6 @@ ShellRoot {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.taskbar
         property: "alwaysHidden"
-        // waffle's own taskbar sits where Windows' would pop up on hover, and it
-        // would come up over it on every use and take its clicks.
         value: ((Config.options.panelFamily === "ii" && Config.options.dock.enable)
                 || Config.options.panelFamily === "waffle")
             && Config.options.windowsPort.taskbarHoverOnly
@@ -300,8 +297,6 @@ ShellRoot {
 
     // Panel families
     property list<string> families: ["ii", "waffle"]
-    // As in end-4, between ii and waffle; the Windows taskbar instead of ii's
-    // bar stays a setting (windowsPort.nativeTaskbar).
     function cyclePanelFamily() {
         const currentIndex = families.indexOf(Config.options.panelFamily)
         const nextIndex = (currentIndex + 1) % families.length
@@ -332,9 +327,6 @@ ShellRoot {
         component: WaffleFamily {}
     }
 
-
-    // Touchpad gestures without a touchpad: `gesture swipe 1 400` swipes one
-    // desktop width toward the next desktop in 400 ms (negative: previous).
     IpcHandler {
         target: "gesture"
 
@@ -359,8 +351,6 @@ ShellRoot {
         onPressed: root.cyclePanelFamily()
     }
 
-    // end-4's Ctrl+Alt+R and Super+Shift+Alt+R (record.sh --fullscreen
-    // [--sound]), with the native recorder: pressed again, they stop it.
     GlobalShortcut {
         name: "screenRecordFullscreen"
         description: "Records the focused screen (toggle)"
@@ -372,4 +362,3 @@ ShellRoot {
         onPressed: if (Platform.isWindows) ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, true, Config.options.screenRecord.microphone)
     }
 }
-

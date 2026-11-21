@@ -5,9 +5,6 @@ import qs
 import qs.modules.common
 import qs.services
 
-// Windows: the same corners as ScreenCorners.qml, drawn by four tiny native
-// windows instead of four Qt windows (each of which brings a whole render
-// context, ~19 MB, along). Rounding, hiding and the corner actions are end-4's.
 QSWin.NativeScreenCorners {
     id: root
 
@@ -24,8 +21,6 @@ QSWin.NativeScreenCorners {
         return corner === 0 || corner === 1;
     }
 
-    // Stacked over the region selector, the corners would open the sidebars
-    // from under a snip (and show in it), so they step aside meanwhile.
     shown: root.showFakeRounding && !GlobalStates.regionSelectorOpen
     color: "#000000"
     radius: Appearance.rounding.screenRounding

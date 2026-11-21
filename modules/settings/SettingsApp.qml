@@ -64,7 +64,6 @@ Singleton {
     }
 
     function close() {
-        // Pop the window out first; it asks to close again once that is done.
         const item = windowLoader.item;
         if (!root.pcLayout && item && typeof item.animatedClose === "function" && !item.popping && item.visible) {
             item.animatedClose();
@@ -87,9 +86,6 @@ Singleton {
             root.open();
     }
 
-    // Settings lives inside the shell on Windows so it opens reliably. Its
-    // window is destroyed on close, but the engine kept its compiled types
-    // and garbage around (about half of the ~220 MB it takes); let it go.
     onIsOpenChanged: {
         if (root.isOpen)
             trimTimer.stop();

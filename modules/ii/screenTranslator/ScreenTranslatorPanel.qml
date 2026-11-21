@@ -162,8 +162,6 @@ PanelWindow {
 
         spacing: 6
 
-        // Its only button sets a Google Cloud key, which Windows doesn't use: it
-        // translates for free, so the toolbar would show up empty.
         Toolbar {
             id: toolbar
             visible: !Platform.isWindows
@@ -238,7 +236,7 @@ PanelWindow {
         ToolbarPairedFab {
             iconText: "close"
             focus: root.visible && Platform.isWindows
-            Keys.onPressed: event => { // Esc to close
+            Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) {
                     root.dismiss();
                 }

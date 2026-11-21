@@ -124,9 +124,6 @@ Singleton {
         const folder = `${(Quickshell.env("APPDATA") || "").replace(/\\/g, "/")}/Microsoft/Windows/AccountPictures`;
         const picture = fs.listDir(folder).find(name => /\.(jpe?g|png|bmp)$/i.test(name));
         if (picture) return `${folder}/${picture}`;
-        // Windows keeps a copy of an account's picture, in several sizes, in
-        // Public\AccountPictures\<account SID>. With one account there is one
-        // folder there, which can only be this one's; the largest size wins.
         const pub = `${(Quickshell.env("PUBLIC") || "C:/Users/Public").replace(/\\/g, "/")}/AccountPictures`;
         if (typeof fs.listDirs !== "function") return "";
         const accounts = fs.listDirs(pub).filter(name => name.startsWith("S-1-5-21-"));

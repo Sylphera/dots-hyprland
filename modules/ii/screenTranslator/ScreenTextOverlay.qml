@@ -208,8 +208,6 @@ Item {
                 return;
             }
             pending++;
-            // One request for the batch, but each text detected on its own: a
-            // screen in two languages translates both.
             root.windowsTrack(GoogleTranslateFree.translateMany("auto", Translation.languageCode, batch, parts => {
                 if (generation !== root.windowsGeneration) return;
                 if (parts.length === batch.length) {

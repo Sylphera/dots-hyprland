@@ -14,9 +14,6 @@ Scope {
     id: bar
     property bool showBarBackground: Config.options.bar.showBackground
     property bool requestedOpen: GlobalStates.barOpen
-    // The space reserved for the bar follows requestedOpen once windows have
-    // slid to their new tiles (windowsMove, 300 ms): apps that react to a work
-    // area change on their own (Chromium) then find nothing to fix.
     property bool reservationOpen: GlobalStates.barOpen
     readonly property int showDuration: 160
     readonly property int hideDuration: 140
@@ -39,10 +36,6 @@ Scope {
         onTriggered: GlobalStates.barOpen = bar.requestedOpen
     }
 
-    // The Windows AppBar reservation can change without Qt reporting a new
-    // availableGeometry. As in Hyprland, the reservation follows the toggle at
-    // once, so windows slide (windowsMove) while the bar slides; tiling is
-    // nudged as soon as Explorer has applied it, and once more to be sure.
     Timer {
         id: reservationDelay
         interval: 150
@@ -89,7 +82,7 @@ Scope {
             active: (Platform.isWindows || bar.requestedOpen) && !GlobalStates.screenLocked
             required property ShellScreen modelData
             component: Scope {
-            PanelWindow { // Bar visuals
+            PanelWindow {
                 id: barRoot
                 screen: barLoader.modelData
 
@@ -367,13 +360,9 @@ Scope {
                 }
             }
 
-            // This surface reserves the same space as the original bar, from the
-            // moment it is toggled, as Hyprland's exclusive zone does.
             PanelWindow {
                 screen: barLoader.modelData
                 visible: Platform.isWindows && bar.reservationOpen
-                // Windows start sliding as the bar is toggled, before the work
-                // area changes and apps react to it on their own.
                 Connections {
                     target: bar
                     function onRequestedOpenChanged() {

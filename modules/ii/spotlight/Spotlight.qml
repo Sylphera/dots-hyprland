@@ -435,8 +435,6 @@ q="$1"; h="$2"
     PanelWindow {
         id: panelWindow
         visible: GlobalStates.spotlightOpen || panelWindow.clearing
-        // Windows shows a window's last frame again when it reappears, so the
-        // window stays up for a transparent frame before it hides.
         property bool clearing: false
 
         Timer {

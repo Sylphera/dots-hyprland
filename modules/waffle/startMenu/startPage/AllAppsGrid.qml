@@ -52,8 +52,6 @@ GridLayout {
     component AppCategory: Item {
         id: categoryItem
         property AggregatedAppCategoryModel aggregatedCategory
-        // Windows gives apps no categories: a folder with none is left out, as
-        // Windows' own Start menu shows only categories that have apps.
         visible: !Platform.isWindows || categoryGrid.desktopEntries.length > 0
         implicitWidth: categoryLayout.implicitWidth
         implicitHeight: categoryLayout.implicitHeight

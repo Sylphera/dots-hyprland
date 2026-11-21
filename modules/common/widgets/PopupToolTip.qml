@@ -13,9 +13,6 @@ Item {
     property bool alternativeVisibleCondition: false
     property bool opacityOnly: false
     property bool popupActive: false
-    // Hyprland fades a popup's window in and out (fadePopups, its slow default
-    // in end-4's config); Windows doesn't. With this set the tooltip's window
-    // fades over these ms, and a closing one keeps fading while another shows.
     property int compositorFadeMs: 0
     property int compositorFadeInMs: compositorFadeMs
     readonly property bool keepsAlive: root.opacityOnly || root.compositorFadeMs > 0

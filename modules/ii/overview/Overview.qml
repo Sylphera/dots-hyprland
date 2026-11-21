@@ -71,18 +71,12 @@ Scope {
             Region {
                 x: columnLayout.x + overviewLoader.x
                 y: columnLayout.y + overviewLoader.y
-                // The grid hides itself while searching, but its loader keeps its
-                // size: only a shown grid takes clicks, or the area under a
-                // search's results kept the overview from closing.
                 width: panelWindow.useVisibleRegions && (overviewLoader.item?.visible ?? false) ? overviewLoader.width : 0
                 height: panelWindow.useVisibleRegions && (overviewLoader.item?.visible ?? false) ? overviewLoader.height : 0
             }
         }
 
         HyprlandFocusGrab {
-            // The bar and the dock belong to the grab, as in the shared one:
-            // a click on their overview button otherwise dismissed it and the
-            // same click opened it again.
             windows: [panelWindow, ...GlobalFocusGrab.persistent]
             active: Platform.isWindows && GlobalStates.overviewOpen
             onCleared: GlobalStates.overviewOpen = false

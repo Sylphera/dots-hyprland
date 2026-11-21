@@ -129,8 +129,6 @@ Rectangle {
                             Loader {
                                 id: avatarLoader
                                 anchors.centerIn: parent
-                                // The size of end-4's "person" glyph it stands in for,
-                                // square: sized to the glyph's box it was an oval.
                                 width: Appearance.font.pixelSize.larger
                                 height: Appearance.font.pixelSize.larger
                                 active: Platform.isWindows && messageData?.role === 'user'
@@ -372,4 +370,3 @@ Rectangle {
 
     }
 }
-

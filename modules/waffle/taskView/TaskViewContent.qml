@@ -257,8 +257,6 @@ Rectangle {
                     positionViewAtIndex(HyprlandData.activeWorkspace.id - 1, ListView.Contain);
                 }
 
-                // A mouse wheel only scrolls vertically; on Windows, where most
-                // scroll with one, it moves the desktops along too.
                 WheelHandler {
                     enabled: Platform.isWindows && workspaceListView.interactive
                     acceptedDevices: PointerDevice.Mouse

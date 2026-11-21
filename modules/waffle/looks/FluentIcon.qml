@@ -8,8 +8,6 @@ Kirigami.Icon {
     id: root
     required property string icon
     property bool filled: false
-    // Tinted here rather than by Kirigami's mask: Windows' stand-in for it
-    // keeps the dark of the black glyphs, so icons stayed black on dark panels.
     property bool monochrome: true
     // Should be 16, but it appears the icons have some padding, 
     // Unlike the Windows-only Segoe UI icons, the open source FluentUI ones are hella small

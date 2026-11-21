@@ -19,8 +19,6 @@ FloatingWindow {
 
     signal closeRequested
 
-    // end-4's windowsIn/windowsOut: Hyprland pops every window in and out.
-    // On Windows the shell does it for its own settings window.
     property bool popping: false
     function animatedClose() {
         if (root.popping)
@@ -34,7 +32,6 @@ FloatingWindow {
         popOutTimer.interval = ms;
         popOutTimer.restart();
     }
-    // Quickshell cloaks it right before it first shows, and it pops in.
     property bool popIn: Platform.isWindows
     Timer {
         id: popOutTimer

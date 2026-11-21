@@ -66,8 +66,6 @@ Scope {
         model: !root.ready ? [] : root.screensForDock().map(screen => ({
             screen: screen,
             position: Config.options.dock.position,
-            // Not the bar's state: a new key rebuilds the dock, which then jumps and
-            // replays its animation every time the bar toggles (Super+J).
             layout: `${Config.options.dock.position}|${Config.options.dock.style}|${Config.options.dock.height}`
         }))
 
@@ -77,9 +75,6 @@ Scope {
             screen: modelData.screen
             visible: !GlobalStates.screenLocked
 
-            // Dock actions can open QuickShell overlays. The native focus
-            // grab must consider the dock an internal surface, otherwise its
-            // initial click dismisses an overlay before the QML toggle runs.
             Component.onCompleted: {
                 if (Platform.isWindows) GlobalFocusGrab.addPersistent(dockRoot);
             }
@@ -92,25 +87,14 @@ Scope {
             readonly property bool vertical: position !== "bottom"
             readonly property real gap: Appearance.sizes.hyprlandGapsOut
             readonly property real shadowMargin: Appearance.sizes.elevationMargin
-            // Windows' input mask follows dockMouseArea while it is animated.
-            // Cursor hit-testing against that moving mask causes alternating
-            // enter/leave events as the dock slides into or out of view.
-            // Use the existing native GetCursorPos-backed API instead, with
-            // a stationary screen-edge trigger and immediate exit detection.
             readonly property bool stableWindowsHover: Platform.isWindows
                 && Config.options.windowsPort.dockStableHover
                 && Config.options.dock.hoverToReveal
             property bool nativePointerInside: false
-            // The native workspace model tracks windows independently of the
-            // foreground HWND. A temporary focus gap during a desktop switch
-            // must never reveal the dock if the destination has windows.
-            // An actually empty destination, however, can reveal immediately.
             readonly property bool nativeWorkspaceEmpty: {
                 const workspace = Hyprland.focusedWorkspace;
                 if (!workspace)
                     return false;
-                // Like end-4: while special holds a window, open or not, the
-                // desktop isn't empty and the dock only comes up on hover.
                 if (HyprlandData.windowList.some(w => HyprlandData.isSpecialWindow(w)))
                     return false;
                 const hasToplevel = (workspace.toplevels?.values ?? []).some(t =>
@@ -134,9 +118,6 @@ Scope {
                     if (screen && cursor?.screen === screen.name) {
                         const x = cursor.x;
                         const y = cursor.y;
-                        // Sample slightly inside the physical trigger as
-                        // well: fast motion can cross a 2px strip between
-                        // two frames, even when QML never receives onEntered.
                         const edge = Math.max(6, Config.options.dock.hoverRegionHeight ?? 2);
                         if (dockRoot.vertical) {
                             const halfHeight = dockMouseArea.implicitHeight / 2;
@@ -180,8 +161,6 @@ Scope {
                 if (root.pinned)
                     return true;
                 if (Config.options?.dock.hoverToReveal) {
-                    // In stable mode the pointer state never depends on the
-                    // position of the dock's animated QML input region.
                     if (dockRoot.stableWindowsHover) {
                         if (dockRoot.nativePointerInside)
                             return true;
@@ -194,7 +173,6 @@ Scope {
                 }
                 if (dockApps.requestDockShow)
                     return true;
-                // Both window sources must agree before considering a workspace empty.
                 if (Platform.isWindows)
                     return dockRoot.nativeWorkspaceEmpty;
                 return !ToplevelManager.activeToplevel?.activated;
@@ -219,13 +197,6 @@ Scope {
             color: "transparent"
 
             mask: Region {
-                // On Windows, dockMouseArea extends over the bottom screen
-                // edge even while the floating dock is hidden. That let
-                // invisible app buttons receive hover/clicks through the
-                // animated input mask. Keep the *original MouseArea* available
-                // as soon as the dock is revealed: a visual-only Rectangle
-                // is not a substitute for the interactive button hit area.
-                // When hidden, only the fixed edge strip remains interactive.
                 item: dockRoot.stableWindowsHover
                     ? (dockRoot.reveal ? dockMouseArea : null)
                     : dockMouseArea
@@ -234,18 +205,11 @@ Scope {
                 }
             }
 
-            // The animated dock moves almost completely outside its own
-            // PanelWindow when hidden. A MouseArea inside that moving item
-            // cannot reliably receive Windows hover events. Keep a fixed
-            // narrow hit target at the physical screen edge and combine its
-            // input mask with the dock's existing animated input region.
             MouseArea {
                 id: dockEdgeTrigger
                 visible: Platform.isWindows && Config.options.windowsPort.dockStableHover
                     && Config.options.dock.hoverToReveal && !root.pinned
                 hoverEnabled: true
-                // The final two pixels reveal the dock, but must never
-                // forward a click or hover to a partly hidden app button.
                 acceptedButtons: Qt.AllButtons
                 onEntered: {
                     if (dockRoot.stableWindowsHover) {
