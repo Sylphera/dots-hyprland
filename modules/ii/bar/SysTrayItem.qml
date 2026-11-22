@@ -108,6 +108,7 @@ MouseArea {
 
     PopupToolTip {
         id: tooltip
+        opacityOnly: Platform.isWindows
         compositorFadeMs: Platform.isWindows ? 800 : 0
         compositorFadeInMs: Platform.isWindows ? 300 : 0
         extraVisibleCondition: root.containsMouse
