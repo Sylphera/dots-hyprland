@@ -383,8 +383,6 @@ Item {
                                             }
                                             GroupButton {
                                                 id: closeButton
-                                                // Keep the close control above the surrounding
-                                                // preview button's pointer handling.
                                                 z: 10
                                                 Layout.fillWidth: false
                                                 Layout.fillHeight: false
@@ -400,8 +398,6 @@ Item {
                                                     color: Appearance.m3colors.m3onSurface
                                                 }
                                                 onClicked: {
-                                                    // Bring modal confirmations to the foreground
-                                                    // instead of leaving them behind the dock.
                                                     const target = windowButton.modelData;
                                                     if (!target) return;
                                                     target.activate();
