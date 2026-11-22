@@ -74,6 +74,12 @@ ShellRoot {
             && Config.options.windowsPort.taskbarHoverOnly
             && !Config.options.windowsPort.nativeTaskbar
     }
+    Binding {
+        when: Platform.isWindows && WindowsNative.ready && WindowsNative.taskbar?.suppressSnapBar !== undefined
+        target: WindowsNative.taskbar
+        property: "suppressSnapBar"
+        value: true
+    }
     readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
         if (root.nativeTaskbarTakesOver)

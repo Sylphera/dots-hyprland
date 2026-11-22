@@ -22,19 +22,35 @@ Scope {
     property bool fingerprintsConfigured: false
     property var targetAction: LockContext.ActionEnum.Unlock
     property bool alsoInhibitIdle: false
-    // Windows: after the third wrong password no more are taken, and Windows'
-    // own lock is offered, as Arch's pam_faillock locks the account after
-    // three. The count survives the field being cleared; a good unlock and a
-    // new lock reset it.
     property int failedAttempts: 0
+    property bool nativeLockPending: false
+    property bool nativeLockRequested: false
+    property bool verificationUnavailable: false
     readonly property int maxFailedAttempts: 3
     readonly property bool attemptsExhausted: Platform.isWindows && root.failedAttempts >= root.maxFailedAttempts
     readonly property int attemptsLeft: Math.max(0, root.maxFailedAttempts - root.failedAttempts)
 
     function handOverToWindows() {
-        root.failedAttempts = 0;
-        WindowsNative.session?.lock();
-        root.unlocked(LockContext.ActionEnum.Unlock);
+        if (root.nativeLockPending) return;
+        root.nativeLockPending = true;
+        root.nativeLockRequested = true;
+        if (!WindowsNative.session?.requestNativeLock()) {
+            root.nativeLockPending = false;
+            root.nativeLockRequested = false;
+            console.warn("[LockContext] Windows did not accept the native lock request");
+        } else {
+            nativeLockTimeout.restart();
+        }
+    }
+
+    Timer {
+        id: nativeLockTimeout
+        interval: 5000
+        onTriggered: {
+            if (!root.nativeLockPending) return;
+            root.nativeLockPending = false;
+            console.warn("[LockContext] Windows lock was not confirmed");
+        }
     }
 
     function resetTargetAction() {
@@ -50,6 +66,10 @@ Scope {
     }
 
     function reset() {
+        root.nativeLockPending = false;
+        root.nativeLockRequested = false;
+        root.verificationUnavailable = false;
+        nativeLockTimeout.stop();
         root.resetTargetAction();
         root.clearText();
         root.unlockInProgress = false;
@@ -58,10 +78,6 @@ Scope {
         stopFingerPam();
     }
 
-    // Windows: the first lock asks for the lock screen's own password, typed
-    // twice. Only for a minute after locking, while whoever locked is still
-    // there: later, someone finding the screen locked could set one and walk
-    // in, so it goes away until the next lock and Windows Hello unlocks.
     property bool setupExpired: false
     readonly property bool setupNeeded: Platform.isWindows && (Config.options.lock.windowsUnlock ?? "") === "" && !root.setupExpired
     Timer {
@@ -78,6 +94,7 @@ Scope {
         function onScreenLockedChanged() {
             root.setupExpired = false;
             root.failedAttempts = 0;
+            root.verificationUnavailable = false;
             if (GlobalStates.screenLocked && root.setupNeeded)
                 setupWindowTimer.restart();
             else
@@ -126,8 +143,6 @@ Scope {
         id: passwordClearTimer
         interval: 10000
         onTriggered: {
-            // Not while Windows Hello is being answered: it takes its time,
-            // and this wiped the password being set before Hello came back.
             if (root.unlockInProgress) {
                 passwordClearTimer.restart();
                 return;
@@ -148,8 +163,6 @@ Scope {
     function tryUnlock(alsoInhibitIdle = false) {
         root.alsoInhibitIdle = alsoInhibitIdle;
         root.unlockInProgress = true;
-        // Windows has no PAM: Windows Hello confirms the user (PIN,
-        // fingerprint, face or password) in its own dialog.
         if (Platform.isWindows) {
             if (root.attemptsExhausted) {
                 root.unlockInProgress = false;
@@ -160,9 +173,6 @@ Scope {
                 root.submitSetup();
                 return;
             }
-            // A typed password is checked quietly (the lock screen's own, or
-            // the account's); an empty field asks Windows Hello, for a PIN,
-            // fingerprint or face.
             if (root.currentText.length === 0)
                 WindowsNative.session?.verifyUser("Unlock illogical-impulse");
             else if (Config.options.lock.windowsUnlock === "password")
@@ -176,21 +186,25 @@ Scope {
 
     Connections {
         target: Platform.isWindows ? (WindowsNative.session ?? null) : null
+        function onNativeSessionLocked() {
+            if (!root.nativeLockRequested) return;
+            root.nativeLockPending = false;
+            root.nativeLockRequested = false;
+            nativeLockTimeout.stop();
+            root.failedAttempts = 0;
+            root.unlocked(LockContext.ActionEnum.Unlock);
+        }
         function onUserVerified(verified, result) {
             if (!root.unlockInProgress)
                 return;
-            // No lock screen password saved (the file went away): Windows Hello.
             if (result === 101) {
                 WindowsNative.session?.verifyUser("Unlock illogical-impulse");
                 return;
             }
-            // Windows Hello that can't be asked (no device, not set up, off by
-            // policy, or no answer at all) mustn't keep anyone locked out: this
-            // lock is a screen over the session, not Windows' own lock.
             const unavailable = result === -1 || result === 1 || result === 2 || result === 3;
             if (root.setupPending) {
                 root.setupPending = false;
-                if ((verified || unavailable) && WindowsNative.session?.setLockPassword(root.setupFirstEntry)) {
+                if (verified && WindowsNative.session?.setLockPassword(root.setupFirstEntry)) {
                     Config.options.lock.windowsUnlock = "password";
                     root.setupFirstEntry = "";
                     root.unlocked(root.targetAction);
@@ -202,18 +216,22 @@ Scope {
                 root.setupMismatch();
                 return;
             }
-            if (verified || unavailable) {
+            if (verified) {
                 root.failedAttempts = 0;
-                if (unavailable)
-                    console.warn("[LockContext] Windows Hello unavailable (" + result + "), unlocking");
                 root.unlocked(root.targetAction);
+                return;
+            }
+            if (unavailable) {
+                root.unlockInProgress = false;
+                root.verificationUnavailable = true;
+                root.clearText();
+                root.handOverToWindows();
                 return;
             }
             root.clearText();
             root.unlockInProgress = false;
             GlobalStates.screenUnlockFailed = true;
             root.showFailure = true;
-            // Windows Hello cancelled isn't a wrong guess.
             if (result === 6)
                 return;
             root.failedAttempts += 1;

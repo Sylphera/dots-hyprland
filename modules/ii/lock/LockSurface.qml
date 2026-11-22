@@ -66,7 +66,7 @@ MouseArea {
         if (event.key === Qt.Key_Control) {
             root.ctrlHeld = true;
         }
-        if (event.key === Qt.Key_Escape) { // Esc to clear; it leaves a trial run
+        if (event.key === Qt.Key_Escape) {
             if (GlobalStates.lockPreview) {
                 root.context.unlocked(LockContext.ActionEnum.Unlock);
                 return;
@@ -153,7 +153,7 @@ MouseArea {
             selectionColor: materialShapeChars ? "transparent" : Appearance.colors.colSecondaryContainer
 
             // Password
-            enabled: !root.context.unlockInProgress && !root.context.attemptsExhausted
+            enabled: !root.context.unlockInProgress && !root.context.attemptsExhausted && !root.context.nativeLockPending
             echoMode: TextInput.Password
             inputMethodHints: Qt.ImhSensitiveData
 
@@ -254,7 +254,6 @@ MouseArea {
         }
     }
 
-    // Windows: the first lock sets the lock screen's password
     property bool setupMismatched: false
     Item {
         id: setupCardWrapper
@@ -324,10 +323,9 @@ MouseArea {
         }
     }
 
-    // Windows: after too many wrong passwords
     Item {
         id: attemptsCardWrapper
-        visible: root.context.attemptsExhausted
+        visible: root.context.attemptsExhausted || root.context.verificationUnavailable
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: mainIsland.top
@@ -369,7 +367,7 @@ MouseArea {
                 StyledText {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: Translation.tr("Too many attempts")
+                    text: root.context.verificationUnavailable ? Translation.tr("Windows Hello unavailable") : Translation.tr("Too many attempts")
                     font.pixelSize: Appearance.font.pixelSize.larger
                     color: Appearance.colors.colOnSurface
                     animateChange: true
@@ -378,7 +376,9 @@ MouseArea {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
-                    text: Translation.tr("No more passwords are taken here. Unlock with Windows to continue.")
+                    text: root.context.verificationUnavailable
+                        ? Translation.tr("Unlock with Windows to continue.")
+                        : Translation.tr("No more passwords are taken here. Unlock with Windows to continue.")
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                 }
@@ -387,6 +387,7 @@ MouseArea {
                     Layout.topMargin: 4
                     iconText: "lock_open"
                     text: Translation.tr("Unlock with Windows")
+                    enabled: !root.context.nativeLockPending
                     onClicked: root.context.handOverToWindows()
                 }
             }
@@ -524,7 +525,6 @@ MouseArea {
         Layout.leftMargin: 10
         Layout.rightMargin: 10
         
-
         MaterialSymbol {
             anchors.verticalCenter: parent.verticalCenter
             fill: 1

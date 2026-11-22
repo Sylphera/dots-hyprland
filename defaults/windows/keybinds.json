@@ -139,6 +139,7 @@
     {"keys": "Ctrl+Super+Up", "action": "dispatch", "dispatch": "workspace r-5"},
     {"keys": "Ctrl+Super+Down", "action": "dispatch", "dispatch": "workspace r+5"},
     {"keys": "Super+L", "action": "native", "description": "Session: Lock"},
+    {"keys": "Ctrl+Super+L", "action": "global", "name": "lock", "description": "Session: Lock (illogical-impulse)"},
     {"keys": "Shift+Super+L", "action": "exec", "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0", "description": "Session: Sleep"},
     {"keys": "Super+Return", "action": "exec", "command": "wt.exe || powershell.exe", "description": "App: Terminal"},
     {"keys": "Super+T", "action": "exec", "command": "wt.exe || powershell.exe"},
