@@ -62,29 +62,36 @@ Singleton {
         Persistent.states.nightLight.manual = root.manualActive === undefined ? -1 : (root.manualActive ? 1 : 0);
         Persistent.states.nightLight.manualAt = root.manualActive === undefined ? 0 : Date.now();
     }
+    function restoreManual() {
+        if (!Persistent.ready) return;
+        const manual = Persistent.states.nightLight.manual;
+        const at = Persistent.states.nightLight.manualAt;
+        if (manual === -1 || Date.now() - at > root.manualMaxAgeMs) {
+            Persistent.states.nightLight.manual = -1;
+            return;
+        }
+        const when = new Date(at);
+        root.manualActiveHour = when.getHours();
+        root.manualActiveMinute = when.getMinutes();
+        root.manualActive = manual === 1;
+        root.reEvaluate();
+        if (root.manualActive === undefined) {
+            root.ensureState();
+        } else if (root.manualActive) {
+            root.enableTemperature();
+        } else {
+            root.disableTemperature();
+        }
+    }
     Connections {
         target: Persistent
         function onReadyChanged() {
-            if (!Persistent.ready) return;
-            const manual = Persistent.states.nightLight.manual;
-            const at = Persistent.states.nightLight.manualAt;
-            if (manual === -1 || Date.now() - at > root.manualMaxAgeMs) {
-                Persistent.states.nightLight.manual = -1;
-                return;
-            }
-            const when = new Date(at);
-            root.manualActiveHour = when.getHours();
-            root.manualActiveMinute = when.getMinutes();
-            root.manualActive = manual === 1;
-            root.reEvaluate();
-            if (root.manualActive === undefined) {
-                root.ensureState();
-            } else if (root.manualActive) {
-                root.enableTemperature();
-            } else {
-                root.disableTemperature();
-            }
+            root.restoreManual();
         }
+    }
+    Component.onCompleted: {
+        if (Config.ready) Qt.callLater(() => root.configLoaded = true);
+        root.restoreManual();
     }
 
     function inBetween(t, from, to) {
