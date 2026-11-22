@@ -2,6 +2,7 @@ import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.services
+import qs.modules.ii.fullscreenNotice
 import QtQuick
 import QtQuick.Controls
 import Quickshell
@@ -15,7 +16,8 @@ Scope {
         id: root
         readonly property string targetScreenName: Config.options.notifications.forceMonitor.enable ? Config.options.notifications.forceMonitor.name : (Hyprland.focusedMonitor?.name ?? "")
         readonly property bool fullscreenOnScreen: Notifications.hasFullscreenOnScreen(root.targetScreenName)
-        visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.islandShownOn(root.targetScreenName) && !GlobalStates.nabyIslandTakes("notifications", root.targetScreenName)
+        readonly property bool hasNotice: Platform.isWindows && FullscreenNotice.current !== null
+        visible: (Notifications.popupList.length > 0 || root.hasNotice) && !GlobalStates.screenLocked && !GlobalStates.islandShownOn(root.targetScreenName) && !GlobalStates.nabyIslandTakes("notifications", root.targetScreenName)
         screen: Quickshell.screens.find(s => s.name === root.targetScreenName) ?? null
 
         property string position: {
@@ -45,7 +47,7 @@ Scope {
         }
 
         mask: Region {
-            item: Platform.isWindows && root.fullscreenOnScreen && !Notifications.popupCursorVisible ? null : listview.contentItem
+            item: Platform.isWindows && root.fullscreenOnScreen && !Notifications.popupCursorVisible && !root.hasNotice ? null : listview.contentItem
         }
 
         color: "transparent"
@@ -116,6 +118,14 @@ Scope {
                 implicitWidth: parent.width - (SekaiTheme.active ? root.phonePadding * 2 : Appearance.sizes.elevationMargin * 2)
                 popup: true
                 verticalLayoutDirection: root.isBottom ? ListView.BottomToTop : ListView.TopToBottom
+                header: Platform.isWindows ? noticeHeader : null
+
+                Component {
+                    id: noticeHeader
+                    FullscreenNoticeCard {
+                        width: listview.width
+                    }
+                }
 
                 states: [
                     State {

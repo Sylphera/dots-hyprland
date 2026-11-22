@@ -44,6 +44,7 @@ ShellRoot {
             WindowsPins.load()
             SettingsApp.load()
             WindowsIdleLock.load()
+            FullscreenNotice.load()
         }
     }
 

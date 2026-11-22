@@ -181,6 +181,10 @@ Singleton {
                     property int start: 0
                 }
             }
+
+            property JsonObject fullscreenNotice: JsonObject {
+                property list<string> dismissed: []
+            }
         }
     }
 }
