@@ -340,6 +340,10 @@ ShellRoot {
         function swipe(distance: real, durationMs: int): void {
             WindowsNative.gestures?.simulateSwipe(distance, durationMs)
         }
+
+        function touchpad(enabled: bool): void {
+            if (WindowsNative.gestures) WindowsNative.gestures.swipeEnabled = enabled
+        }
     }
 
     // Shortcuts
