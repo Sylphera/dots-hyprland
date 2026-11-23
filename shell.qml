@@ -81,6 +81,12 @@ ShellRoot {
         property: "suppressSnapBar"
         value: true
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready && WindowsNative.gestures?.swipeEnabled !== undefined
+        target: WindowsNative.gestures
+        property: "swipeEnabled"
+        value: Config.options.windowsPort.touchpadSwipe
+    }
     readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
         if (root.nativeTaskbarTakesOver)
@@ -342,7 +348,7 @@ ShellRoot {
         }
 
         function touchpad(enabled: bool): void {
-            if (WindowsNative.gestures) WindowsNative.gestures.swipeEnabled = enabled
+            Config.options.windowsPort.touchpadSwipe = enabled
         }
     }
 

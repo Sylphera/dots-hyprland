@@ -750,6 +750,7 @@ Singleton {
                 property bool backgroundBehindIcons: true
                 property bool ownWallpaper: false
                 property bool superDrag: true
+                property bool touchpadSwipe: true
                 property bool focusFollowsMouse: true
                 property bool panelAnimations: true
                 property string panelAnimationStyle: "standard"
