@@ -37,6 +37,41 @@ Singleton {
 
     property var _pendingOcr: ({})
     property string _editPath: ""
+    property var _fullscreenCaptures: ({})
+
+    function captureWindowsFullscreen(screenName, save) {
+        const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
+        if (!screenName || typeof shot?.captureScreenAsync !== "function")
+            return;
+
+        const directory = save ? (root.saveDir() || root.defaultScreenshotDir) : Directories.screenshotTemp;
+        const suffix = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+        const path = FileUtils.trimFileProtocol(directory)
+            + "/screenshot-" + root.timestampForFilename() + "-" + suffix + ".png";
+        const id = shot.captureScreenAsync(screenName, path, true);
+        if (id < 0) {
+            Notifications.sendDesktop(Translation.tr("Screenshot failed"), "");
+            return;
+        }
+        root._fullscreenCaptures[id] = { path: path, save: save };
+    }
+
+    Connections {
+        target: Platform.isWindows && WindowsNative.ready ? WindowsNative.screenshot : null
+        function onCaptureFinished(requestId, ok) {
+            const capture = root._fullscreenCaptures[requestId];
+            if (!capture) return;
+            delete root._fullscreenCaptures[requestId];
+            const copied = ok && WindowsNative.clipboard?.copyImageFile(capture.path);
+            if (capture.save && ok) {
+                WindowsNative.screenshot.releaseCapture(capture.path);
+            } else {
+                root.removeWindowsTemp(capture.path);
+            }
+            if (!copied)
+                Notifications.sendDesktop(ok ? Translation.tr("Could not copy screenshot") : Translation.tr("Screenshot failed"), "");
+        }
+    }
 
     function removeWindowsTemp(path) {
         if (!path) return;

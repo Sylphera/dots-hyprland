@@ -403,6 +403,17 @@ ShellRoot {
     }
 
     GlobalShortcut {
+        name: "screenshotFullscreen"
+        description: "Copies a screenshot of the focused screen"
+        onPressed: if (Platform.isWindows) ScreenshotAction.captureWindowsFullscreen(Hyprland.focusedMonitor?.name, false)
+    }
+    GlobalShortcut {
+        name: "screenshotFullscreenSave"
+        description: "Saves and copies a screenshot of the focused screen"
+        onPressed: if (Platform.isWindows) ScreenshotAction.captureWindowsFullscreen(Hyprland.focusedMonitor?.name, true)
+    }
+
+    GlobalShortcut {
         name: "screenRecordFullscreen"
         description: "Records the focused screen (toggle)"
         onPressed: if (Platform.isWindows) ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, false)
