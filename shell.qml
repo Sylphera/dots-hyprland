@@ -87,6 +87,13 @@ ShellRoot {
         property: "swipeEnabled"
         value: Config.options.windowsPort.touchpadSwipe
     }
+    Connections {
+        target: WindowsNative.gestures
+        ignoreUnknownSignals: true
+        function onVerticalSwiped() {
+            Hyprland.dispatch("global quickshell:overviewWorkspacesToggle")
+        }
+    }
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.windowManager
