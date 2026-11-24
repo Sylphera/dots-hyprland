@@ -103,7 +103,7 @@ Singleton {
         root.monitors = Hyprland.monitors.values.map(m => m.lastIpcObject);
         root.layers = ({});
 
-        const workspaces = Hyprland.workspaces.values.map(ws => ws.lastIpcObject).filter(ws => ws.id >= 1 && ws.id <= 1000);
+        const workspaces = Hyprland.workspaces.values.map(ws => ws.lastIpcObject).filter(ws => ws.id >= 1);
         let tempWorkspaceById = {};
         for (const ws of workspaces) tempWorkspaceById[ws.id] = ws;
         root.workspaces = workspaces;
