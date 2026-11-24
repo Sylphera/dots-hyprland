@@ -87,6 +87,12 @@ ShellRoot {
         property: "swipeEnabled"
         value: Config.options.windowsPort.touchpadSwipe
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.gestures
+        property: "moveEnabled"
+        value: Config.options.windowsPort.touchpadMove
+    }
     Connections {
         target: WindowsNative.gestures
         ignoreUnknownSignals: true

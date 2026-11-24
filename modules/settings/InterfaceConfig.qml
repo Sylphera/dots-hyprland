@@ -650,6 +650,48 @@ ContentPage {
 
     ContentSection {
         visible: Platform.isWindows
+        icon: "gesture"
+        title: Translation.tr("Touchpad and workspaces")
+
+        ConfigSwitch {
+            buttonIcon: "swipe"
+            text: Translation.tr("Four fingers switch workspaces")
+            checked: Config.options.windowsPort.touchpadSwipe
+            onCheckedChanged: {
+                Config.options.windowsPort.touchpadSwipe = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Swipe sideways to slide between workspaces, up or down for the overview.\nTakes the place of the four finger Windows gestures while ii runs.")
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "drag_pan"
+            text: Translation.tr("Three fingers move the window")
+            checked: Config.options.windowsPort.touchpadMove
+            onCheckedChanged: {
+                Config.options.windowsPort.touchpadMove = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Moves the focused window; with tiling on, it moves the tile in that direction.\nTakes the place of the three finger Windows swipes while ii runs.")
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "auto_delete"
+            text: Translation.tr("Remove empty workspaces")
+            checked: Config.options.windowsPort.removeEmptyDesktops
+            onCheckedChanged: {
+                Config.options.windowsPort.removeEmptyDesktops = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Removes the empty workspaces behind the last one that has windows, like Hyprland does.")
+            }
+        }
+    }
+
+    ContentSection {
+        visible: Platform.isWindows
         icon: "dashboard"
         title: Translation.tr("Windows tiling")
 
