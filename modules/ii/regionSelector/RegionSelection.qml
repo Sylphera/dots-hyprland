@@ -192,7 +192,7 @@ PanelWindow {
         screen: root.screen
         screenshotDir: root.screenshotDir
         keepWindowsZoom: true
-        previewShown: root.visible
+        previewShown: root.visible && root.phase === RegionSelection.Phase.Select
         onExited: (exitCode, exitStatus) => {
             if (root.enableContentRegions) {
                 if (Platform.isWindows) {
@@ -390,7 +390,7 @@ PanelWindow {
 
         focus: root.visible
         Keys.onPressed: (event) => { // Esc to close
-            if (event.key === Qt.Key_Escape) {
+            if (event.key === Qt.Key_Escape && !(event.modifiers & Qt.MetaModifier)) {
                 root.dismiss();
             }
         }

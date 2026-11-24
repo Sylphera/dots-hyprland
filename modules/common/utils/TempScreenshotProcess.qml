@@ -28,6 +28,7 @@ Item {
     property bool keepWindowsZoom: false
     property var capturedZoom: null
     property bool previewShown: false
+    property bool zoomSuspended: false
     readonly property bool zoomed: (root.capturedZoom?.factor ?? 1) > 1
 
     function projectRegion(region, width, height) {
@@ -46,10 +47,17 @@ Item {
         return Object.assign({}, region, { at: [left, top], size: [right - left, bottom - top] });
     }
 
-    function finishZoomPreview() {
+    onPreviewShownChanged: {
+        if (!root.previewShown && root.zoomSuspended)
+            root.resumeZoom();
+    }
+
+    function resumeZoom() {
+        zoomPreviewTimer.stop();
+        root.zoomSuspended = false;
         const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
-        if (typeof shot?.finishZoomPreview === "function")
-            shot.finishZoomPreview(root.windowsOwnedPath);
+        if (root.keepWindowsZoom && typeof shot?.resumeZoom === "function")
+            shot.resumeZoom();
     }
 
     Connections {
@@ -63,7 +71,10 @@ Item {
     Timer {
         id: zoomPreviewTimer
         interval: 50
-        onTriggered: root.finishZoomPreview()
+        onTriggered: {
+            root.zoomSuspended = true;
+            WindowsNative.screenshot.suspendZoom();
+        }
     }
 
     function captureWindows() {
@@ -74,7 +85,7 @@ Item {
         if (shot && typeof shot.captureScreenAsync === "function") {
             if (root.keepWindowsZoom && typeof shot.freezeZoom === "function")
                 shot.freezeZoom();
-            const requestId = root.keepWindowsZoom && typeof shot.finishZoomPreview === "function"
+            const requestId = root.keepWindowsZoom && typeof shot.freezeZoom === "function"
                 ? shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath, true)
                 : shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath);
             root.windowsRequestId = requestId;
@@ -90,7 +101,7 @@ Item {
         if (root.windowsRequestId > 0 && typeof shot?.cancelCapture === "function")
             shot.cancelCapture(root.windowsRequestId);
         root.windowsRequestId = -1;
-        if (root.zoomed) root.finishZoomPreview();
+        root.resumeZoom();
         const path = root.windowsOwnedPath;
         root.windowsOwnedPath = "";
         root.capturedZoom = null;

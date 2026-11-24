@@ -136,7 +136,7 @@ PanelWindow {
 
         focus: root.visible
         Keys.onPressed: event => { // Esc to close
-            if (event.key === Qt.Key_Escape) {
+            if (event.key === Qt.Key_Escape && !(event.modifiers & Qt.MetaModifier)) {
                 root.close();
             } else if (event.key === Qt.Key_E && event.modifiers & Qt.ControlModifier) {
                 if (root.imageAction === WRegionSelectionPanel.ImageAction.Menu) {

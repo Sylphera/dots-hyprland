@@ -79,6 +79,8 @@ PanelWindow {
         id: screenshotProc
         screen: root.screen
         screenshotDir: root.screenshotDir
+        keepWindowsZoom: true
+        previewShown: root.visible
         onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0) {
                 console.warn("[ColorPicker] Screen capture failed, closing the picker");
@@ -113,7 +115,7 @@ PanelWindow {
 
         focus: root.visible
         Keys.onPressed: event => {
-            if (event.key === Qt.Key_Escape) {
+            if (event.key === Qt.Key_Escape && !(event.modifiers & Qt.MetaModifier)) {
                 root.dismiss();
                 event.accepted = true;
             }

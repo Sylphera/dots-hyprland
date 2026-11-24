@@ -48,6 +48,8 @@ PanelWindow {
         running: true
         screen: root.screen
         screenshotDir: root.screenshotDir
+        keepWindowsZoom: true
+        previewShown: root.visible
         onExited: (_, __) => {
             root.visible = true;
             root.performTranslation();
@@ -167,7 +169,7 @@ PanelWindow {
             visible: !Platform.isWindows
             focus: root.visible && !Platform.isWindows
             Keys.onPressed: event => { // Esc to close
-                if (event.key === Qt.Key_Escape) {
+                if (event.key === Qt.Key_Escape && !(event.modifiers & Qt.MetaModifier)) {
                     root.dismiss();
                 }
             }
@@ -237,7 +239,7 @@ PanelWindow {
             iconText: "close"
             focus: root.visible && Platform.isWindows
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Escape) {
+                if (event.key === Qt.Key_Escape && !(event.modifiers & Qt.MetaModifier)) {
                     root.dismiss();
                 }
             }
