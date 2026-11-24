@@ -54,6 +54,7 @@
     {"keys": "Shift+Super+M", "action": "key", "key": "VolumeMute", "description": "Media: Toggle mute"},
     {"keys": "Alt+Super+Up", "action": "ipc", "target": "audio", "function": "volumeUp", "repeat": true, "description": "Media: Volume up"},
     {"keys": "Alt+Super+Down", "action": "ipc", "target": "audio", "function": "volumeDown", "repeat": true, "description": "Media: Volume down"},
+    {"keys": "Super+Alt+F1", "action": "dispatch", "dispatch": "submap virtual-machine", "description": "Virtual machine: Toggle passing keys through"},
     {"keys": "Alt+Tab", "action": "dispatch", "dispatch": "cyclenext", "description": "Window: Focus next on this workspace"},
     {"keys": "Shift+Alt+Tab", "action": "dispatch", "dispatch": "cyclenext prev", "description": "Window: Focus previous on this workspace"},
     {"keys": "Super+Left", "action": "dispatch", "dispatch": "movefocus l", "description": "Window: Focus Left"},
@@ -175,7 +176,6 @@
     {"keys": "Super+Alt+F", "hyprland": "fullscreenstate (spoof)", "reason": "no equivalent"},
     {"keys": "Super+C, Ctrl+Shift+Alt+Super+W", "hyprland": "code editor / office", "reason": "no default editor ships with Windows; add your own exec binds (Super+C centers the window, or its column in the scrolling layout)"},
     {"keys": "Super+code:N, Super+Alt+code:N (number row and keypad keycodes)", "hyprland": "workspace binds", "reason": "virtual keys for the number row are layout independent already; keypad digits are not bound"},
-    {"keys": "Super+Alt+F1", "hyprland": "virtual-machine submap", "reason": "submaps are not supported"},
     {"keys": "Ctrl+Shift+Alt+Super+Delete", "hyprland": "systemctl poweroff", "reason": "Ctrl+Alt+Delete belongs to Windows and can't be captured; shut down from the session menu"},
     {"keys": "Super+Alt+F11/F12/Equal, Alt+F4", "hyprland": "test notifications / close hint", "reason": "Linux notification tests; Alt+F4 closes windows natively"}
   ]
