@@ -53,6 +53,20 @@ Item {
         root.desktopEntry = null;
     }
 
+    readonly property var floatIds: root.hasWindows ? root.toplevels.map(t => t.appId.toLowerCase()) : [root.appId.toLowerCase()]
+    readonly property bool alwaysFloats: Config.options.windowsPort.tiling.excluded.some(entry => root.floatsBy(entry))
+
+    function floatsBy(entry) {
+        return root.floatIds.includes(entry.trim().toLowerCase().replace(/\.exe$/, ""));
+    }
+
+    function toggleAlwaysFloat() {
+        const excluded = Config.options.windowsPort.tiling.excluded;
+        Config.options.windowsPort.tiling.excluded = root.alwaysFloats
+            ? excluded.filter(entry => !root.floatsBy(entry))
+            : excluded.concat([root.hasWindows ? root.toplevels[0].appId : root.appId]);
+    }
+
     function moveToWorkspace(ws) {
         for (const toplevel of root.toplevels) {
             const address = toplevel.HyprlandToplevel?.address;
@@ -263,6 +277,17 @@ Item {
                         enabled: root.appId !== ""
                         onClicked: {
                             TaskbarApps.togglePin(root.appId);
+                            root.close();
+                        }
+                    }
+
+                    ContextMenuItem {
+                        visible: Platform.isWindows && Config.options.windowsPort.tiling.enable
+                        iconName: root.alwaysFloats ? "grid_view" : "picture_in_picture"
+                        label: root.alwaysFloats ? Translation.tr("Tile again") : Translation.tr("Always float")
+                        enabled: root.appId !== ""
+                        onClicked: {
+                            root.toggleAlwaysFloat();
                             root.close();
                         }
                     }
