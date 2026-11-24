@@ -192,12 +192,8 @@ PanelWindow {
         screen: root.screen
         screenshotDir: root.screenshotDir
         keepWindowsZoom: true
+        previewShown: root.visible
         onExited: (exitCode, exitStatus) => {
-            if (Platform.isWindows && exitCode !== 0) {
-                root.dismiss();
-                return;
-            }
-            root.previewReady = true;
             if (root.enableContentRegions) {
                 if (Platform.isWindows) {
                     if (WindowsNative.imageTools) {
@@ -236,12 +232,11 @@ PanelWindow {
         }
     }
     property bool preparationDone: false
-    property bool previewReady: false
     onPreparationDoneChanged: root.showPrepared()
 
     function showPrepared() {
-        if (!root.preparationDone || root.visible
-                || (Platform.isWindows && frozenPreview.status !== Image.Ready)) return;
+        if (!root.preparationDone || root.visible) return;
+        if (screenshotProc.zoomed && zoomedPreview.status === Image.Loading) return;
         if (root.isRecording && root.recordingShouldStop) {
             if (Platform.isWindows) {
                 ScreenshotAction.stopWindowsRecording();
@@ -257,7 +252,6 @@ PanelWindow {
             return;
         }
         root.visible = true;
-        if (Platform.isWindows) screenshotProc.finishZoomPreview();
     }
 
     Process {
@@ -380,28 +374,18 @@ PanelWindow {
         }
     }
 
-    Item {
+    ScreencopyView { // For freezing
         anchors.fill: parent
+        live: false
+        captureSource: screenshotProc.zoomed ? null : root.screen
         visible: root.phase === RegionSelection.Phase.Select
 
-        Loader {
-            anchors.fill: parent
-            active: !Platform.isWindows
-            sourceComponent: ScreencopyView {
-                live: false
-                captureSource: root.screen
-            }
-        }
-
         Image {
-            id: frozenPreview
+            id: zoomedPreview
             anchors.fill: parent
-            source: Platform.isWindows && root.previewReady ? FileUtils.folderUrl(root.screenshotPath) : ""
+            source: screenshotProc.zoomed ? FileUtils.folderUrl(root.screenshotPath) : ""
             cache: false
-            onStatusChanged: {
-                if (status === Image.Ready) root.showPrepared();
-                else if (status === Image.Error) root.dismiss();
-            }
+            onStatusChanged: root.showPrepared()
         }
 
         focus: root.visible

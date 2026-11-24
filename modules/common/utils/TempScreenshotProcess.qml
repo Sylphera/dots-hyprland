@@ -27,10 +27,12 @@ Item {
     property string windowsOwnedPath: ""
     property bool keepWindowsZoom: false
     property var capturedZoom: null
+    property bool previewShown: false
+    readonly property bool zoomed: (root.capturedZoom?.factor ?? 1) > 1
 
     function projectRegion(region, width, height) {
         const zoom = root.capturedZoom;
-        if (!zoom || !(zoom.factor > 1) || width <= 0 || height <= 0)
+        if (!root.zoomed || width <= 0 || height <= 0)
             return region;
 
         const x = region.at[0] * zoom.factor + zoom.x * width / zoom.width;
@@ -50,12 +52,28 @@ Item {
             shot.finishZoomPreview(root.windowsOwnedPath);
     }
 
+    Connections {
+        target: Platform.isWindows ? root.Window.window : null
+        enabled: root.zoomed && root.previewShown
+        function onFrameSwapped() {
+            zoomPreviewTimer.start();
+        }
+    }
+
+    Timer {
+        id: zoomPreviewTimer
+        interval: 50
+        onTriggered: root.finishZoomPreview()
+    }
+
     function captureWindows() {
         if (!root.running) return;
         root.releaseWindows();
         const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
         root.windowsOwnedPath = root.screenshotPath;
         if (shot && typeof shot.captureScreenAsync === "function") {
+            if (root.keepWindowsZoom && typeof shot.freezeZoom === "function")
+                shot.freezeZoom();
             const requestId = root.keepWindowsZoom && typeof shot.finishZoomPreview === "function"
                 ? shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath, true)
                 : shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath);
@@ -72,6 +90,7 @@ Item {
         if (root.windowsRequestId > 0 && typeof shot?.cancelCapture === "function")
             shot.cancelCapture(root.windowsRequestId);
         root.windowsRequestId = -1;
+        if (root.zoomed) root.finishZoomPreview();
         const path = root.windowsOwnedPath;
         root.windowsOwnedPath = "";
         root.capturedZoom = null;

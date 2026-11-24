@@ -76,11 +76,8 @@ PanelWindow {
         screen: root.screen
         screenshotDir: root.screenshotDir
         keepWindowsZoom: true
+        previewShown: root.visible
         onExited: (exitCode, exitStatus) => {
-            if (Platform.isWindows && exitCode !== 0) {
-                root.close();
-                return;
-            }
             root.preparationDone = true;
         }
     }
@@ -88,10 +85,9 @@ PanelWindow {
     onPreparationDoneChanged: root.showPrepared()
 
     function showPrepared() {
-        if (!root.preparationDone || root.visible
-                || (Platform.isWindows && frozenPreview.status !== Image.Ready)) return;
+        if (!root.preparationDone || root.visible) return;
+        if (screenshotProc.zoomed && zoomedPreview.status === Image.Loading) return;
         root.visible = true;
-        if (Platform.isWindows) screenshotProc.finishZoomPreview();
     }
 
     function getScreenshotAction() {
@@ -124,28 +120,18 @@ PanelWindow {
         id: snipProc
     }
 
-    Item {
+    ScreencopyView {
         id: screencopyView
         anchors.fill: parent
-
-        Loader {
-            anchors.fill: parent
-            active: !Platform.isWindows
-            sourceComponent: ScreencopyView {
-                live: false
-                captureSource: root.screen
-            }
-        }
+        live: false
+        captureSource: screenshotProc.zoomed ? null : root.screen
 
         Image {
-            id: frozenPreview
+            id: zoomedPreview
             anchors.fill: parent
-            source: Platform.isWindows && root.preparationDone ? FileUtils.folderUrl(root.screenshotPath) : ""
+            source: screenshotProc.zoomed ? FileUtils.folderUrl(root.screenshotPath) : ""
             cache: false
-            onStatusChanged: {
-                if (status === Image.Ready) root.showPrepared();
-                else if (status === Image.Error) root.close();
-            }
+            onStatusChanged: root.showPrepared()
         }
 
         focus: root.visible
