@@ -754,6 +754,7 @@ Singleton {
                 property bool touchpadMove: true
                 property bool removeEmptyDesktops: true
                 property bool windowRules: true
+                property bool dimInactive: true
                 property bool focusFollowsMouse: true
                 property bool panelAnimations: true
                 property string panelAnimationStyle: "standard"

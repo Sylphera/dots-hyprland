@@ -720,6 +720,18 @@ ContentPage {
         }
 
         ConfigSwitch {
+            buttonIcon: "contrast"
+            text: Translation.tr("Dim inactive windows")
+            checked: Config.options.windowsPort.dimInactive
+            onCheckedChanged: {
+                Config.options.windowsPort.dimInactive = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Darkens the windows without focus a little, like Hyprland.")
+            }
+        }
+
+        ConfigSwitch {
             buttonIcon: "open_with"
             text: Translation.tr("Super + drag moves and resizes windows")
             checked: Config.options.windowsPort.superDrag

@@ -115,6 +115,12 @@ ShellRoot {
         property: "windowRules"
         value: Config.options.windowsPort.windowRules
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "dimInactive"
+        value: Config.options.windowsPort.dimInactive
+    }
     readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
         if (root.nativeTaskbarTakesOver)
