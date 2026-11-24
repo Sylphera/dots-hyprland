@@ -76,6 +76,10 @@
     {"keys": "Super+F", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen"},
     {"keys": "F11", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen (the shell's, in place of the app's own)"},
     {"keys": "Shift+Super+Return", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen (in place of Windows' full screen for Store apps)"},
+    {"keys": "Alt+Super+M", "action": "ipc", "target": "audio", "function": "toggleMicMute", "description": "Media: Toggle mic"},
+    {"keys": "Alt+Shift+Super+Q", "action": "dispatch", "dispatch": "kill", "description": "Window: Forcefully zap a window"},
+    {"keys": "Ctrl+Super+Backslash", "action": "dispatch", "dispatch": "resizeactive exact 640 480"},
+    {"keys": "Super+mouse:275", "action": "native", "description": "Workspace: Toggle scratchpad"},
     {"keys": "Super+P", "action": "dispatch", "dispatch": "pin", "description": "Window: Pin"},
     {"keys": "Alt+Super+Space", "action": "dispatch", "dispatch": "togglefloating", "description": "Window: Float/Tile"},
     {"keys": "Super+S", "action": "dispatch", "dispatch": "togglespecialworkspace", "description": "Workspace: Toggle scratchpad"},
@@ -156,16 +160,14 @@
     {"keys": "Ctrl+Shift+Alt+Super+Delete", "hyprland": "systemctl poweroff", "reason": "contains Ctrl+Alt+Delete (secure attention sequence)"},
     {"keys": "XF86MonBrightnessUp/Down", "hyprland": "brightness increment/decrement", "reason": "Windows has no virtual keys for brightness; laptop firmware handles those keys"},
     {"keys": "XF86AudioRaiseVolume/LowerVolume/Mute, XF86AudioPlay/Pause/Next/Prev", "hyprland": "wpctl / playerctl", "reason": "Windows handles the media keys natively (system volume, current media session); ii's OSD follows the system volume"},
-    {"keys": "Alt+XF86AudioMute, XF86AudioMicMute, Super+Alt+M", "hyprland": "wpctl set-mute @DEFAULT_SOURCE@", "reason": "no virtual key for mic mute and ii has no IPC target or global shortcut for it"},
+    {"keys": "Alt+XF86AudioMute, XF86AudioMicMute", "hyprland": "wpctl set-mute @DEFAULT_SOURCE@", "reason": "no virtual key for mic mute and ii has no IPC target or global shortcut for it"},
     {"keys": "Print, Ctrl+Print", "hyprland": "grim fullscreen screenshot", "reason": "left to Windows (Print Screen / Snipping Tool); Super+Shift+S is ii's region snip"},
     {"keys": "Super+Shift+Alt+mouse:273/275/276", "hyprland": "AI summary, playerctl", "reason": "mouse binds are not supported (Super+left/right drag to move/resize windows is built in, see windowsPort.superDrag)"},
-    {"keys": "Super+Shift+Alt+Q", "hyprland": "hyprctl kill (click a window to kill it)", "reason": "no kill mode, and the Windows Hyprland module has no forcekillactive dispatcher yet"},
     {"keys": "Super+Alt+F", "hyprland": "fullscreenstate (spoof)", "reason": "no equivalent"},
     {"keys": "Super+C, Ctrl+Shift+Alt+Super+W", "hyprland": "code editor / office", "reason": "no default editor ships with Windows; add your own exec binds (Super+C centers the window, or its column in the scrolling layout)"},
     {"keys": "Super+code:N, Super+Alt+code:N (number row and keypad keycodes)", "hyprland": "workspace binds", "reason": "virtual keys for the number row are layout independent already; keypad digits are not bound"},
     {"keys": "Super+Alt+F1", "hyprland": "virtual-machine submap", "reason": "submaps are not supported"},
     {"keys": "Ctrl+Shift+Alt+Super+Delete", "hyprland": "systemctl poweroff", "reason": "Ctrl+Alt+Delete belongs to Windows and can't be captured; shut down from the session menu"},
-    {"keys": "Super+Alt+F11/F12/Equal, Alt+F4", "hyprland": "test notifications / close hint", "reason": "Linux notification tests; Alt+F4 closes windows natively"},
-    {"keys": "Ctrl+Super+Backslash", "hyprland": "resize to 640x480", "reason": "no equivalent"}
+    {"keys": "Super+Alt+F11/F12/Equal, Alt+F4", "hyprland": "test notifications / close hint", "reason": "Linux notification tests; Alt+F4 closes windows natively"}
   ]
 }
