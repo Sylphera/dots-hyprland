@@ -99,6 +99,9 @@ ShellRoot {
         function onVerticalSwiped() {
             Hyprland.dispatch("global quickshell:overviewWorkspacesToggle")
         }
+        function onPinched() {
+            Hyprland.dispatch("fullscreen 0")
+        }
     }
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready

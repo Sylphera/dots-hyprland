@@ -667,7 +667,7 @@ ContentPage {
 
         ConfigSwitch {
             buttonIcon: "drag_pan"
-            text: Translation.tr("Three fingers move the window")
+            text: Translation.tr("Three fingers move the window, pinching toggles fullscreen")
             checked: Config.options.windowsPort.touchpadMove
             onCheckedChanged: {
                 Config.options.windowsPort.touchpadMove = checked;
