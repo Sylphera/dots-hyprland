@@ -759,7 +759,7 @@ Singleton {
                 property bool panelAnimations: true
                 property string panelAnimationStyle: "standard"
                 property JsonObject tiling: JsonObject {
-                    property bool enable: false
+                    property bool enable: true
                     property int gapsIn: 4
                     property int gapsOut: 5
                     property bool preserveSplit: true
