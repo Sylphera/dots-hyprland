@@ -33,7 +33,7 @@ Item {
 
     function projectRegion(region, width, height) {
         const zoom = root.capturedZoom;
-        if (!root.zoomed || width <= 0 || height <= 0)
+        if (!region || !root.zoomed || width <= 0 || height <= 0)
             return region;
 
         const x = region.at[0] * zoom.factor + zoom.x * width / zoom.width;

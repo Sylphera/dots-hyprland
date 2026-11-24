@@ -35,6 +35,8 @@ PanelWindow {
     property var action: RegionSelection.SnipAction.Copy
     property var selectionMode: RegionSelection.SelectionMode.RectCorners
     property var phase: RegionSelection.Phase.Select
+    readonly property bool hideRecordingFrame: Platform.isWindows && root.phase === RegionSelection.Phase.Post
+        && screenshotProc.zoomed
     signal dismiss()
 
     // Styles
@@ -448,6 +450,7 @@ PanelWindow {
             z: 2
             anchors.fill: parent
             active: root.selectionMode === RegionSelection.SelectionMode.RectCorners
+            visible: !root.hideRecordingFrame
             sourceComponent: RectCornersSelectionDetails {
                 regionX: root.regionX
                 regionY: root.regionY
