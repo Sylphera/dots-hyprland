@@ -25,6 +25,30 @@ Item {
 
     property int windowsRequestId: -1
     property string windowsOwnedPath: ""
+    property bool keepWindowsZoom: false
+    property var capturedZoom: null
+
+    function projectRegion(region, width, height) {
+        const zoom = root.capturedZoom;
+        if (!zoom || !(zoom.factor > 1) || width <= 0 || height <= 0)
+            return region;
+
+        const x = region.at[0] * zoom.factor + zoom.x * width / zoom.width;
+        const y = region.at[1] * zoom.factor + zoom.y * height / zoom.height;
+        const left = Math.max(0, x);
+        const top = Math.max(0, y);
+        const right = Math.min(width, x + region.size[0] * zoom.factor);
+        const bottom = Math.min(height, y + region.size[1] * zoom.factor);
+        if (right <= left || bottom <= top)
+            return null;
+        return Object.assign({}, region, { at: [left, top], size: [right - left, bottom - top] });
+    }
+
+    function finishZoomPreview() {
+        const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
+        if (typeof shot?.finishZoomPreview === "function")
+            shot.finishZoomPreview(root.windowsOwnedPath);
+    }
 
     function captureWindows() {
         if (!root.running) return;
@@ -32,7 +56,9 @@ Item {
         const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
         root.windowsOwnedPath = root.screenshotPath;
         if (shot && typeof shot.captureScreenAsync === "function") {
-            const requestId = shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath);
+            const requestId = root.keepWindowsZoom && typeof shot.finishZoomPreview === "function"
+                ? shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath, true)
+                : shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath);
             root.windowsRequestId = requestId;
             if (requestId < 0) Qt.callLater(() => root.finishWindows(requestId, false));
             return;
@@ -48,6 +74,7 @@ Item {
         root.windowsRequestId = -1;
         const path = root.windowsOwnedPath;
         root.windowsOwnedPath = "";
+        root.capturedZoom = null;
         if (path.length === 0 || !shot) return;
         if (typeof shot.discardCapture === "function") {
             shot.discardCapture(path);
@@ -60,6 +87,11 @@ Item {
     function finishWindows(requestId, ok) {
         if (requestId !== root.windowsRequestId) return;
         root.windowsRequestId = -1;
+        if (ok && root.keepWindowsZoom) {
+            const shot = WindowsNative.screenshot;
+            if (typeof shot?.captureZoom === "function")
+                root.capturedZoom = shot.captureZoom(root.windowsOwnedPath);
+        }
         if (!ok) console.warn("[TempScreenshotProcess] Native capture failed for", root.screen.name);
         root.running = false;
         root.exited(ok ? 0 : 1, 0);

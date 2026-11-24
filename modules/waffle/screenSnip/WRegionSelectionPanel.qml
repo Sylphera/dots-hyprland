@@ -75,15 +75,23 @@ PanelWindow {
         running: true
         screen: root.screen
         screenshotDir: root.screenshotDir
+        keepWindowsZoom: true
         onExited: (exitCode, exitStatus) => {
+            if (Platform.isWindows && exitCode !== 0) {
+                root.close();
+                return;
+            }
             root.preparationDone = true;
         }
     }
     property bool preparationDone: false
-    onPreparationDoneChanged: {
-        if (!preparationDone)
-            return;
+    onPreparationDoneChanged: root.showPrepared()
+
+    function showPrepared() {
+        if (!root.preparationDone || root.visible
+                || (Platform.isWindows && frozenPreview.status !== Image.Ready)) return;
         root.visible = true;
+        if (Platform.isWindows) screenshotProc.finishZoomPreview();
     }
 
     function getScreenshotAction() {
@@ -116,11 +124,29 @@ PanelWindow {
         id: snipProc
     }
 
-    ScreencopyView {
+    Item {
         id: screencopyView
         anchors.fill: parent
-        live: false
-        captureSource: root.screen
+
+        Loader {
+            anchors.fill: parent
+            active: !Platform.isWindows
+            sourceComponent: ScreencopyView {
+                live: false
+                captureSource: root.screen
+            }
+        }
+
+        Image {
+            id: frozenPreview
+            anchors.fill: parent
+            source: Platform.isWindows && root.preparationDone ? FileUtils.folderUrl(root.screenshotPath) : ""
+            cache: false
+            onStatusChanged: {
+                if (status === Image.Ready) root.showPrepared();
+                else if (status === Image.Error) root.close();
+            }
+        }
 
         focus: root.visible
         Keys.onPressed: event => { // Esc to close
@@ -143,12 +169,18 @@ PanelWindow {
             cursorShape: Qt.CrossCursor
 
             property bool isWindowSelection: root.selectionMode === WRegionSelectionPanel.SelectionMode.Window
-            property var hoveredWindow: root.windows.find(w => {
-                const inCurrentWorkspace = w.workspace.id === HyprlandData.activeWorkspace.id;
-                const withinXRange = w.at[0] <= dragArea.mouseX && dragArea.mouseX <= w.at[0] + w.size[0];
-                const withinYRange = w.at[1] <= dragArea.mouseY && dragArea.mouseY <= w.at[1] + w.size[1];
-                return inCurrentWorkspace && withinXRange && withinYRange;
-            })
+            property var hoveredWindow: root.windows
+                .filter(w => w.workspace.id === HyprlandData.activeWorkspace.id)
+                .map(w => {
+                    if (!(screenshotProc.capturedZoom?.factor > 1))
+                        return w;
+                    return screenshotProc.projectRegion({
+                        at: [w.at[0] - root.hyprlandMonitor.x, w.at[1] - root.hyprlandMonitor.y],
+                        size: w.size,
+                    }, root.width, root.height);
+                })
+                .find(w => w && w.at[0] <= dragArea.mouseX && dragArea.mouseX <= w.at[0] + w.size[0]
+                    && w.at[1] <= dragArea.mouseY && dragArea.mouseY <= w.at[1] + w.size[1])
             property int winPadding: 1
             property int selectionX: isWindowSelection ? ((hoveredWindow?.at[0] ?? 0) - winPadding) : regionTopLeftX
             property int selectionY: isWindowSelection ? ((hoveredWindow?.at[1] ?? 0) - winPadding) : regionTopLeftY

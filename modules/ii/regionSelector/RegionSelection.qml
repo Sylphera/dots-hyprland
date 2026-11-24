@@ -82,16 +82,17 @@ PanelWindow {
     property var imageRegions: []
     readonly property list<var> windowRegions: RegionFunctions.filterWindowRegionsByLayers(
         root.windows.filter(w => w.workspace.id === root.activeWorkspaceId),
-        root.layerRegions
-    ).map(window => {
-        return {
-            at: [window.at[0] - root.monitorOffsetX, window.at[1] - root.monitorOffsetY],
-            size: [window.size[0], window.size[1]],
-            class: window.class,
-            title: window.title,
-        }
-    })
-    readonly property list<var> layerRegions: {
+        root.unscaledLayerRegions
+    ).map(window => screenshotProc.projectRegion({
+        at: [window.at[0] - root.monitorOffsetX, window.at[1] - root.monitorOffsetY],
+        size: [window.size[0], window.size[1]],
+        class: window.class,
+        title: window.title,
+    }, root.width, root.height)).filter(region => region !== null)
+    readonly property list<var> layerRegions: root.unscaledLayerRegions
+        .map(layer => screenshotProc.projectRegion(layer, root.width, root.height))
+        .filter(region => region !== null)
+    readonly property list<var> unscaledLayerRegions: {
         const layersOfThisMonitor = root.layers[root.hyprlandMonitor.name]
         const topLayers = layersOfThisMonitor?.levels["2"]
         if (!topLayers) return [];
@@ -190,7 +191,13 @@ PanelWindow {
         running: true
         screen: root.screen
         screenshotDir: root.screenshotDir
+        keepWindowsZoom: true
         onExited: (exitCode, exitStatus) => {
+            if (Platform.isWindows && exitCode !== 0) {
+                root.dismiss();
+                return;
+            }
+            root.previewReady = true;
             if (root.enableContentRegions) {
                 if (Platform.isWindows) {
                     if (WindowsNative.imageTools) {
@@ -229,8 +236,12 @@ PanelWindow {
         }
     }
     property bool preparationDone: false
-    onPreparationDoneChanged: {
-        if (!preparationDone) return;
+    property bool previewReady: false
+    onPreparationDoneChanged: root.showPrepared()
+
+    function showPrepared() {
+        if (!root.preparationDone || root.visible
+                || (Platform.isWindows && frozenPreview.status !== Image.Ready)) return;
         if (root.isRecording && root.recordingShouldStop) {
             if (Platform.isWindows) {
                 ScreenshotAction.stopWindowsRecording();
@@ -246,6 +257,7 @@ PanelWindow {
             return;
         }
         root.visible = true;
+        if (Platform.isWindows) screenshotProc.finishZoomPreview();
     }
 
     Process {
@@ -368,11 +380,29 @@ PanelWindow {
         }
     }
 
-    ScreencopyView { // For freezing
+    Item {
         anchors.fill: parent
-        live: false
-        captureSource: root.screen
         visible: root.phase === RegionSelection.Phase.Select
+
+        Loader {
+            anchors.fill: parent
+            active: !Platform.isWindows
+            sourceComponent: ScreencopyView {
+                live: false
+                captureSource: root.screen
+            }
+        }
+
+        Image {
+            id: frozenPreview
+            anchors.fill: parent
+            source: Platform.isWindows && root.previewReady ? FileUtils.folderUrl(root.screenshotPath) : ""
+            cache: false
+            onStatusChanged: {
+                if (status === Image.Ready) root.showPrepared();
+                else if (status === Image.Error) root.dismiss();
+            }
+        }
 
         focus: root.visible
         Keys.onPressed: (event) => { // Esc to close
