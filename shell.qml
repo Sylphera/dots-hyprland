@@ -82,10 +82,16 @@ ShellRoot {
         value: true
     }
     Binding {
-        when: Platform.isWindows && Config.ready && WindowsNative.ready && WindowsNative.gestures?.swipeEnabled !== undefined
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.gestures
         property: "swipeEnabled"
         value: Config.options.windowsPort.touchpadSwipe
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "removeEmptyDesktops"
+        value: Config.options.windowsPort.removeEmptyDesktops
     }
     readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
