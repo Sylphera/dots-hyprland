@@ -78,21 +78,31 @@ Item { // Window
         }
     }
 
+    Component {
+        id: geometryAnimation
+
+        NumberAnimation {
+            duration: Appearance.animation.elementMoveEnter.duration
+            easing.type: Appearance.animation.elementMoveEnter.type
+            easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve
+        }
+    }
+
     Behavior on x {
         enabled: root.animate
-        animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
+        animation: geometryAnimation.createObject(this)
     }
     Behavior on y {
         enabled: root.animate
-        animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
+        animation: geometryAnimation.createObject(this)
     }
     Behavior on width {
         enabled: root.animate
-        animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
+        animation: geometryAnimation.createObject(this)
     }
     Behavior on height {
         enabled: root.animate
-        animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
+        animation: geometryAnimation.createObject(this)
     }
 
     ScreencopyView {
@@ -145,11 +155,11 @@ Item { // Window
 
             Behavior on width {
                 enabled: root.animate
-                animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
+                animation: geometryAnimation.createObject(this)
             }
             Behavior on height {
                 enabled: root.animate
-                animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
+                animation: geometryAnimation.createObject(this)
             }
         }
     }
