@@ -109,6 +109,12 @@ ShellRoot {
         property: "removeEmptyDesktops"
         value: Config.options.windowsPort.removeEmptyDesktops
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "windowRules"
+        value: Config.options.windowsPort.windowRules
+    }
     readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
         if (root.nativeTaskbarTakesOver)

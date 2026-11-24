@@ -708,6 +708,18 @@ ContentPage {
         }
 
         ConfigSwitch {
+            buttonIcon: "picture_in_picture_center"
+            text: Translation.tr("Place dialogs and picture-in-picture")
+            checked: Config.options.windowsPort.windowRules
+            onCheckedChanged: {
+                Config.options.windowsPort.windowRules = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Dialogs open centered and file dialogs with a comfortable size.\nPicture-in-picture goes to its corner and stays on every workspace.")
+            }
+        }
+
+        ConfigSwitch {
             buttonIcon: "open_with"
             text: Translation.tr("Super + drag moves and resizes windows")
             checked: Config.options.windowsPort.superDrag
