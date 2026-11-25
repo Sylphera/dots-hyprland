@@ -164,6 +164,7 @@ Item {
                         }
                         contentItem: W.MaterialSymbol {
                             anchors.centerIn: parent
+                            horizontalAlignment: Text.AlignHCenter
                             text: "search"
                             iconSize: Appearance.font.pixelSize.larger
                             color: Appearance.colors.colOnLayer1
@@ -208,6 +209,7 @@ Item {
                     onClicked: root.closeRequested()
                     contentItem: W.MaterialSymbol {
                         anchors.centerIn: parent
+                        horizontalAlignment: Text.AlignHCenter
                         text: "close"
                         iconSize: Appearance.font.pixelSize.larger
                         color: Appearance.colors.colOnLayer1

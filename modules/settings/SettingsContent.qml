@@ -252,37 +252,6 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
                 RippleButton {
-                    visible: root.windowControls
-                    buttonRadius: Appearance.rounding.full
-                    implicitWidth: 35
-                    implicitHeight: 35
-                    onClicked: root.Window.window?.showMinimized()
-                    contentItem: MaterialSymbol {
-                        anchors.centerIn: parent
-                        horizontalAlignment: Text.AlignHCenter
-                        text: "minimize"
-                        iconSize: 20
-                    }
-                }
-                RippleButton {
-                    visible: root.windowControls
-                    buttonRadius: Appearance.rounding.full
-                    implicitWidth: 35
-                    implicitHeight: 35
-                    onClicked: {
-                        const backingWindow = root.Window.window;
-                        if (!backingWindow) return;
-                        if (backingWindow.visibility === Window.Maximized) backingWindow.showNormal();
-                        else backingWindow.showMaximized();
-                    }
-                    contentItem: MaterialSymbol {
-                        anchors.centerIn: parent
-                        horizontalAlignment: Text.AlignHCenter
-                        text: root.Window.window?.visibility === Window.Maximized ? "filter_none" : "crop_square"
-                        iconSize: 20
-                    }
-                }
-                RippleButton {
                     buttonRadius: Appearance.rounding.full
                     implicitWidth: 35
                     implicitHeight: 35
