@@ -40,10 +40,10 @@ StyledOverlayWidget {
                 BigRecorderButton {
                     materialSymbol: "photo_camera"
                     name: "Screenshot"
-                    visible: !Platform.isWindows
                     onClicked: {
                         GlobalStates.overlayOpen = false;
-                        Quickshell.execDetached(["bash", "-c", "grim - | wl-copy"]);
+                        if (Platform.isWindows) ScreenshotAction.captureWindowsFullscreenSoon(Hyprland.focusedMonitor?.name);
+                        else Quickshell.execDetached(["bash", "-c", "grim - | wl-copy"]);
                     }
                 }
 

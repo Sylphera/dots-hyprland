@@ -39,6 +39,19 @@ Singleton {
     property string _editPath: ""
     property var _fullscreenCaptures: ({})
 
+    property string _delayedFullscreenScreen: ""
+
+    Timer {
+        id: delayedFullscreenTimer
+        interval: 350
+        onTriggered: root.captureWindowsFullscreen(root._delayedFullscreenScreen, false)
+    }
+
+    function captureWindowsFullscreenSoon(screenName) {
+        root._delayedFullscreenScreen = screenName ?? "";
+        delayedFullscreenTimer.restart();
+    }
+
     function captureWindowsFullscreen(screenName, save) {
         const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
         if (!screenName || typeof shot?.captureScreenAsync !== "function")
