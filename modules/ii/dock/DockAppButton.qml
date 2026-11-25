@@ -107,6 +107,43 @@ DockButton {
         appToplevel.toplevels[lastFocused].activate()
     }
 
+    property real wheelAccum: 0
+    property var wheelTarget: null
+    Timer {
+        id: wheelTargetReset
+        interval: 600
+        onTriggered: root.wheelTarget = null
+    }
+
+    WheelHandler {
+        enabled: DockStyle.pcFeatures && (Config.options.dock.scrollToCycleWindows ?? false)
+            && !root.isSeparator && root.appToplevel.toplevels.length > 0
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => {
+            root.wheelAccum += event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
+            if (Math.abs(root.wheelAccum) < 120)
+                return;
+            const step = root.wheelAccum > 0 ? -1 : 1;
+            root.wheelAccum = 0;
+            const list = root.appToplevel.toplevels;
+            let current = root.wheelTarget ? list.indexOf(root.wheelTarget) : -1;
+            if (current < 0)
+                current = list.findIndex(t => t.activated);
+            const next = current < 0 ? (step > 0 ? 0 : list.length - 1) : (current + step + list.length) % list.length;
+            root.wheelTarget = list[next];
+            wheelTargetReset.restart();
+            root.lastFocused = next;
+            list[next].activate();
+        }
+    }
+
+    DockTooltip {
+        text: root.desktopEntry?.name || root.appToplevel.appId
+        show: root.hovered && !root.isSeparator && appListRoot.reorderFrom === -1
+        app: root.appToplevel
+        contextMenu: root.contextMenu
+    }
+
     middleClickAction: () => {
         root.desktopEntry?.execute();
     }

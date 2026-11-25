@@ -7,6 +7,7 @@ Singleton {
     readonly property string position: Config.options.dock.position ?? "bottom"
     readonly property bool vertical: position !== "bottom"
     readonly property bool hug: Config.options.dock.style === "hug"
+    readonly property bool pcFeatures: Config.options.appearance.visualStyle === "end4pc"
 
     function mTop(inner, outer, alongStart) {
         return vertical ? (alongStart ?? 0) : inner;

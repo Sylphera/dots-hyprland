@@ -745,5 +745,8 @@
   "Font size": "Tamaño de fuente",
   "System": "Sistema",
   "More Internet settings": "Más ajustes de Internet",
-  "Utility buttons": "Botones de utilidad"
+  "Utility buttons": "Botones de utilidad",
+  "App name tooltips": "Nombre de la app al pasar el ratón",
+  "Window previews": "Vistas previas de ventanas",
+  "Scroll on an app to switch its windows": "Rueda sobre una app para cambiar entre sus ventanas"
 }

@@ -460,6 +460,20 @@ ContentPage {
                 checked: Config.options.dock.showPreviews
                 onCheckedChanged: { Config.options.dock.showPreviews = checked }
             }
+            ConfigSwitch {
+                visible: Config.options.appearance.visualStyle === "end4pc"
+                buttonIcon: "tooltip"
+                text: Translation.tr("App name tooltips")
+                checked: Config.options.dock.showTooltips
+                onCheckedChanged: { Config.options.dock.showTooltips = checked }
+            }
+            ConfigSwitch {
+                visible: Config.options.appearance.visualStyle === "end4pc"
+                buttonIcon: "swap_vert"
+                text: Translation.tr("Scroll on an app to switch its windows")
+                checked: Config.options.dock.scrollToCycleWindows
+                onCheckedChanged: { Config.options.dock.scrollToCycleWindows = checked }
+            }
             ConfigSpinBox {
                 icon: "photo_size_select_large"
                 text: Translation.tr("Icon size")

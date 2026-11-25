@@ -645,6 +645,8 @@ Singleton {
                 property real radius: 23
                 property bool followFrameColor: false
                 property bool showPreviews: true
+                property bool showTooltips: true
+                property bool scrollToCycleWindows: false
                 property real iconSize: 35
                 property real iconSpacing: 0
                 property bool showPinButton: true
