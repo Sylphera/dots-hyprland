@@ -15,7 +15,7 @@ FloatingWindow {
     property string tab: "environment"
     readonly property bool railOpen: Config.options.settings.environmentRailOpen
     readonly property real railWidth: 236
-    readonly property bool railOverlay: root.tab === "environment" && root.pcLayout
+    readonly property bool railOverlay: root.tab === "environment" && root.pcLayout && (contentLoader.item?.fullBleedPage ?? false)
 
     function setRailOpen(open) {
         Config.options.settings.environmentRailOpen = open;

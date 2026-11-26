@@ -14,6 +14,7 @@ Item {
     signal pageExitRequested()
     signal closeRequested()
     property real leftInset: 0
+    readonly property bool fullBleedPage: root.pageNames[root.currentPage]?.icon === "play_circle"
 
     function focusContent() {
         root.forceActiveFocus();
