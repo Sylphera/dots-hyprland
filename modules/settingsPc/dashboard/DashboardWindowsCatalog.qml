@@ -34,6 +34,8 @@ QtObject {
     }
 
     readonly property var controls: ({
+        "windows:Background behind icons": { type: "switch", get: () => Config.options.windowsPort.backgroundBehindIcons, set: v => { Config.options.windowsPort.backgroundBehindIcons = v; } },
+        "windows:Draw own wallpaper": { type: "switch", get: () => Config.options.windowsPort.ownWallpaper, set: v => { Config.options.windowsPort.ownWallpaper = v; } },
         "windows:Tiling": { type: "switch", get: () => Config.options.windowsPort.tiling.enable, set: v => { Config.options.windowsPort.tiling.enable = v; } },
         "windows:Tiling Layout": {
             type: "select",
@@ -276,6 +278,12 @@ QtObject {
         {
             page: Translation.tr("Windows"), title: Translation.tr("Displays"), icon: "monitor", when: "windows", cards: [
                 { type: "embed", h: 5, key: "windows:Displays panel", embed: "WindowsDisplaysPanel.qml", title: Translation.tr("Displays"), icon: "monitor", kw: "display monitor screen resolution refresh rate orientation scale hdr sdr brightness main primary" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Windows desktop"), icon: "desktop_windows", when: "windows", cards: [
+                { type: "toggle", w: 2, key: "windows:Background behind icons", title: Translation.tr("Put the background behind the desktop icons"), icon: "layers", kw: "desktop icons background behind wallpaper widgets show desktop" },
+                { type: "toggle", w: 2, when: "winbehindicons", key: "windows:Draw own wallpaper", title: Translation.tr("Draw ii's own wallpaper"), icon: "wallpaper", kw: "own wallpaper draw blur centered transitions parallax effects native windows" }
             ]
         },
         {

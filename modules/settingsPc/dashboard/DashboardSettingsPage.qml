@@ -173,6 +173,7 @@ Item {
         if (when === "winlock") return Config.options.windowsPort.idle.lock > 0;
         if (when === "winbattery") return WindowsNative.idlePower?.hasBattery ?? false;
         if (when === "winpanelanim") return Config.options.windowsPort.panelAnimations;
+        if (when === "winbehindicons") return Config.options.windowsPort.backgroundBehindIcons;
         return true;
     }
 
