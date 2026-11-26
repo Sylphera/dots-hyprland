@@ -116,6 +116,25 @@ Scope { // Scope
         onTriggered: root.preloadSidebarContent()
     }
 
+    onContentComponentChanged: {
+        const old = root.sidebarContent;
+        if (!old && !root.contentIncubator) return;
+        root.contentIncubator = null;
+        root.sidebarContent = null;
+        if (old) {
+            old.parent = null;
+            old.destroy();
+        }
+        const contentParent = root.detach ? detachedSidebarLoader.item?.contentParent : sidebarLoader.item?.contentParent;
+        if (GlobalStates.sidebarLeftOpen || root.detach || !Platform.isWindows) {
+            root.ensureSidebarContent();
+            if (contentParent)
+                contentParent.children = [root.sidebarContent];
+        } else {
+            root.preloadSidebarContent();
+        }
+    }
+
     Component.onCompleted: {
         if (!Platform.isWindows) {
             root.ensureSidebarContent();
