@@ -211,7 +211,8 @@ LazyLoader {
                     const far = root.QsWindow?.mapFromItem(root.hoverTarget, root.hoverTarget.width, 0);
                     if (!origin || !far)
                         return 0;
-                    return origin.x + (far.x - origin.x - popupBackground.implicitWidth) / 2;
+                    const centered = origin.x + (far.x - origin.x - popupBackground.implicitWidth) / 2;
+                    return Math.max(0, Math.min(centered, (popupWindow.screen?.width ?? centered) - popupWindow.implicitWidth));
                 }
                 return Appearance.sizes.verticalBarWidth;
             }
