@@ -444,7 +444,7 @@ ButtonMouseArea {
             anchors.centerIn: parent
             Loader {
                 anchors.centerIn: parent
-                sourceComponent: (Config.options?.bar.workspaces.indicatorStyle ?? "dot") === "icon" ? iconComponent : dotComponent
+                sourceComponent: DockStyle.pcFeatures && (Config.options?.bar.workspaces.indicatorStyle ?? "dot") === "icon" ? iconComponent : dotComponent
 
                 Component {
                     id: dotComponent
