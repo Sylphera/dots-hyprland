@@ -7,13 +7,14 @@ import Quickshell.Hyprland
 import qs.modules.common
 import qs.modules.settingsPc as SettingsPc
 import qs.modules.settingsPc.dashboard as SettingsPcDashboard
+import qs.modules.settingsFrame as SettingsFrame
 
 Singleton {
     id: root
     property bool isOpen: false
     property var target: null
-    readonly property bool wantsPcLayout: (Config.options?.appearance?.settingsLayout ?? "ii") === "end4pc"
-    readonly property bool wantsDashboard: Config.options?.settings?.style === "dashboard"
+    readonly property bool wantsPcLayout: false
+    readonly property bool wantsDashboard: false
     property bool pcLayout: false
     property bool dashboardMode: false
     property bool handoff: false
@@ -27,7 +28,7 @@ Singleton {
             if (pcLoader.source == "")
                 pcLoader.source = Qt.resolvedUrl(root.dashboardMode ? "../settingsPc/dashboard/SettingsPcDashboardWindow.qml" : "../settingsPc/SettingsPcPanel.qml");
         } else if (windowLoader.source == "") {
-            windowLoader.source = Qt.resolvedUrl("SettingsAppWindow.qml");
+            windowLoader.source = Qt.resolvedUrl("../settingsFrame/SettingsFrameWindow.qml");
         }
     }
 
@@ -56,11 +57,12 @@ Singleton {
     }
 
     function applyTarget() {
-        if (!root.target || !root.pcLayout || !pcLoader.item)
+        const item = root.activeLoader.item;
+        if (!root.target || !item || typeof item.goToTarget !== "function")
             return;
         const target = root.target;
         root.target = null;
-        pcLoader.item.goToTarget(target);
+        item.goToTarget(target);
     }
 
     function close() {
@@ -155,7 +157,10 @@ Singleton {
     LazyLoader {
         id: windowLoader
         active: root.isOpen && (!root.pcLayout || root.handoff)
-        onItemChanged: root.finishHandoff()
+        onItemChanged: {
+            root.applyTarget();
+            root.finishHandoff();
+        }
     }
 
     LazyLoader {

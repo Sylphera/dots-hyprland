@@ -26,7 +26,9 @@ Item {
         id: catalog
     }
 
-    readonly property string group: GlobalStates.dashboardGroup
+    property string forcedGroup: ""
+    readonly property string windowsGroup: Translation.tr("Windows")
+    readonly property string group: root.forcedGroup !== "" ? root.forcedGroup : GlobalStates.dashboardGroup
 
     readonly property var groupDefs: {
         const c = Appearance.colors;
@@ -58,7 +60,7 @@ Item {
         name: Translation.tr("All"), icon: "apps",
         container: Appearance.m3colors.m3surfaceContainerHighest, onContainer: Appearance.m3colors.m3onSurface,
         accent: Appearance.m3colors.m3onSurface, onAccent: Appearance.m3colors.m3surface
-    })].concat(groupDefs.map(g => Object.assign({ id: g.name, count: allEntries.filter(e => e.kind === "card" && e.group === g.name && isVisibleEntry(e)).length }, g)))
+    })].concat(groupDefs.filter(g => root.forcedGroup !== "" || g.name !== root.windowsGroup).map(g => Object.assign({ id: g.name, count: allEntries.filter(e => e.kind === "card" && e.group === g.name && isVisibleEntry(e)).length }, g)))
 
     readonly property var railDimmed: {
         const dim = {};
@@ -178,6 +180,10 @@ Item {
     }
 
     function isVisibleEntry(e) {
+        if (e.group !== undefined) {
+            if (root.forcedGroup !== "" && e.group !== root.forcedGroup) return false;
+            if (root.forcedGroup === "" && e.group === root.windowsGroup) return false;
+        }
         if (Platform.isWindows && !root.windowsUsable(e)) return false;
         if (typeof e.when === "string" && (e.when === "windows" || e.when.startsWith("win")) && !root.isVisibleWindowsEntry(e.when)) return false;
         if (e.when === "material" && ColorSchemes.current !== "") return false;
@@ -460,7 +466,8 @@ Item {
     property string pendingSection: ""
 
     function openSection(groupName, sectionTitle) {
-        GlobalStates.dashboardGroup = groupName;
+        if (root.forcedGroup === "")
+            GlobalStates.dashboardGroup = groupName;
         root.pendingSection = sectionTitle;
         pendingScrollTimer.restart();
     }
@@ -490,7 +497,8 @@ Item {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: 70
+            width: root.forcedGroup !== "" ? 0 : 70
+            visible: root.forcedGroup === ""
             groups: root.railGroups
             current: root.group
             dimmed: root.railDimmed
