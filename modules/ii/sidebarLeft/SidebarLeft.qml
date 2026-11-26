@@ -135,6 +135,18 @@ Scope { // Scope
         }
     }
 
+    Component.onDestruction: {
+        const incubator = root.contentIncubator;
+        if (incubator) {
+            incubator.onStatusChanged = status => {
+                if (status === Component.Ready)
+                    incubator.object.destroy();
+            };
+        }
+        if (root.sidebarContent)
+            root.sidebarContent.destroy();
+    }
+
     Component.onCompleted: {
         if (!Platform.isWindows) {
             root.ensureSidebarContent();

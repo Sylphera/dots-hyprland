@@ -18,8 +18,8 @@ DockButton {
     readonly property bool isSeparator: appToplevel.appId === "SEPARATOR"
     property var desktopEntry: DesktopEntries.heuristicLookup(appToplevel.appId)
     readonly property int pinIndex: appToplevel.pinned ? TaskbarApps.apps.indexOf(appToplevel) : -1
-    readonly property bool reordering: appListRoot.reorderFrom !== -1 && root.pinIndex === appListRoot.reorderFrom
-    readonly property real reorderShift: appListRoot.reorderShift(root.pinIndex)
+    readonly property bool reordering: (appListRoot?.reorderFrom ?? -1) !== -1 && root.pinIndex === appListRoot.reorderFrom
+    readonly property real reorderShift: appListRoot?.reorderShift(root.pinIndex) ?? 0
     property bool justReordered: false
     enabled: !isSeparator
     implicitWidth: isSeparator ? 1 : naturalWidth
@@ -44,18 +44,18 @@ DockButton {
         y: DockStyle.vertical ? root.reorderShift : 0
 
         Behavior on x {
-            enabled: !root.reordering && !appListRoot.reorderSettling
+            enabled: !root.reordering && !(appListRoot?.reorderSettling ?? false)
             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
         Behavior on y {
-            enabled: !root.reordering && !appListRoot.reorderSettling
+            enabled: !root.reordering && !(appListRoot?.reorderSettling ?? false)
             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
     }]
 
     DragHandler {
         target: null
-        enabled: root.pinIndex !== -1 && !appListRoot.reorderLocked && appListRoot.pinnedCount > 1
+        enabled: root.pinIndex !== -1 && !(appListRoot?.reorderLocked ?? true) && (appListRoot?.pinnedCount ?? 0) > 1
         xAxis.enabled: !DockStyle.vertical
         yAxis.enabled: DockStyle.vertical
         grabPermissions: PointerHandler.CanTakeOverFromAnything
@@ -148,7 +148,7 @@ DockButton {
 
     DockTooltip {
         text: root.desktopEntry?.name || root.appToplevel.appId
-        show: root.hovered && !root.isSeparator && appListRoot.reorderFrom === -1
+        show: root.hovered && !root.isSeparator && (appListRoot?.reorderFrom ?? -1) === -1
         app: root.appToplevel
         contextMenu: root.contextMenu
     }
