@@ -16,6 +16,7 @@ Scope {
     property var action: RegionSelection.SnipAction.Copy
     property var selectionMode: RegionSelection.SelectionMode.RectCorners
     property string recordingScreen: ""
+    onRecordingScreenChanged: GlobalStates.regionSelectorRecording = root.recordingScreen !== ""
 
     Connections {
         target: GlobalStates

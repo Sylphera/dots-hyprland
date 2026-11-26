@@ -24,7 +24,8 @@ QSWin.NativeScreenCorners {
     shown: root.showFakeRounding && !GlobalStates.regionSelectorOpen
     color: "#000000"
     radius: Appearance.rounding.screenRounding
-    hotEnabled: Config.options.sidebar.cornerOpen.enable && !root.fullscreen && !GlobalStates.regionSelectorOpen
+    hotEnabled: Config.options.sidebar.cornerOpen.enable && !root.fullscreen
+        && (!GlobalStates.regionSelectorOpen || GlobalStates.regionSelectorRecording)
     hotBottom: Config.options.sidebar.cornerOpen.bottom
     hotWidth: Config.options.sidebar.cornerOpen.cornerRegionWidth
     hotHeight: Config.options.sidebar.cornerOpen.cornerRegionHeight
