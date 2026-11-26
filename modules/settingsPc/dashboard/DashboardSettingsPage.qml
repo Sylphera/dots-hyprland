@@ -512,11 +512,44 @@ Item {
     }
 
 
+        RippleButton {
+            id: railBack
+            visible: root.globalMode
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            width: 70
+            implicitHeight: visible ? 52 : 0
+            buttonRadius: 14
+            colBackground: Appearance.colors.colLayer2
+            colBackgroundHover: Appearance.colors.colLayer2Hover
+            onClicked: root.pager?.pageExitRequested()
+
+            contentItem: ColumnLayout {
+                spacing: 1
+
+                MaterialSymbol {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "arrow_back"
+                    iconSize: Appearance.font.pixelSize.larger
+                    color: Appearance.colors.colOnLayer2
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: Translation.tr("Back")
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    font.weight: Font.DemiBold
+                    color: Appearance.colors.colOnLayer2
+                }
+            }
+        }
+
         DashboardGroupRail {
             id: rail
             anchors.left: parent.left
             anchors.top: parent.top
-            anchors.bottom: parent.bottom
+            anchors.bottom: root.globalMode ? railBack.top : parent.bottom
+            anchors.bottomMargin: root.globalMode ? 10 : 0
             width: 70
             groups: root.railGroups
             current: root.group

@@ -516,6 +516,7 @@ FloatingWindow {
         id: windowsPage
         WindowsSettingsPage {
             onCloseRequested: root.closeRequested()
+            onPageExitRequested: root.tab = "environment"
         }
     }
 

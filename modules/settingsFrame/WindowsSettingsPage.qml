@@ -57,7 +57,6 @@ Item {
             }
 
             ColumnLayout {
-                Layout.fillWidth: true
                 spacing: 0
 
                 StyledText {
@@ -72,6 +71,10 @@ Item {
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                 }
+            }
+
+            Item {
+                Layout.fillWidth: true
             }
 
             Rectangle {

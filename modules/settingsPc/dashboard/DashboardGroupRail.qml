@@ -91,6 +91,11 @@ ColumnLayout {
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
                             Layout.bottomMargin: 6
+                            Layout.fillWidth: true
+                            Layout.maximumWidth: button.availableWidth
+                            horizontalAlignment: Text.AlignHCenter
+                            fontSizeMode: Text.HorizontalFit
+                            minimumPixelSize: 8
                             text: box.modelData.name
                             font.pixelSize: Appearance.font.pixelSize.smallest
                             font.weight: Font.DemiBold
