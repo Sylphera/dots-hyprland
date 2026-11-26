@@ -101,6 +101,35 @@ Singleton {
         if (still && !root.isVideoPath(still)) root._retheme(still, Appearance.m3colors.darkmode, false, main);
     }
 
+    property string _environment: ""
+
+    Connections {
+        target: Config
+        function onActiveEnvironmentChanged() {
+            const previous = root._environment;
+            root._environment = Config.activeEnvironment;
+            if (previous !== "" && previous !== Config.activeEnvironment && Platform.isWindows && root._shellProcess)
+                environmentThemeTimer.restart();
+        }
+    }
+
+    Timer {
+        id: environmentThemeTimer
+        interval: 300
+        onTriggered: root._applyEnvironmentWallpaper()
+    }
+
+    function _applyEnvironmentWallpaper() {
+        const main = Config.options.background.wallpaperPath;
+        if (!main) return;
+        if (!root.isVideoPath(main)) {
+            root._retheme(main, Appearance.m3colors.darkmode, true);
+            return;
+        }
+        const still = Config.options.background.thumbnailPath;
+        if (still && !root.isVideoPath(still)) root._retheme(still, Appearance.m3colors.darkmode, true, main);
+    }
+
     signal changed()
     signal thumbnailGenerated(directory: string)
     signal thumbnailGeneratedFile(filePath: string)
