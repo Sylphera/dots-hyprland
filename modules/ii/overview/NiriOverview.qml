@@ -17,6 +17,7 @@ Item {
     readonly property int effectiveActiveWorkspaceId: Math.max(1, Math.min(100, monitor?.activeWorkspace?.id ?? 1))
     property bool monitorIsFocused: (Hyprland.focusedMonitor?.name == monitor?.name)
     property bool live: true
+    property bool shown: GlobalStates.overviewOpen
     property bool animate: true
     property var windowByAddress: HyprlandData.windowByAddress
     property var monitors: HyprlandData.monitors
@@ -212,6 +213,7 @@ Item {
                             }
                             delegate: OverviewWindow {
                                 id: window
+                                shown: root.shown
                                 required property var modelData
                                 property var address: `0x${modelData.HyprlandToplevel.address}`
                                 toplevel: modelData

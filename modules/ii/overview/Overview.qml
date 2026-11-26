@@ -36,12 +36,14 @@ Scope {
         readonly property string searchingText: searchWidgetLoader.item?.searchingText ?? ""
         readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
-        readonly property bool shown: GlobalStates.overviewOpen || closeHold.running
+        property bool shown: false
         visible: shown
+        Component.onCompleted: panelWindow.shown = GlobalStates.overviewOpen
 
         Timer {
             id: closeHold
             interval: 300
+            onTriggered: panelWindow.shown = false
         }
 
         WlrLayershell.namespace: "quickshell:overview"
@@ -50,7 +52,7 @@ Scope {
         color: "transparent"
 
         readonly property bool windowDragging: (overviewLoader.item?.draggingFromWorkspace ?? -1) !== -1
-        readonly property bool useVisibleRegions: Platform.isWindows && GlobalStates.overviewOpen && !panelWindow.windowDragging
+        readonly property bool useVisibleRegions: Platform.isWindows && panelWindow.shown && !panelWindow.windowDragging
         readonly property Item searchSurface: searchWidgetLoader.item?.inputSurface ?? null
         readonly property Item previewSurface: searchWidgetLoader.item?.previewSurface ?? null
 
@@ -113,11 +115,13 @@ Scope {
             function onOverviewOpenChanged() {
                 if (!GlobalStates.overviewOpen) {
                     if (DockStyle.pcFeatures) closeHold.restart();
+                    else panelWindow.shown = false;
                     searchWidgetLoader.item?.disableExpandAnimation();
                     overviewScope.dontAutoCancelSearch = false;
                     GlobalFocusGrab.dismiss();
                 } else {
                     closeHold.stop();
+                    panelWindow.shown = true;
                     if (!overviewScope.dontAutoCancelSearch) {
                         searchWidgetLoader.item?.cancelSearch();
                     }
@@ -215,7 +219,8 @@ Scope {
                     OverviewWidget {
                         screen: panelWindow.screen
                         visible: (panelWindow.searchingText == "")
-                        live: !Platform.isWindows || GlobalStates.overviewOpen
+                        live: !Platform.isWindows || panelWindow.shown
+                        shown: panelWindow.shown
                     }
                 }
                 Component {
@@ -223,7 +228,8 @@ Scope {
                     NiriOverview {
                         screen: panelWindow.screen
                         visible: (panelWindow.searchingText == "")
-                        live: !Platform.isWindows || GlobalStates.overviewOpen
+                        live: !Platform.isWindows || panelWindow.shown
+                        shown: panelWindow.shown
                     }
                 }
             }

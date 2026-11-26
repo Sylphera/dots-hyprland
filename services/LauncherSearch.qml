@@ -172,6 +172,16 @@ Singleton {
         ? ["python", helperScriptPath, "--omni-history=" + (root.omniOn("enableBrowserHistory") ? "1" : "0")]
         : ["env", "QS_OMNI_HISTORY=" + (root.omniOn("enableBrowserHistory") ? "1" : "0"), "python3", helperScriptPath]
 
+    function aiIcon(appName, systemIcon) {
+        if (!Platform.isWindows)
+            return { name: systemIcon, type: LauncherSearchResult.IconType.System };
+        const wanted = appName.toLowerCase();
+        const entry = AppSearch.list.find(app => (app.name ?? "").toLowerCase() === wanted);
+        if (entry && entry.icon)
+            return { name: entry.icon, type: LauncherSearchResult.IconType.System };
+        return { name: "neurology", type: LauncherSearchResult.IconType.Material };
+    }
+
     function omniOn(key) {
         if (!DockStyle.pcFeatures) return false;
         if (key === "enableSpotify" && Platform.isWindows) return false;
@@ -554,8 +564,8 @@ Singleton {
                     comment: prompt ? Translation.tr("Ask in Claude") : Translation.tr("Open Claude"),
                     verb: Translation.tr("Open"),
                     type: Translation.tr("AI Assistant"),
-                    iconName: "claude-desktop",
-                    iconType: LauncherSearchResult.IconType.System,
+                    iconName: root.aiIcon("Claude", "claude-desktop").name,
+                    iconType: root.aiIcon("Claude", "claude-desktop").type,
                     execute: () => {
                         GlobalStates.overviewOpen = false;
                         if (prompt) Quickshell.clipboardText = prompt;
@@ -568,8 +578,8 @@ Singleton {
                     comment: prompt ? Translation.tr("Ask in ChatGPT (prompt copied)") : Translation.tr("Open ChatGPT"),
                     verb: Translation.tr("Open"),
                     type: Translation.tr("AI Assistant"),
-                    iconName: "chatgpt",
-                    iconType: LauncherSearchResult.IconType.System,
+                    iconName: root.aiIcon("ChatGPT", "chatgpt").name,
+                    iconType: root.aiIcon("ChatGPT", "chatgpt").type,
                     execute: () => {
                         GlobalStates.overviewOpen = false;
                         if (prompt) Quickshell.clipboardText = prompt;

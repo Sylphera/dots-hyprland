@@ -13,6 +13,7 @@ import Quickshell.Wayland
 Item { // Window
     id: root
     property var toplevel
+    property bool shown: GlobalStates.overviewOpen
     property var windowData
     property var monitorData
     property var scale
@@ -108,7 +109,7 @@ Item { // Window
     ScreencopyView {
         id: windowPreview
         anchors.fill: parent
-        captureSource: GlobalStates.overviewOpen ? root.toplevel : null
+        captureSource: root.shown ? root.toplevel : null
         live: true
 
         // Color overlay for interactions

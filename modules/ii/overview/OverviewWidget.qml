@@ -22,6 +22,7 @@ Item {
     readonly property int workspaceGroup: Math.floor((effectiveActiveWorkspaceId - 1) / workspacesShown)
     property bool monitorIsFocused: (Hyprland.focusedMonitor?.name == monitor.name)
     property bool live: true
+    property bool shown: GlobalStates.overviewOpen
     property bool animate: true
     property var windows: HyprlandData.windowList
     property var windowByAddress: HyprlandData.windowByAddress
@@ -53,7 +54,9 @@ Item {
     implicitWidth: overviewBackground.implicitWidth + Appearance.sizes.elevationMargin * 2
     implicitHeight: overviewBackground.implicitHeight + Appearance.sizes.elevationMargin * 2
 
-    property Component windowComponent: OverviewWindow {}
+    property Component windowComponent: OverviewWindow {
+        shown: root.shown
+    }
     property list<OverviewWindow> windowWidgets: []
 
     function windowsInWorkspaceGroup() {
@@ -246,6 +249,7 @@ Item {
                 }
                 delegate: OverviewWindow {
                     id: window
+                    shown: root.shown
                     required property var modelData
                     property int monitorId: windowData?.monitor
                     property var monitor: root.monitors.find(m => m.id == monitorId)
