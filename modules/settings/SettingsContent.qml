@@ -63,110 +63,6 @@ Item {
     signal closeRequested
     property bool windowControls: false
 
-    property var searchResults: []
-
-    function searchLabel(node) {
-        if (typeof node.text === "string" && node.text.length > 0)
-            return node.text;
-        if (typeof node.title === "string" && node.title.length > 0)
-            return node.title;
-        return "";
-    }
-
-    function sectionOf(node, pageRoot) {
-        let p = node.parent;
-        while (p && p !== pageRoot) {
-            if (typeof p.title === "string" && p.title.length > 0)
-                return p.title;
-            p = p.parent;
-        }
-        return "";
-    }
-
-    function collectMatches(node, query, pageIndex, pageRoot, seen, out) {
-        if (!node || out.length >= 60)
-            return;
-        const label = root.searchLabel(node);
-        if (label.length > 0 && label.length < 200 && label.toLowerCase().includes(query)) {
-            const key = pageIndex + "|" + label;
-            if (!seen[key]) {
-                seen[key] = true;
-                out.push({
-                    page: pageIndex,
-                    pageName: root.pages[pageIndex].name,
-                    section: root.sectionOf(node, pageRoot),
-                    label: label.replace(/\n/g, " "),
-                    item: node
-                });
-            }
-            return;
-        }
-        const kids = node.children ?? [];
-        for (let i = 0; i < kids.length; i++)
-            root.collectMatches(kids[i], query, pageIndex, pageRoot, seen, out);
-    }
-
-    function runSearch(text) {
-        const query = text.trim().toLowerCase();
-        if (query.length < 2) {
-            root.searchResults = [];
-            return;
-        }
-        const out = [];
-        const seen = {};
-        for (let i = 0; i < pageRepeater.count; i++) {
-            const loader = pageRepeater.itemAt(i);
-            if (!loader)
-                continue;
-            if (!loader.visited)
-                loader.visited = true;
-            if (loader.item)
-                root.collectMatches(loader.item, query, i, loader.item, seen, out);
-        }
-        root.searchResults = out;
-    }
-
-    function openResult(result) {
-        if (!result)
-            return;
-        searchJump.target = result.item;
-        settingsSearch.text = "";
-        root.searchResults = [];
-        root.currentPage = result.page;
-        searchJump.restart();
-    }
-
-    function scrollToItem(item) {
-        if (!item)
-            return;
-        let flick = null;
-        let p = item.parent;
-        while (p && p !== pageArea) {
-            if (p.contentY !== undefined && p.contentItem !== undefined && p.contentHeight !== undefined)
-                flick = p;
-            p = p.parent;
-        }
-        if (flick) {
-            const pos = item.mapToItem(flick.contentItem, 0, 0);
-            const maxY = Math.max(0, flick.contentHeight - flick.height);
-            flick.contentY = Math.max(0, Math.min(pos.y - 60, maxY));
-        }
-        const box = item.mapToItem(pageHolder, 0, 0);
-        searchHighlight.x = box.x - 6;
-        searchHighlight.y = box.y - 4;
-        searchHighlight.width = item.width + 12;
-        searchHighlight.height = item.height + 8;
-        searchHighlight.opacity = 1;
-        searchHighlightFade.restart();
-    }
-
-    Timer {
-        id: searchJump
-        property var target: null
-        interval: 350
-        onTriggered: root.scrollToItem(searchJump.target)
-    }
-
     Binding on ready {
         when: root.lookReady
         value: true
@@ -189,11 +85,7 @@ Item {
 
         Keys.onPressed: event => {
             if (event.modifiers === Qt.ControlModifier) {
-                if (event.key === Qt.Key_F) {
-                    settingsSearch.forceActiveFocus();
-                    settingsSearch.selectAll();
-                    event.accepted = true;
-                } else if (event.key === Qt.Key_PageDown) {
+                if (event.key === Qt.Key_PageDown) {
                     root.currentPage = Math.min(root.currentPage + 1, root.pageSources.length - 1);
                     event.accepted = true;
                 } else if (event.key === Qt.Key_PageUp) {
@@ -350,44 +242,6 @@ Item {
                 color: Appearance.m3colors.m3surfaceContainerLow
                 radius: Appearance.rounding.windowRounding - root.contentPadding
 
-                MaterialTextField {
-                    id: settingsSearch
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                        margins: 10
-                    }
-                    placeholderText: Translation.tr("Search settings")
-                    onTextChanged: searchDebounce.restart()
-                    Timer {
-                        id: searchDebounce
-                        interval: 120
-                        onTriggered: root.runSearch(settingsSearch.text)
-                    }
-                    Keys.onReturnPressed: {
-                        root.runSearch(settingsSearch.text);
-                        root.openResult(root.searchResults[0]);
-                    }
-                    Keys.onEnterPressed: {
-                        root.runSearch(settingsSearch.text);
-                        root.openResult(root.searchResults[0]);
-                    }
-                    Keys.onEscapePressed: {
-                        settingsSearch.text = "";
-                        root.searchResults = [];
-                    }
-                }
-
-                Item {
-                    id: pageHolder
-                    anchors {
-                        top: settingsSearch.bottom
-                        left: parent.left
-                        right: parent.right
-                        bottom: parent.bottom
-                    }
-
                 Item {
                     id: pageArea
                     property int shownPage: -1
@@ -499,92 +353,6 @@ Item {
                             duration: 200
                             easing.type: Appearance.animation.elementMoveEnter.type
                             easing.bezierCurve: Appearance.animationCurves.emphasizedLastHalf
-                        }
-                    }
-                }
-
-                Rectangle {
-                    id: searchHighlight
-                    z: 5
-                    opacity: 0
-                    visible: opacity > 0
-                    color: "transparent"
-                    radius: Appearance.rounding.small
-                    border.width: 2
-                    border.color: Appearance.m3colors.m3primary
-                    NumberAnimation on opacity {
-                        id: searchHighlightFade
-                        running: false
-                        from: 1
-                        to: 0
-                        duration: 1800
-                        easing.type: Easing.InQuad
-                    }
-                }
-                }
-
-                Rectangle {
-                    id: searchResultsBox
-                    z: 10
-                    visible: settingsSearch.text.trim().length >= 2
-                    anchors {
-                        top: settingsSearch.bottom
-                        left: settingsSearch.left
-                        right: settingsSearch.right
-                        topMargin: 4
-                    }
-                    height: Math.min(searchResultsList.contentHeight, 360) + 8
-                    radius: Appearance.rounding.normal
-                    color: Appearance.m3colors.m3surfaceContainerHigh
-                    border.width: 1
-                    border.color: Appearance.m3colors.m3outlineVariant
-
-                    StyledText {
-                        visible: root.searchResults.length === 0
-                        anchors.centerIn: parent
-                        text: Translation.tr("No results")
-                        color: Appearance.m3colors.m3outline
-                    }
-
-                    ListView {
-                        id: searchResultsList
-                        anchors.fill: parent
-                        anchors.margins: 4
-                        clip: true
-                        model: root.searchResults
-                        implicitHeight: contentHeight
-                        delegate: RippleButton {
-                            id: resultButton
-                            required property var modelData
-                            width: ListView.view.width
-                            implicitHeight: resultColumn.implicitHeight + 12
-                            buttonRadius: Appearance.rounding.small
-                            onClicked: root.openResult(resultButton.modelData)
-                            contentItem: Column {
-                                id: resultColumn
-                                anchors {
-                                    left: parent.left
-                                    right: parent.right
-                                    verticalCenter: parent.verticalCenter
-                                    leftMargin: 12
-                                    rightMargin: 12
-                                }
-                                StyledText {
-                                    width: parent.width
-                                    elide: Text.ElideRight
-                                    text: resultButton.modelData.label
-                                    color: Appearance.colors.colOnLayer1
-                                }
-                                StyledText {
-                                    width: parent.width
-                                    elide: Text.ElideRight
-                                    font.pixelSize: Appearance.font.pixelSize.smaller
-                                    color: Appearance.m3colors.m3outline
-                                    text: resultButton.modelData.section.length > 0
-                                        ? `${resultButton.modelData.pageName} › ${resultButton.modelData.section}`
-                                        : resultButton.modelData.pageName
-                                }
-                            }
                         }
                     }
                 }
