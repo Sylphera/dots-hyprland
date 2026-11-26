@@ -90,6 +90,10 @@ QtObject {
         "windows:Now Playing fly from bar": { type: "switch", get: () => Config.options.media.nowPlaying.flyFromBar, set: v => { Config.options.media.nowPlaying.flyFromBar = v; } },
         "windows:Now Playing flight": { type: "spin", get: () => Config.options.media.nowPlaying.flyDuration, set: v => { Config.options.media.nowPlaying.flyDuration = v; }, from: 200, to: 3000, stepSize: 50 },
         "windows:Now Playing size": { type: "spin", get: () => Config.options.media.nowPlaying.size, set: v => { Config.options.media.nowPlaying.size = v; }, from: 60, to: 200, stepSize: 10 },
+        "windows:Wallpaper per desktop": { type: "switch", get: () => Config.options.background.desktopWallpapers.enable, set: v => { Config.options.background.desktopWallpapers.enable = v; } },
+        "windows:Konachan spicy": { type: "switch", get: () => Config.options.background.konachanSpicy && SpicyStuff.allowed, set: v => { if (SpicyStuff.allowed) Config.options.background.konachanSpicy = v; } },
+        "windows:Konachan only yuri": { type: "switch", get: () => Config.options.background.konachanOnlyYuri, set: v => { Config.options.background.konachanOnlyYuri = v; } },
+        "windows:Konachan extra tags": { type: "text", get: () => Config.options.background.konachanExtraTags, set: v => { Config.options.background.konachanExtraTags = v; } },
         "windows:Notify on low peripheral battery": { type: "switch", get: () => Config.options.battery.peripheralNotify, set: v => { Config.options.battery.peripheralNotify = v; } },
         "windows:Peripheral low warning": { type: "spin", get: () => Config.options.battery.peripheralLow, set: v => { Config.options.battery.peripheralLow = v; }, from: 0, to: 100, stepSize: 5 },
         "windows:Peripheral critical warning": { type: "spin", get: () => Config.options.battery.peripheralCritical, set: v => { Config.options.battery.peripheralCritical = v; }, from: 0, to: 100, stepSize: 5 },
@@ -343,6 +347,7 @@ QtObject {
         {
             page: Translation.tr("Windows"), title: Translation.tr("Windows desktop"), icon: "desktop_windows", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Background behind icons", title: Translation.tr("Put the background behind the desktop icons"), icon: "layers", kw: "desktop icons background behind wallpaper widgets show desktop" },
+                { type: "toggle", w: 2, key: "windows:Wallpaper per desktop", title: Translation.tr("A different wallpaper for each desktop"), icon: "view_carousel", kw: "wallpaper per desktop virtual desktops different each" },
                 { type: "toggle", w: 2, when: "winbehindicons", key: "windows:Draw own wallpaper", title: Translation.tr("Draw ii's own wallpaper"), icon: "wallpaper", kw: "own wallpaper draw blur centered transitions parallax effects native windows" }
             ]
         },
@@ -486,6 +491,13 @@ QtObject {
                 { type: "spin", key: "windows:Now Playing opening", title: Translation.tr("Opening animation (ms)"), icon: "animation", kw: "now playing open animation" },
                 { type: "spin", key: "windows:Now Playing closing", title: Translation.tr("Closing animation (ms)"), icon: "animation", kw: "now playing close animation" },
                 { type: "spin", w: 2, key: "windows:Now Playing flight", title: Translation.tr("Flight animation (ms)"), icon: "flight", kw: "now playing flight animation" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Random Konachan wallpaper"), icon: "casino", when: "winspicy", cards: [
+                { type: "toggle", w: 2, key: "windows:Konachan spicy", title: Translation.tr("Spicy Stuff"), icon: "local_fire_department", kw: "konachan random wallpaper spicy rating" },
+                { type: "toggle", w: 2, key: "windows:Konachan only yuri", title: Translation.tr("Only yuri"), icon: "favorite", kw: "konachan random wallpaper yuri" },
+                { type: "text", w: 4, when: "winkonachantags", key: "windows:Konachan extra tags", title: Translation.tr("Extra tags"), icon: "sell", placeholder: Translation.tr("Separated by spaces"), kw: "konachan random wallpaper tags" }
             ]
         },
         {
