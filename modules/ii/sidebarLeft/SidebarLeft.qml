@@ -12,7 +12,15 @@ Scope { // Scope
     id: root
     property bool detach: false
     property bool pin: false
-    property Component contentComponent: SidebarLeftContent {}
+    property Component contentComponent: DockStyle.pcFeatures ? pcContent : iiContent
+    Component {
+        id: iiContent
+        SidebarLeftContent {}
+    }
+    Component {
+        id: pcContent
+        SidebarLeftContentPc {}
+    }
     property var sidebarContent: null
     property var contentIncubator: null
 

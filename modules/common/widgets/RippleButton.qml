@@ -23,6 +23,13 @@ Button {
     property var altAction // When right clicking
     property var middleClickAction // When middle clicking
 
+    property bool border: false
+    property bool glass: false
+    readonly property bool glassActive: glass && !toggled && (Config.options?.background.widgets.glass?.enable ?? false)
+    property real borderWidth: 1
+    property color colBorder: (Config.options?.background.widgets.glass?.enable ?? false)
+        ? ColorUtils.transparentize(Appearance?.colors.colOutlineVariant ?? "#79747E", 0.55)
+        : (Appearance?.colors.colOutlineVariant ?? "#79747E")
     property color colBackground: ColorUtils.transparentize(Appearance?.colors.colLayer1Hover, 1) || "transparent"
     property color colBackgroundHover: Appearance?.colors.colLayer1Hover ?? "#E5DFED"
     property color colBackgroundToggled: Appearance?.colors.colPrimary ?? "#65558F"
@@ -34,8 +41,8 @@ Button {
     property color buttonColor: ColorUtils.transparentize(root.toggled ? 
         (root.hovered ? colBackgroundToggledHover : 
             colBackgroundToggled) :
-        (root.hovered ? colBackgroundHover : 
-            colBackground), root.enabled ? 0 : 1)
+        (root.hovered ? (root.glassActive ? ColorUtils.transparentize(colBackgroundHover, 0.6) : colBackgroundHover) : 
+            (root.glassActive ? "transparent" : colBackground)), root.enabled ? 0 : 1)
     property color rippleColor: root.toggled ? colRippleToggled : colRipple
 
     function startRipple(x, y) {
@@ -155,6 +162,8 @@ Button {
         implicitHeight: 30
 
         color: root.buttonColor
+        border.width: root.border ? root.borderWidth : 0
+        border.color: root.colBorder
         Behavior on color {
             animation: Appearance?.animation.elementMoveFast.colorAnimation.createObject(this)
         }
