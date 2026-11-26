@@ -910,6 +910,13 @@ Singleton {
                 property bool clipboardPreviewPopup: false
                 property bool sloppy: false // Uses levenshtein distance based scoring instead of fuzzy sort. Very weird.
                 property bool spotlight: false
+                property JsonObject omni: JsonObject {
+                    property bool enableFileSearch: false // Opt-in: "/" path & file search
+                    property bool enableBrowserHistory: false // Opt-in: read-only browser & launcher history suggestions
+                    property bool enableDirectUrl: false // Opt-in: launch typed domains/URLs directly
+                    property bool enableAiShortcuts: false // Opt-in: gpt / chatgpt / claude / ai prefixes
+                    property bool enableSpotify: false // Opt-in: p <song> / q <song> prefixes + queue daemon
+                }
                 property JsonObject prefix: JsonObject {
                     property bool showDefaultActionsWithoutPrefix: true
                     property string action: "/"

@@ -31,7 +31,8 @@ Singleton {
         if (configLang !== "auto")
             return configLang;
 
-        const name = Qt.locale().name;
+        const windowsUi = Platform.isWindows && WindowsNative.ready ? (WindowsNative.session?.osInfo()?.uiLanguage ?? "") : "";
+        const name = windowsUi.length > 0 ? windowsUi.replace("-", "_") : Qt.locale().name;
         const languages = root.allAvailableLanguages;
         if (languages.includes(name))
             return name;

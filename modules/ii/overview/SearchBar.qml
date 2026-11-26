@@ -19,9 +19,12 @@ RowLayout {
         searchInput.forceActiveFocus();
     }
 
-    enum SearchPrefixType { Action, App, Clipboard, Emojis, Math, ShellCommand, WebSearch, DefaultSearch }
+    enum SearchPrefixType { Action, App, Clipboard, Emojis, Math, ShellCommand, WebSearch, SpotifyPlay, SpotifyQueue, AskAI, DefaultSearch }
 
     property var searchPrefixType: {
+        if (LauncherSearch.omniOn("enableAiShortcuts") && /^(?:gpt|chatgpt|claude|ai)\b/i.test(root.searchingText.trim())) return SearchBar.SearchPrefixType.AskAI;
+        if (LauncherSearch.omniOn("enableSpotify") && /^[pP]\s+/.test(root.searchingText)) return SearchBar.SearchPrefixType.SpotifyPlay;
+        if (LauncherSearch.omniOn("enableSpotify") && /^[qQ]\s+/.test(root.searchingText)) return SearchBar.SearchPrefixType.SpotifyQueue;
         if (root.searchingText.startsWith(Config.options.search.prefix.action)) return SearchBar.SearchPrefixType.Action;
         if (root.searchingText.startsWith(Config.options.search.prefix.app)) return SearchBar.SearchPrefixType.App;
         if (root.searchingText.startsWith(Config.options.search.prefix.clipboard)) return SearchBar.SearchPrefixType.Clipboard;
@@ -37,6 +40,9 @@ RowLayout {
         Layout.alignment: Qt.AlignVCenter
         iconSize: Appearance.font.pixelSize.huge
         shape: switch(root.searchPrefixType) {
+            case SearchBar.SearchPrefixType.AskAI: return MaterialShape.Shape.SoftBurst;
+            case SearchBar.SearchPrefixType.SpotifyPlay: return MaterialShape.Shape.SoftBurst;
+            case SearchBar.SearchPrefixType.SpotifyQueue: return MaterialShape.Shape.Clover4Leaf;
             case SearchBar.SearchPrefixType.Action: return MaterialShape.Shape.Pill;
             case SearchBar.SearchPrefixType.App: return MaterialShape.Shape.Clover4Leaf;
             case SearchBar.SearchPrefixType.Clipboard: return MaterialShape.Shape.Gem;
@@ -47,7 +53,10 @@ RowLayout {
             default: return MaterialShape.Shape.Cookie7Sided;
         }
         text: switch (root.searchPrefixType) {
-            case SearchBar.SearchPrefixType.Action: return "settings_suggest";
+            case SearchBar.SearchPrefixType.AskAI: return "neurology";
+            case SearchBar.SearchPrefixType.SpotifyPlay: return "play_circle";
+            case SearchBar.SearchPrefixType.SpotifyQueue: return "queue_music";
+            case SearchBar.SearchPrefixType.Action: return LauncherSearch.omniOn("enableFileSearch") ? "folder_open" : "settings_suggest";
             case SearchBar.SearchPrefixType.App: return "apps";
             case SearchBar.SearchPrefixType.Clipboard: return "content_paste_search";
             case SearchBar.SearchPrefixType.Emojis: return "add_reaction";
