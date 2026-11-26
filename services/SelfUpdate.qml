@@ -12,7 +12,8 @@ Singleton {
     id: root
 
     readonly property string curlBin: Platform.isWindows ? "curl.exe" : "curl"
-    readonly property string repo: "nunreasonable/ii-windows"
+    readonly property string repo: ""
+    readonly property bool enabled: root.repo !== ""
     readonly property string setupAssetName: "ii-windows-setup.exe"
     readonly property string apiOverride: Quickshell.env("IIW_SELF_UPDATE_RELEASE_JSON") || ""
     readonly property string apiUrl: root.apiOverride !== "" ? root.apiOverride
@@ -62,6 +63,7 @@ Singleton {
     }
     readonly property string patchLabel: root.patchNumber > 0 ? `${root.installedVersion}-p${root.patchNumber}` : ""
     readonly property bool patchAvailable: Platform.isWindows
+        && root.enabled
         && !root.updateAvailable
         && root.patchNumber > root.installedPatchNumber
         && root.patchLabel !== root.failedPatch
@@ -70,6 +72,7 @@ Singleton {
     readonly property string displayVersion: root.installedPatchNumber > 0 ? `${root.installedVersion}-p${root.installedPatchNumber}` : root.installedVersion
 
     readonly property bool updateAvailable: Platform.isWindows
+        && root.enabled
         && root.installedVersion !== ""
         && root.latestVersion !== ""
         && root._isNewer(root.latestVersion, root.installedVersion)
@@ -198,7 +201,7 @@ Singleton {
     function load() {}
 
     function refresh() {
-        if (!Platform.isWindows || root.checking) return;
+        if (!Platform.isWindows || !root.enabled || root.checking) return;
         root.checking = true;
         root.lastError = "";
         checkProc.command = [root.curlBin, "-sS", "--max-time", "10", "-w", "\nHTTP_STATUS:%{http_code}",
