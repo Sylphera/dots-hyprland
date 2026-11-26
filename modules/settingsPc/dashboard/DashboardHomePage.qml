@@ -20,7 +20,7 @@ Item {
     readonly property string displayName: Config.options.profile.displayName || SystemInfo.username
     readonly property string avatarPath: Config.options.profile.avatarPath !== "" && Config.options.profile.avatarPicture !== ""
         ? Config.options.profile.avatarPicture
-        : `${FileUtils.trimFileProtocol(Directories.home)}/.face`
+        : (Platform.isWindows ? Directories.userAvatarPathWindows : `${FileUtils.trimFileProtocol(Directories.home)}/.face`)
     readonly property bool typing: flip.showBack || tasksCard.adding
     readonly property int pendingTasks: Todo.list.filter(t => !t.done).length
 
@@ -257,7 +257,7 @@ Item {
                         Image {
                             id: avatarImage
                             anchors.fill: parent
-                            source: `file://${root.avatarPath}`
+                            source: root.avatarPath === "" ? "" : /^(file|image|qrc):/.test(root.avatarPath) ? root.avatarPath : (Platform.isWindows ? "file:///" : "file://") + root.avatarPath
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                             cache: false

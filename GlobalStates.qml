@@ -44,6 +44,7 @@ Singleton {
     property bool overviewOpen: false
     property bool regionSelectorOpen: false
     property bool regionSelectorRecording: false
+    property int dashboardPage: 0
     property bool searchOpen: false
     property bool screenLocked: false
     property bool lockPreview: false
