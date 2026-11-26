@@ -83,6 +83,13 @@ QtObject {
         },
         "windows:Save screenshots to a folder": { type: "switch", get: () => Config.options.screenSnip.saveToFolder, set: v => { Config.options.screenSnip.saveToFolder = v; } },
         "windows:Spotlight search": { type: "switch", get: () => Config.options.search.spotlight, set: v => { Config.options.search.spotlight = v; } },
+        "windows:Now Playing": { type: "switch", get: () => Config.options.media.nowPlaying.enable, set: v => { Config.options.media.nowPlaying.enable = v; } },
+        "windows:Now Playing seconds": { type: "spin", get: () => Math.round(Config.options.media.nowPlaying.duration / 1000), set: v => { Config.options.media.nowPlaying.duration = v * 1000; }, from: 1, to: 10, stepSize: 1 },
+        "windows:Now Playing opening": { type: "spin", get: () => Config.options.media.nowPlaying.openDuration, set: v => { Config.options.media.nowPlaying.openDuration = v; }, from: 200, to: 3000, stepSize: 100 },
+        "windows:Now Playing closing": { type: "spin", get: () => Config.options.media.nowPlaying.closeDuration, set: v => { Config.options.media.nowPlaying.closeDuration = v; }, from: 200, to: 3000, stepSize: 100 },
+        "windows:Now Playing fly from bar": { type: "switch", get: () => Config.options.media.nowPlaying.flyFromBar, set: v => { Config.options.media.nowPlaying.flyFromBar = v; } },
+        "windows:Now Playing flight": { type: "spin", get: () => Config.options.media.nowPlaying.flyDuration, set: v => { Config.options.media.nowPlaying.flyDuration = v; }, from: 200, to: 3000, stepSize: 50 },
+        "windows:Now Playing size": { type: "spin", get: () => Config.options.media.nowPlaying.size, set: v => { Config.options.media.nowPlaying.size = v; }, from: 60, to: 200, stepSize: 10 },
         "windows:Notify on low peripheral battery": { type: "switch", get: () => Config.options.battery.peripheralNotify, set: v => { Config.options.battery.peripheralNotify = v; } },
         "windows:Peripheral low warning": { type: "spin", get: () => Config.options.battery.peripheralLow, set: v => { Config.options.battery.peripheralLow = v; }, from: 0, to: 100, stepSize: 5 },
         "windows:Peripheral critical warning": { type: "spin", get: () => Config.options.battery.peripheralCritical, set: v => { Config.options.battery.peripheralCritical = v; }, from: 0, to: 100, stepSize: 5 },
@@ -468,6 +475,17 @@ QtObject {
                 { type: "toggle", w: 2, key: "windows:Notify on low peripheral battery", title: Translation.tr("Notify on low peripheral battery"), icon: "notifications", kw: "bluetooth peripheral battery low notify mouse headphones" },
                 { type: "spin", key: "windows:Peripheral low warning", title: Translation.tr("Low warning"), icon: "battery_alert", kw: "peripheral battery low warning" },
                 { type: "spin", key: "windows:Peripheral critical warning", title: Translation.tr("Critical warning"), icon: "battery_0_bar", kw: "peripheral battery critical warning" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Now Playing"), icon: "music_note", when: "windows", cards: [
+                { type: "toggle", w: 2, key: "windows:Now Playing", title: Translation.tr("Show a pill when the track changes"), icon: "music_note", kw: "now playing track song pill media" },
+                { type: "spin", w: 2, key: "windows:Now Playing seconds", title: Translation.tr("Seconds on screen"), icon: "timer", kw: "now playing duration seconds" },
+                { type: "toggle", w: 2, key: "windows:Now Playing fly from bar", title: Translation.tr("Cover flies out of the bar"), icon: "flight_takeoff", kw: "now playing cover fly bar animation" },
+                { type: "spin", w: 2, key: "windows:Now Playing size", title: Translation.tr("Size (%)"), icon: "aspect_ratio", kw: "now playing size" },
+                { type: "spin", key: "windows:Now Playing opening", title: Translation.tr("Opening animation (ms)"), icon: "animation", kw: "now playing open animation" },
+                { type: "spin", key: "windows:Now Playing closing", title: Translation.tr("Closing animation (ms)"), icon: "animation", kw: "now playing close animation" },
+                { type: "spin", w: 2, key: "windows:Now Playing flight", title: Translation.tr("Flight animation (ms)"), icon: "flight", kw: "now playing flight animation" }
             ]
         },
         {
