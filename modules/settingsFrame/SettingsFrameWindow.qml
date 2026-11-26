@@ -5,7 +5,6 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.settings as IiSettings
-import qs.modules.settingsPc as PcSettings
 import qs.modules.settingsPc.dashboard as PcDashboard
 
 FloatingWindow {
@@ -15,7 +14,6 @@ FloatingWindow {
 
     property string tab: "environment"
     readonly property bool pcLayout: Config.options.appearance.settingsLayout === "end4pc"
-    readonly property bool pcDashboard: Config.options.settings.style === "dashboard"
     readonly property string currentEnvironment: Config.options.appearance.visualStyle
     readonly property bool maximized: frame.Window.window?.visibility === Window.Maximized
 
@@ -232,9 +230,8 @@ FloatingWindow {
                 Layout.fillHeight: true
                 focus: true
                 sourceComponent: root.tab === "windows" && Platform.isWindows ? windowsPage
-                    : !root.pcLayout ? iiContent
-                    : root.pcDashboard ? pcDashboardContent
-                    : pcPanelContent
+                    : root.pcLayout ? pcDashboardContent
+                    : iiContent
                 onLoaded: Qt.callLater(() => contentLoader.item?.forceActiveFocus())
             }
         }
@@ -320,13 +317,6 @@ FloatingWindow {
     Component {
         id: pcDashboardContent
         PcDashboard.SettingsPcDashboardContent {
-            onCloseRequested: root.closeRequested()
-        }
-    }
-
-    Component {
-        id: pcPanelContent
-        PcSettings.SettingsPcContent {
             onCloseRequested: root.closeRequested()
         }
     }

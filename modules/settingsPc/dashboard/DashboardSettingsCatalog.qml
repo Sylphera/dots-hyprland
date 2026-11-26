@@ -113,6 +113,17 @@ QtObject {
     })
 
     readonly property var custom: ({
+        "interface:Settings animation speed": {
+            type: "select",
+            get: () => Config.options.settings.animationSpeed ?? 1,
+            set: v => { Config.options.settings.animationSpeed = v; },
+            options: [
+                { displayName: "1x", icon: "speed", value: 1 },
+                { displayName: "1.5x", icon: "speed", value: 1.5 },
+                { displayName: "2x", icon: "speed", value: 2 },
+                { displayName: "3x", icon: "speed", value: 3 }
+            ]
+        },
         "bar:Claude Code": { type: "switch", get: () => Config.options.bar.aiUsage.claudeEnabled, set: v => { Config.options.bar.aiUsage.claudeEnabled = v; } },
         "bar:Codex": { type: "switch", get: () => Config.options.bar.aiUsage.codexEnabled, set: v => { Config.options.bar.aiUsage.codexEnabled = v; } },
         "bar:Bar style": { type: "select", get: () => Config.options.bar.cornerStyle, set: v => { Config.options.bar.cornerStyle = v; }, options: [{ displayName: Translation.tr("Hug"), icon: "line_curve", value: 0 }, { displayName: Translation.tr("Split Hug"), icon: "splitscreen", value: 6 }, { displayName: Translation.tr("Float"), icon: "view_day", value: 1 }, { displayName: Translation.tr("Islands"), icon: "crop_3_2", value: 2 }, { displayName: Translation.tr("M3"), icon: "interests", value: 3 }, { displayName: Translation.tr("M3 Hug"), icon: "category", value: 4 }, { displayName: Translation.tr("Panel"), icon: "toolbar", value: 5 }] },
