@@ -81,6 +81,8 @@ QtObject {
                     Wallpapers.setAccentColor(value);
             }
         },
+        "windows:Save screenshots to a folder": { type: "switch", get: () => Config.options.screenSnip.saveToFolder, set: v => { Config.options.screenSnip.saveToFolder = v; } },
+        "windows:Spotlight search": { type: "switch", get: () => Config.options.search.spotlight, set: v => { Config.options.search.spotlight = v; } },
         "windows:Notify on low peripheral battery": { type: "switch", get: () => Config.options.battery.peripheralNotify, set: v => { Config.options.battery.peripheralNotify = v; } },
         "windows:Peripheral low warning": { type: "spin", get: () => Config.options.battery.peripheralLow, set: v => { Config.options.battery.peripheralLow = v; }, from: 0, to: 100, stepSize: 5 },
         "windows:Peripheral critical warning": { type: "spin", get: () => Config.options.battery.peripheralCritical, set: v => { Config.options.battery.peripheralCritical = v; }, from: 0, to: 100, stepSize: 5 },
@@ -466,6 +468,14 @@ QtObject {
                 { type: "toggle", w: 2, key: "windows:Notify on low peripheral battery", title: Translation.tr("Notify on low peripheral battery"), icon: "notifications", kw: "bluetooth peripheral battery low notify mouse headphones" },
                 { type: "spin", key: "windows:Peripheral low warning", title: Translation.tr("Low warning"), icon: "battery_alert", kw: "peripheral battery low warning" },
                 { type: "spin", key: "windows:Peripheral critical warning", title: Translation.tr("Critical warning"), icon: "battery_0_bar", kw: "peripheral battery critical warning" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Services"), icon: "settings", when: "windows", cards: [
+                { type: "toggle", w: 2, key: "windows:Save screenshots to a folder", title: Translation.tr("Save screenshots to a folder"), icon: "folder_special", kw: "screenshot screen snip save folder file clipboard" },
+                { type: "toggle", w: 2, key: "windows:Spotlight search", title: Translation.tr("Spotlight search"), icon: "search", kw: "spotlight search super workspaces tab" },
+                { type: "toggle", w: 2, key: "services:Enable update checks", title: Translation.tr("App update checks"), icon: "deployed_code_update", kw: "winget app updates check count" },
+                { type: "spin", w: 2, key: "services:Check interval (mins)", title: Translation.tr("Check interval (min)"), icon: "av_timer", kw: "winget updates check interval minutes" }
             ]
         },
         {
