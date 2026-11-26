@@ -14,8 +14,8 @@ FloatingWindow {
 
     property string tab: "environment"
     readonly property bool railOpen: Config.options.settings.environmentRailOpen
-    readonly property real railWidth: 210
-    readonly property bool railOverlay: !root.railOpen && root.tab === "environment" && root.pcLayout
+    readonly property real railWidth: 236
+    readonly property bool railOverlay: root.tab === "environment" && root.pcLayout
 
     function setRailOpen(open) {
         Config.options.settings.environmentRailOpen = open;
@@ -25,10 +25,10 @@ FloatingWindow {
     readonly property bool maximized: frame.Window.window?.visibility === Window.Maximized
 
     readonly property var environments: [
-        { value: "ii", name: "illogical-impulse", note: "end-4", icon: "auto_awesome" },
-        { value: "end4pc", name: "end4-pC", note: "pctrade", icon: "dashboard_customize" },
-        { value: "sekaipop", name: "SekaiPop", note: "Blapples", icon: "interests" },
-        { value: "nabyscape", name: "NabyScape", note: "BillyNabil", icon: "toolbar" }
+        { value: "ii", name: "illogical-impulse", note: "end-4", icon: "auto_awesome", shape: MaterialShape.Shape.Sunny },
+        { value: "end4pc", name: "end4-pC", note: "pctrade", icon: "dashboard_customize", shape: MaterialShape.Shape.Cookie9Sided },
+        { value: "sekaipop", name: "SekaiPop", note: "Blapples", icon: "interests", shape: MaterialShape.Shape.Clover8Leaf },
+        { value: "nabyscape", name: "NabyScape", note: "BillyNabil", icon: "toolbar", shape: MaterialShape.Shape.Puffy }
     ].filter(environment => VisualStyle.styles.includes(environment.value))
 
     function hideTitleBar() {
@@ -118,60 +118,106 @@ FloatingWindow {
                 Layout.fillHeight: true
                 Layout.margins: 10
                 Layout.rightMargin: 0
-                implicitWidth: root.railOpen ? root.railWidth : 30
+                implicitWidth: root.railOpen ? root.railWidth : 52
                 radius: Appearance.rounding.large
-                color: root.railOverlay ? Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, collapsedHandle.containsMouse ? 0.75 : 0.45)
-                    : collapsedHandle.containsMouse && !root.railOpen ? Appearance.colors.colLayer1Hover : Appearance.colors.colLayer1
+                color: root.railOverlay ? Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, root.railOpen ? 0.72 : foldedArea.containsMouse ? 0.8 : 0.55)
+                    : Appearance.colors.colLayer1
                 clip: true
 
                 Behavior on implicitWidth {
-                    NumberAnimation { duration: 240; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
                 }
                 Behavior on color {
                     ColorAnimation { duration: 140 }
                 }
 
                 MouseArea {
-                    id: collapsedHandle
+                    id: foldedArea
                     property point pressPoint
                     property bool dragged: false
                     anchors.fill: parent
                     visible: !root.railOpen
                     hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
                     onPressed: mouse => {
-                        collapsedHandle.pressPoint = Qt.point(mouse.x, mouse.y);
-                        collapsedHandle.dragged = false;
+                        foldedArea.pressPoint = Qt.point(mouse.x, mouse.y);
+                        foldedArea.dragged = false;
                     }
                     onPositionChanged: mouse => {
-                        if (!collapsedHandle.pressed || collapsedHandle.dragged)
+                        if (!foldedArea.pressed || foldedArea.dragged)
                             return;
-                        if (Math.abs(mouse.x - collapsedHandle.pressPoint.x) + Math.abs(mouse.y - collapsedHandle.pressPoint.y) > 6) {
-                            collapsedHandle.dragged = true;
+                        if (Math.abs(mouse.x - foldedArea.pressPoint.x) + Math.abs(mouse.y - foldedArea.pressPoint.y) > 6) {
+                            foldedArea.dragged = true;
                             frame.Window.window?.startSystemMove();
                         }
                     }
                     onClicked: {
-                        if (!collapsedHandle.dragged)
+                        if (!foldedArea.dragged)
                             root.setRailOpen(true);
                     }
+                }
 
-                    MaterialSymbol {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.top: parent.top
-                        anchors.topMargin: 14
-                        text: "chevron_right"
-                        iconSize: Appearance.font.pixelSize.huge
-                        color: Appearance.colors.colOnLayer1
+                ColumnLayout {
+                    id: foldedColumn
+                    anchors.fill: parent
+                    anchors.topMargin: 10
+                    anchors.bottomMargin: 10
+                    spacing: 8
+                    opacity: root.railOpen ? 0 : 1
+                    visible: opacity > 0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
                     }
 
-                    StyledText {
-                        anchors.centerIn: parent
-                        rotation: -90
-                        text: Translation.tr("Environments") + "  ·  " + Translation.tr("Global")
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        font.weight: Font.Medium
-                        color: Appearance.colors.colSubtext
+                    RailIconButton {
+                        Layout.alignment: Qt.AlignHCenter
+                        symbol: "chevron_right"
+                        tip: Translation.tr("Show environments")
+                        onClicked: root.setRailOpen(true)
+                    }
+
+                    MaterialShapeWrappedMaterialSymbol {
+                        Layout.alignment: Qt.AlignHCenter
+                        readonly property var current: root.environments.find(environment => environment.value === root.currentEnvironment) ?? root.environments[0]
+                        shape: current.shape
+                        text: current.icon
+                        iconSize: 18
+                        fill: 1
+                        padding: 8
+                        color: Appearance.colors.colPrimary
+                        colSymbol: Appearance.colors.colOnPrimary
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        StyledText {
+                            anchors.centerIn: parent
+                            rotation: -90
+                            text: Translation.tr("Environments").toUpperCase()
+                            font.pixelSize: Appearance.font.pixelSize.smallest
+                            font.weight: Font.DemiBold
+                            font.letterSpacing: 2
+                            color: Appearance.colors.colSubtext
+                            opacity: foldedArea.containsMouse ? 1 : 0.7
+                        }
+                    }
+
+                    RailIconButton {
+                        Layout.alignment: Qt.AlignHCenter
+                        visible: Platform.isWindows
+                        symbol: "public"
+                        selected: root.tab === "windows"
+                        tip: Translation.tr("Global")
+                        onClicked: root.tab = root.tab === "windows" ? "environment" : "windows"
+                    }
+
+                    RailIconButton {
+                        Layout.alignment: Qt.AlignHCenter
+                        symbol: "close"
+                        tip: Translation.tr("Close")
+                        onClicked: root.closeRequested()
                     }
                 }
 
@@ -180,7 +226,7 @@ FloatingWindow {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    height: 64
+                    height: 60
                     onPressed: frame.Window.window?.startSystemMove()
                     onDoubleClicked: {
                         const backingWindow = frame.Window.window;
@@ -204,13 +250,13 @@ FloatingWindow {
                     visible: opacity > 0
 
                     Behavior on opacity {
-                        NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 40
-                        Layout.bottomMargin: 10
+                        Layout.bottomMargin: 14
                         spacing: 10
 
                         MaterialShapeWrappedMaterialSymbol {
@@ -241,42 +287,37 @@ FloatingWindow {
                             }
                         }
 
-                        RippleButton {
-                            implicitWidth: 32
-                            implicitHeight: 32
-                            buttonRadius: Appearance.rounding.full
-                            colBackground: "transparent"
-                            colBackgroundHover: Appearance.colors.colLayer1Hover
+                        RailIconButton {
+                            small: true
+                            symbol: "close"
+                            tip: Translation.tr("Close")
+                            onClicked: root.closeRequested()
+                        }
+
+                        RailIconButton {
+                            small: true
+                            symbol: "chevron_left"
+                            tip: Translation.tr("Hide environments")
                             onClicked: root.setRailOpen(false)
-                            contentItem: MaterialSymbol {
-                                anchors.centerIn: parent
-                                horizontalAlignment: Text.AlignHCenter
-                                text: "chevron_left"
-                                iconSize: Appearance.font.pixelSize.larger
-                                color: Appearance.colors.colOnLayer1
-                            }
-                            StyledToolTip {
-                                text: Translation.tr("Hide environments")
-                            }
                         }
                     }
 
                     StyledText {
                         Layout.leftMargin: 6
-                        text: Translation.tr("Environment")
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        font.weight: Font.Medium
+                        Layout.bottomMargin: 2
+                        text: Translation.tr("Environments").toUpperCase()
+                        font.pixelSize: Appearance.font.pixelSize.smallest
+                        font.weight: Font.DemiBold
+                        font.letterSpacing: 1.5
                         color: Appearance.colors.colSubtext
                     }
 
                     Repeater {
                         model: root.environments
 
-                        delegate: SidebarButton {
+                        delegate: EnvironmentCard {
                             required property var modelData
-                            symbol: modelData.icon
-                            label: modelData.name
-                            note: modelData.note
+                            environment: modelData
                             selected: root.tab === "environment" && root.currentEnvironment === modelData.value
                             active: root.currentEnvironment === modelData.value
                             onClicked: root.pickEnvironment(modelData.value)
@@ -287,29 +328,61 @@ FloatingWindow {
                         Layout.fillHeight: true
                     }
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 6
-                        Layout.rightMargin: 6
-                        Layout.topMargin: 4
-                        Layout.bottomMargin: 4
-                        implicitHeight: 1
-                        color: Appearance.colors.colOutlineVariant
-                    }
-
-                    SidebarButton {
+                    RippleButton {
+                        id: globalCard
                         visible: Platform.isWindows
-                        symbol: "public"
-                        label: Translation.tr("Global")
-                        note: Translation.tr("All environments")
-                        selected: root.tab === "windows"
+                        Layout.fillWidth: true
+                        implicitHeight: 72
+                        buttonRadius: Appearance.rounding.large
+                        toggled: root.tab === "windows"
+                        colBackground: Appearance.colors.colLayer2
+                        colBackgroundHover: Appearance.colors.colLayer2Hover
+                        colBackgroundToggled: Appearance.colors.colPrimaryContainer
+                        colBackgroundToggledHover: Appearance.colors.colPrimaryContainerHover
                         onClicked: root.tab = "windows"
-                    }
 
-                    SidebarButton {
-                        symbol: "close"
-                        label: Translation.tr("Close")
-                        onClicked: root.closeRequested()
+                        contentItem: RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+                            spacing: 12
+
+                            MaterialShapeWrappedMaterialSymbol {
+                                shape: MaterialShape.Shape.Cookie9Sided
+                                text: "public"
+                                iconSize: 22
+                                fill: 1
+                                padding: 9
+                                color: globalCard.toggled ? Appearance.colors.colPrimary : Appearance.colors.colTertiaryContainer
+                                colSymbol: globalCard.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnTertiaryContainer
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: -2
+
+                                StyledText {
+                                    text: Translation.tr("Global")
+                                    font.pixelSize: Appearance.font.pixelSize.large
+                                    font.weight: Font.DemiBold
+                                    color: globalCard.toggled ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer2
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: Translation.tr("All environments")
+                                    elide: Text.ElideRight
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: Appearance.colors.colSubtext
+                                }
+                            }
+
+                            MaterialSymbol {
+                                text: "chevron_right"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: globalCard.toggled ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colSubtext
+                            }
+                        }
                     }
                 }
             }
@@ -328,18 +401,46 @@ FloatingWindow {
         }
     }
 
-    component SidebarButton: RippleButton {
-        id: sidebarButton
+    component RailIconButton: RippleButton {
+        id: railIconButton
         property string symbol: ""
-        property string label: ""
-        property string note: ""
+        property string tip: ""
+        property bool small: false
+        property bool selected: false
+
+        implicitWidth: railIconButton.small ? 30 : 36
+        implicitHeight: railIconButton.small ? 30 : 36
+        buttonRadius: Appearance.rounding.full
+        toggled: railIconButton.selected
+        colBackground: "transparent"
+        colBackgroundHover: Appearance.colors.colLayer1Hover
+        colBackgroundToggled: Appearance.colors.colPrimaryContainer
+        colBackgroundToggledHover: Appearance.colors.colPrimaryContainerHover
+
+        contentItem: MaterialSymbol {
+            anchors.centerIn: parent
+            horizontalAlignment: Text.AlignHCenter
+            text: railIconButton.symbol
+            iconSize: railIconButton.small ? Appearance.font.pixelSize.large : Appearance.font.pixelSize.larger
+            fill: railIconButton.selected ? 1 : 0
+            color: railIconButton.selected ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer1
+        }
+
+        StyledToolTip {
+            text: railIconButton.tip
+        }
+    }
+
+    component EnvironmentCard: RippleButton {
+        id: environmentCard
+        property var environment: ({})
         property bool selected: false
         property bool active: false
 
         Layout.fillWidth: true
-        implicitHeight: sidebarButton.note !== "" ? 52 : 42
+        implicitHeight: 58
         buttonRadius: Appearance.rounding.normal
-        toggled: sidebarButton.selected
+        toggled: environmentCard.selected
         colBackground: "transparent"
         colBackgroundHover: Appearance.colors.colLayer1Hover
         colBackgroundToggled: Appearance.colors.colSecondaryContainer
@@ -347,15 +448,18 @@ FloatingWindow {
 
         contentItem: RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 12
-            anchors.rightMargin: 12
-            spacing: 12
+            anchors.leftMargin: 8
+            anchors.rightMargin: 10
+            spacing: 10
 
-            MaterialSymbol {
-                text: sidebarButton.symbol
-                iconSize: Appearance.font.pixelSize.huge
-                fill: sidebarButton.selected ? 1 : 0
-                color: sidebarButton.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
+            MaterialShapeWrappedMaterialSymbol {
+                shape: environmentCard.environment.shape
+                text: environmentCard.environment.icon
+                iconSize: 18
+                fill: environmentCard.active ? 1 : 0
+                padding: 8
+                color: environmentCard.active ? Appearance.colors.colPrimary : Appearance.colors.colLayer2
+                colSymbol: environmentCard.active ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
             }
 
             ColumnLayout {
@@ -364,16 +468,15 @@ FloatingWindow {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: sidebarButton.label
+                    text: environmentCard.environment.name
                     elide: Text.ElideRight
-                    font.weight: sidebarButton.selected ? Font.DemiBold : Font.Normal
-                    color: sidebarButton.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
+                    font.weight: environmentCard.selected || environmentCard.active ? Font.DemiBold : Font.Normal
+                    color: environmentCard.selected ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    visible: sidebarButton.note !== ""
-                    text: sidebarButton.note
+                    text: Translation.tr("by %1").arg(environmentCard.environment.note)
                     elide: Text.ElideRight
                     font.pixelSize: Appearance.font.pixelSize.smallest
                     color: Appearance.colors.colSubtext
@@ -381,11 +484,20 @@ FloatingWindow {
             }
 
             Rectangle {
-                visible: sidebarButton.active
-                implicitWidth: 8
-                implicitHeight: 8
-                radius: 4
+                visible: environmentCard.active
+                implicitHeight: 20
+                implicitWidth: activeLabel.implicitWidth + 14
+                radius: height / 2
                 color: Appearance.colors.colPrimary
+
+                StyledText {
+                    id: activeLabel
+                    anchors.centerIn: parent
+                    text: Translation.tr("Active")
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    font.weight: Font.DemiBold
+                    color: Appearance.colors.colOnPrimary
+                }
             }
         }
     }
