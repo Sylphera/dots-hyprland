@@ -36,7 +36,13 @@ Scope {
         readonly property string searchingText: searchWidgetLoader.item?.searchingText ?? ""
         readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
-        visible: GlobalStates.overviewOpen
+        readonly property bool shown: GlobalStates.overviewOpen || closeHold.running
+        visible: shown
+
+        Timer {
+            id: closeHold
+            interval: 300
+        }
 
         WlrLayershell.namespace: "quickshell:overview"
         WlrLayershell.layer: Platform.isWindows ? WlrLayer.Overlay : WlrLayer.Top
@@ -106,10 +112,12 @@ Scope {
             target: GlobalStates
             function onOverviewOpenChanged() {
                 if (!GlobalStates.overviewOpen) {
+                    if (DockStyle.pcFeatures) closeHold.restart();
                     searchWidgetLoader.item?.disableExpandAnimation();
                     overviewScope.dontAutoCancelSearch = false;
                     GlobalFocusGrab.dismiss();
                 } else {
+                    closeHold.stop();
                     if (!overviewScope.dontAutoCancelSearch) {
                         searchWidgetLoader.item?.cancelSearch();
                     }
@@ -135,7 +143,19 @@ Scope {
 
         Column {
             id: columnLayout
-            visible: GlobalStates.overviewOpen
+            visible: panelWindow.shown
+            opacity: !DockStyle.pcFeatures || GlobalStates.overviewOpen ? 1 : 0
+            scale: !DockStyle.pcFeatures || GlobalStates.overviewOpen ? 1 : 0.85
+            transformOrigin: Item.Top
+
+            Behavior on opacity {
+                enabled: DockStyle.pcFeatures
+                NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+            }
+            Behavior on scale {
+                enabled: DockStyle.pcFeatures
+                NumberAnimation { duration: 400; easing.type: Easing.BezierSpline; easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial }
+            }
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.top
