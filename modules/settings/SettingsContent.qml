@@ -48,11 +48,6 @@ Item {
             file: "ServicesConfig.qml",
             icon: "settings"
         },
-        ...(Platform.isWindows ? [{
-            name: Translation.tr("System"),
-            file: "SystemConfig.qml",
-            icon: "computer"
-        }] : []),
         {
             name: Translation.tr("Advanced"),
             file: "AdvancedConfig.qml",

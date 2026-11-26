@@ -11,16 +11,6 @@ import qs.modules.common.functions
 ContentPage {
     id: root
     forceWidth: true
-    readonly property var sekaiThemes: [
-        { displayName: Translation.tr("Mint"), icon: "circle", value: "mint" },
-        { displayName: Translation.tr("Indigo"), icon: "circle", value: "indigo" },
-        { displayName: Translation.tr("Lime"), icon: "circle", value: "lime" },
-        { displayName: Translation.tr("Rose"), icon: "circle", value: "rose" },
-        { displayName: Translation.tr("Amber"), icon: "circle", value: "amber" },
-        { displayName: Translation.tr("Violet"), icon: "circle", value: "violet" },
-        { displayName: Translation.tr("Monochrome"), icon: "contrast", value: "mono" },
-        { displayName: Translation.tr("Wallpaper"), icon: "wallpaper", value: "wallpaper" }
-    ]
 
     component SmallLightDarkPreferenceButton: RippleButton {
         id: smallLightDarkPreferenceButton
@@ -345,81 +335,6 @@ ContentPage {
             checked: Config.options.appearance.transparency.enable
             onCheckedChanged: {
                 Config.options.appearance.transparency.enable = checked;
-            }
-        }
-    }
-
-    ContentSection {
-        icon: "style"
-        title: Translation.tr("Style")
-
-        ConfigRow {
-            ContentSubsection {
-                title: Translation.tr("Visual style")
-                tooltip: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults. A bar layout you changed is kept and comes back with its style") + " " + Translation.tr("NabyScape puts a black island at the top of the screen, inspired by NabyScape by BillyNabil. On Windows it also swaps ii's bar for the Windows taskbar until you switch to another style") + " " + Translation.tr("SekaiPop draws the bar as outlined blocks with a hard shadow that sink when pressed, inspired by SekaiPop by Blapples")
-
-                ConfigSelectionArray {
-                    currentValue: Config.options.appearance.visualStyle
-                    onSelected: newValue => {
-                        Config.options.appearance.visualStyle = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: "illogical-impulse",
-                            icon: "auto_awesome",
-                            value: "ii"
-                        },
-                        {
-                            displayName: "end4-pC",
-                            icon: "dashboard_customize",
-                            value: "end4pc"
-                        },
-                        {
-                            displayName: "NabyScape",
-                            icon: "toolbar",
-                            value: "nabyscape"
-                        },
-                        {
-                            displayName: "SekaiPop",
-                            icon: "interests",
-                            value: "sekaipop"
-                        }
-                    ]
-                }
-            }
-            ContentSubsection {
-                title: Translation.tr("Settings layout")
-
-                ConfigSelectionArray {
-                    currentValue: Config.options.appearance.settingsLayout
-                    onSelected: newValue => {
-                        Config.options.appearance.settingsLayout = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: "illogical-impulse",
-                            icon: "view_sidebar",
-                            value: "ii"
-                        },
-                        {
-                            displayName: "end4-pC",
-                            icon: "web_asset",
-                            value: "end4pc"
-                        }
-                    ]
-                }
-            }
-        }
-        ContentSubsection {
-            visible: Config.options.appearance.visualStyle === "sekaipop"
-            title: Translation.tr("SekaiPop theme")
-
-            ConfigSelectionArray {
-                currentValue: Config.options.appearance.sekaipop.theme
-                onSelected: newValue => {
-                    Config.options.appearance.sekaipop.theme = newValue;
-                }
-                options: root.sekaiThemes
             }
         }
     }
