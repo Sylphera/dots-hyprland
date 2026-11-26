@@ -26,6 +26,50 @@ Singleton {
     }
 
     readonly property var currentScheme: root.schemes[Config.options.appearance.palette.namedScheme] ?? null
+    readonly property string current: Config.options.appearance.palette.namedScheme
+    readonly property var currentData: root.currentScheme
+    readonly property string userDir: FileUtils.trimFileProtocol(`${Directories.shellConfig}/schemes`)
+
+    function materialPreview() {
+        const colors = Appearance.colors;
+        return [
+            { value: "primary", color: colors.colPrimary, displayName: "Primary" },
+            { value: "secondary", color: colors.colSecondary, displayName: "Secondary" },
+            { value: "tertiary", color: colors.colTertiary, displayName: "Tertiary" },
+            { value: "primaryContainer", color: colors.colPrimaryContainer, displayName: "Primary container" },
+            { value: "secondaryContainer", color: colors.colSecondaryContainer, displayName: "Secondary container" },
+            { value: "tertiaryContainer", color: colors.colTertiaryContainer, displayName: "Tertiary container" },
+            { value: "error", color: colors.colError, displayName: "Error" }
+        ];
+    }
+
+    function currentAccentName(slot) {
+        const scheme = root.currentScheme;
+        if (!scheme)
+            return slot === "primary" ? "primary" : "secondary";
+        const accents = root.accentsFor(Appearance.m3colors.darkmode);
+        const chosen = slot === "secondary" ? Config.options.appearance.palette.namedSchemeSecondary : Config.options.appearance.palette.namedSchemePrimary;
+        return chosen in accents ? chosen : (scheme.defaults ?? {})[slot];
+    }
+
+    function setScheme(id) {
+        Config.options.appearance.palette.namedScheme = id;
+        Config.options.appearance.palette.namedSchemePrimary = "";
+        Config.options.appearance.palette.namedSchemeSecondary = "";
+        Wallpapers.reapplyPalette();
+    }
+
+    function setAccent(slot, name) {
+        if (root.current === "")
+            return;
+        if (slot === "secondary")
+            Config.options.appearance.palette.namedSchemeSecondary = name;
+        else
+            Config.options.appearance.palette.namedSchemePrimary = name;
+        Wallpapers.reapplyPalette();
+    }
+
+    function addScheme() {}
 
     function schemeOptions() {
         const options = [
@@ -52,7 +96,9 @@ Singleton {
     }
 
     function accentOptions(dark) {
-        const accents = root.accentsFor(dark);
+        if (!root.currentScheme)
+            return root.materialPreview();
+        const accents = root.accentsFor(dark ?? Appearance.m3colors.darkmode);
         return Object.keys(accents).map(role => ({
                     displayName: role,
                     value: role,

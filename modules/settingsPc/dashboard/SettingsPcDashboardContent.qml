@@ -7,7 +7,6 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
-import qs.modules.settingsPc as Pc
 import qs.modules.ii.wallpaperSelector as WP
 
 Item {
@@ -25,21 +24,9 @@ Item {
         root.pendingPage = root.settingsPage;
         root.currentPage = root.settingsPage;
         GlobalStates.dashboardPage = root.settingsPage;
-        Qt.callLater(() => settingsLoader.item?.goToTarget(target));
-    }
-
-    function runSearch(query) {
-        return query.trim().length > 0 ? SettingsSearchIndex.search(query, 20) : [];
-    }
-
-    function pickSearchResult(result) {
-        root.closeSearch();
-        root.goToTarget({
-            page: result.pageId,
-            label: result.kind === "page" ? "" : (result.rawLabel ?? ""),
-            section: result.rawSection ?? "",
-            subsection: result.rawSubsection ?? ""
-        });
+        const query = target?.label || target?.subsection || target?.section || "";
+        searchInput.text = query;
+        root.searchOpen = query !== "";
     }
 
     property int currentPage: GlobalStates.dashboardPage
@@ -343,7 +330,7 @@ Item {
                     }
 
                     StyledText {
-                        text: SystemInfo.distroName
+                        text: Platform.isWindows ? (parseInt(SystemInfo.windowsBuild) < 22000 ? "Windows 10" : "Windows 11") : SystemInfo.distroName
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.Medium
                         color: ui.fgSurface
@@ -391,89 +378,6 @@ Item {
                                 text: navBtn.modelData.name
                                 color: navBtn.toggled ? ui.fgAccent : ui.fgSurface
                                 visible: navBtn.toggled
-                            }
-                        }
-                    }
-                }
-            }
-
-            Rectangle {
-                id: searchResultsPanel
-                visible: root.searchOpen && root.pendingPage === root.settingsPage && root.searchQuery.trim().length > 0
-                anchors.top: parent.bottom
-                anchors.right: parent.right
-                anchors.topMargin: 6
-                width: 320
-                implicitHeight: Math.min(320, resultsColumn.implicitHeight + 16)
-                radius: Appearance.rounding.normal
-                color: ui.surface
-                z: 20
-
-                property var results: root.runSearch(root.searchQuery)
-
-                Flickable {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    contentWidth: width
-                    contentHeight: resultsColumn.implicitHeight
-                    clip: true
-
-                    ColumnLayout {
-                        id: resultsColumn
-                        width: parent.width
-                        spacing: 2
-
-                        StyledText {
-                            Layout.fillWidth: true
-                            visible: searchResultsPanel.results.length === 0
-                            text: Translation.tr("No results")
-                            color: ui.subtext
-                            font.pixelSize: Appearance.font.pixelSize.small
-                        }
-
-                        Repeater {
-                            model: searchResultsPanel.results
-
-                            delegate: RippleButton {
-                                id: resultRow
-                                required property var modelData
-                                Layout.fillWidth: true
-                                implicitHeight: 36
-                                buttonRadius: Appearance.rounding.small
-                                colBackground: "transparent"
-                                onClicked: root.pickSearchResult(resultRow.modelData)
-
-                                contentItem: RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 8
-                                    anchors.rightMargin: 8
-                                    spacing: 8
-
-                                    MaterialSymbol {
-                                        text: resultRow.modelData.icon
-                                        iconSize: Appearance.font.pixelSize.larger
-                                        color: ui.fgSurface
-                                    }
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: -2
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            text: resultRow.modelData.label
-                                            elide: Text.ElideRight
-                                            color: ui.fgSurface
-                                            font.pixelSize: Appearance.font.pixelSize.small
-                                        }
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            visible: resultRow.modelData.kind !== "page"
-                                            text: resultRow.modelData.pageName
-                                            elide: Text.ElideRight
-                                            color: ui.subtext
-                                            font.pixelSize: Appearance.font.pixelSize.smallest
-                                        }
-                                    }
-                                }
                             }
                         }
                     }
@@ -792,8 +696,9 @@ Item {
             visible: active
             active: root.currentPage === root.settingsPage
 
-            sourceComponent: Pc.SettingsPcContent {
-                onCloseRequested: root.closeRequested()
+            sourceComponent: DashboardSettingsPage {
+                pager: root
+                staggerMs: root.staggerMs
             }
         }
 

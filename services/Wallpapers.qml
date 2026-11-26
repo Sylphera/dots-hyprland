@@ -382,6 +382,40 @@ Singleton {
         }
     }
 
+    function normalizeText(text) {
+        return String(text ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function scoreToken(key, token) {
+        const index = key.indexOf(token);
+        if (index >= 0) {
+            const wordStart = index === 0 || key.charAt(index - 1) === " ";
+            return 200 + (wordStart ? 60 : 0) - Math.min(index, 40) + Math.min(token.length, 12);
+        }
+        if (token.length < 3) return -1;
+        let position = 0;
+        let gaps = 0;
+        let last = -1;
+        for (let i = 0; i < token.length; i++) {
+            const found = key.indexOf(token.charAt(i), position);
+            if (found < 0) return -1;
+            if (last >= 0) gaps += found - last - 1;
+            last = found;
+            position = found + 1;
+        }
+        return Math.max(1, 100 - gaps * 3 - token.length);
+    }
+
+    function scoreItem(key, tokens) {
+        let total = 0;
+        for (const token of tokens) {
+            const score = root.scoreToken(key, token);
+            if (score < 0) return -1;
+            total += score;
+        }
+        return total;
+    }
+
     function reapplyPalette() {
         if (Platform.isWindows) {
             root._retheme(Config.options.background.wallpaperPath, Appearance.m3colors.darkmode);

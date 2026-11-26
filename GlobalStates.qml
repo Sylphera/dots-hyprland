@@ -10,6 +10,19 @@ pragma ComponentBehavior: Bound
 Singleton {
     id: root
     property bool barOpen: true
+
+    Timer {
+        id: barRefreshTimer
+        interval: 200
+        repeat: false
+        onTriggered: root.barOpen = true
+    }
+
+    function refreshBar() {
+        if (!root.barOpen) return;
+        root.barOpen = false;
+        barRefreshTimer.restart();
+    }
     property bool colorPickerOpen: false
     property string colorPickerAction: "copy"
     property bool crosshairOpen: false
@@ -45,6 +58,7 @@ Singleton {
     property bool regionSelectorOpen: false
     property bool regionSelectorRecording: false
     property int dashboardPage: 0
+    property string dashboardGroup: ""
     property bool searchOpen: false
     property bool screenLocked: false
     property bool lockPreview: false
