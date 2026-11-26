@@ -4,7 +4,7 @@ import Quickshell
 import qs.modules.common
 
 Scope {
-    PanelLoader { deferred: false; extraCondition: !Config.options.bar.vertical && !(Platform.isWindows && Config.nativeTaskbar); panelSource: "../modules/ii/bar/Bar.qml" }
+    PanelLoader { deferred: false; extraCondition: !Config.options.bar.vertical && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar); panelSource: "../modules/ii/bar/Bar.qml" }
     PanelLoader { deferPriority: 2; panelSource: "../modules/ii/background/Background.qml" }
     PanelLoader { panelSource: "../modules/ii/cheatsheet/Cheatsheet.qml" }
     PanelLoader { extraCondition: Platform.isWindows; panelSource: "../modules/ii/keybindsEditor/KeybindsEditor.qml" }
@@ -16,7 +16,6 @@ Scope {
     PanelLoader { deferred: Platform.isWindows && !Config.options.lock.launchOnStartup; panelSource: "../modules/ii/lock/Lock.qml" }
     PanelLoader { panelSource: "../modules/ii/equalizer/EqualizerPopup.qml" }
     PanelLoader { panelSource: "../modules/ii/mediaControls/MediaControls.qml" }
-    PanelLoader { extraCondition: Config.options.nabyIsland.enable; panelSource: "../modules/ii/nabyIsland/NabyIsland.qml" }
     PanelLoader { panelSource: "../modules/ii/notificationPopup/NotificationPopup.qml" }
     PanelLoader { panelSource: "../modules/ii/nowPlaying/NowPlaying.qml" }
     PanelLoader { panelSource: "../modules/ii/onScreenDisplay/OnScreenDisplay.qml" }
@@ -31,6 +30,6 @@ Scope {
     PanelLoader { panelSource: "../modules/ii/sessionScreen/SessionScreen.qml" }
     PanelLoader { deferPriority: 1; panelSource: "../modules/ii/sidebarLeft/SidebarLeft.qml" }
     PanelLoader { deferPriority: 1; panelSource: "../modules/ii/sidebarRight/SidebarRight.qml" }
-    PanelLoader { deferred: false; extraCondition: Config.options.bar.vertical && !(Platform.isWindows && Config.nativeTaskbar); panelSource: "../modules/ii/verticalBar/VerticalBar.qml" }
+    PanelLoader { deferred: false; extraCondition: Config.options.bar.vertical && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar); panelSource: "../modules/ii/verticalBar/VerticalBar.qml" }
     PanelLoader { panelSource: "../modules/ii/wallpaperSelector/WallpaperSelector.qml" }
 }

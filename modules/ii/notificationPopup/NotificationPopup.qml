@@ -17,7 +17,7 @@ Scope {
         readonly property string targetScreenName: Config.options.notifications.forceMonitor.enable ? Config.options.notifications.forceMonitor.name : (Hyprland.focusedMonitor?.name ?? "")
         readonly property bool fullscreenOnScreen: Notifications.hasFullscreenOnScreen(root.targetScreenName)
         readonly property bool hasNotice: Platform.isWindows && FullscreenNotice.current !== null
-        visible: (Notifications.popupList.length > 0 || root.hasNotice) && !GlobalStates.screenLocked && !GlobalStates.islandShownOn(root.targetScreenName) && !GlobalStates.nabyIslandTakes("notifications", root.targetScreenName)
+        visible: (Notifications.popupList.length > 0 || root.hasNotice) && !GlobalStates.screenLocked && !GlobalStates.islandShownOn(root.targetScreenName)
         screen: Quickshell.screens.find(s => s.name === root.targetScreenName) ?? null
 
         property string position: {

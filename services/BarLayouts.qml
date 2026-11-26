@@ -81,7 +81,7 @@ Singleton {
     function barOnScreen(screenName) {
         if (!GlobalStates.barOpen || GlobalStates.screenLocked)
             return false;
-        if (Platform.isWindows && Config.nativeTaskbar)
+        if (Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
             return false;
         const list = Config.options.bar.screenList;
         return !list || list.length === 0 || list.includes(screenName);

@@ -82,7 +82,7 @@ Singleton {
         && Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
     property var islandScreens: ({})
     readonly property bool islandsAllowed: root.dynamicIslandEnabled && root.barOpen && !root.screenLocked
-        && !(Platform.isWindows && Config.nativeTaskbar)
+        && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
     readonly property bool dynamicIslandActive: root.islandsAllowed && Object.keys(root.islandScreens).length > 0
 
     function setIslandShown(screenName, shown) {
@@ -97,18 +97,6 @@ Singleton {
 
     function islandShownOn(screenName) {
         return root.islandsAllowed && (root.islandScreens[screenName ?? ""] ?? 0) > 0;
-    }
-
-    property string nabyIslandScreen: ""
-    property bool nabyIslandOsd: false
-    property bool nabyIslandNotifications: false
-
-    function nabyIslandTakes(kind, screenName) {
-        if (root.nabyIslandScreen === "")
-            return false;
-        if (kind === "osd" ? !root.nabyIslandOsd : kind === "notifications" ? !root.nabyIslandNotifications : true)
-            return false;
-        return !screenName || screenName === root.nabyIslandScreen;
     }
 
     function setFrameHover(screenName, side, hovered) {

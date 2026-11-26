@@ -14,7 +14,7 @@ Scope {
     id: root
     property string protectionMessage: ""
     property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
-    readonly property bool shownInIsland: GlobalStates.islandShownOn(root.focusedScreen?.name) || GlobalStates.nabyIslandTakes("osd", root.focusedScreen?.name)
+    readonly property bool shownInIsland: GlobalStates.islandShownOn(root.focusedScreen?.name)
 
     property string currentIndicator: "volume"
     onCurrentIndicatorChanged: GlobalStates.osdIndicatorType = currentIndicator

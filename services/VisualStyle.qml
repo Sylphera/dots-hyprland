@@ -6,7 +6,7 @@ import Quickshell
 Singleton {
     id: root
 
-    readonly property list<string> styles: ["ii", "end4pc", "nabyscape", "sekaipop"]
+    readonly property list<string> styles: ["ii", "end4pc", "sekaipop"]
     readonly property list<string> layoutStyles: ["ii", "end4pc"]
     readonly property string selected: Config.options.appearance.visualStyle
     readonly property string applied: Config.options.appearance.visualStyleApplied
@@ -18,8 +18,12 @@ Singleton {
     readonly property int presetVersion: 2
 
     function sync() {
-        if (!Config.ready || !root.styles.includes(root.selected))
+        if (!Config.ready)
             return;
+        if (!root.styles.includes(root.selected)) {
+            Config.options.appearance.visualStyle = "ii";
+            return;
+        }
         if (root.selected !== root.applied) {
             root.applyPreset(root.selected);
             return;
@@ -46,7 +50,7 @@ Singleton {
     }
 
     function layoutStyle(style) {
-        return style === "nabyscape" || style === "sekaipop" ? "ii" : style;
+        return style === "sekaipop" ? "ii" : style;
     }
 
     function defaultLayout(style) {
@@ -101,10 +105,6 @@ Singleton {
         Config.options.sidebar.sectionOrder = pc ? ["banner", "quickToggles", "sliders", "media", "notifications", "bottom"] : ["banner", "sliders", "quickToggles", "media", "notifications", "bottom"];
     }
 
-    function applyIsland(naby) {
-        Config.options.nabyIsland.enable = naby;
-    }
-
     function applyPreset(style) {
         const pc = style === "end4pc";
         Config.options.bar.utilButtons.showColorPicker = pc;
@@ -114,8 +114,7 @@ Singleton {
         Config.options.bar.workspaces.showAppIcons = !pc;
         Config.options.bar.resources.alwaysShowSwap = !pc;
         Config.options.sidebar.quickSliders.enable = pc;
-        Config.options.appearance.settingsLayout = style === "nabyscape" || style === "sekaipop" ? "end4pc" : style;
-        root.applyIsland(style === "nabyscape");
+        Config.options.appearance.settingsLayout = style === "sekaipop" ? "end4pc" : style;
         root.applyNewKeys(pc, root.applied);
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
         Config.options.appearance.visualStyleApplied = style;

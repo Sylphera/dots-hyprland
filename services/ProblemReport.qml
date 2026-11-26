@@ -18,7 +18,6 @@ Singleton {
     readonly property var styleNames: ({
             "ii": "illogical-impulse (ii)",
             "end4pc": "end4-pC",
-            "nabyscape": "NabyScape",
             "sekaipop": "SekaiPop"
         })
     property string arch: ""

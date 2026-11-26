@@ -662,17 +662,6 @@ JsonAdapter {
         }
     }
 
-    property JsonObject nabyIsland: JsonObject {
-        property bool enable: false
-        property string screen: ""
-        property bool followCursor: false
-        property bool showOsd: true
-        property bool showNotifications: true
-        property bool showTimers: true
-        property bool showWaveform: true
-        property bool keptNativeTaskbar: false
-    }
-
     property JsonObject windowsPort: JsonObject {
         property int pinsVersion: 0
         property bool sharedWallpaper: false

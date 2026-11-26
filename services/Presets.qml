@@ -26,9 +26,9 @@ Singleton {
 
     property list<string> lastSkippedKeys: []
 
-    readonly property var allowedRoots: ["appearance", "background", "bar", "calendar", "cheatsheet", "crosshair", "custom", "dock", "interactions", "lock", "nabyIsland", "notifications", "osd", "overview", "panelFamily", "settings", "sidebar", "time", "waffles", "wallpaperSelector"]
+    readonly property var allowedRoots: ["appearance", "background", "bar", "calendar", "cheatsheet", "crosshair", "custom", "dock", "interactions", "lock", "notifications", "osd", "overview", "panelFamily", "settings", "sidebar", "time", "waffles", "wallpaperSelector"]
     readonly property var allowedPrefixes: ["windowsPort.decoration", "windowsPort.panelAnimationStyle"]
-    readonly property var stateKeys: ["appearance.visualStyleApplied", "appearance.visualStylePresetVersion", "nabyIsland.keptNativeTaskbar"]
+    readonly property var stateKeys: ["appearance.visualStyleApplied", "appearance.visualStylePresetVersion"]
     readonly property var forbiddenParts: ["__proto__", "prototype", "constructor"]
     readonly property var spicyKeys: [
         "background.konachanSpicy",
@@ -40,7 +40,6 @@ Singleton {
         "dock.pinnedApps",
         "bar.screenList",
         "notifications.forceMonitor",
-        "nabyIsland.screen",
         "calendar.events.sources"
     ]
     readonly property var themingDefaults: ({
