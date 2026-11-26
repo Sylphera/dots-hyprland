@@ -6,7 +6,6 @@ import qs.modules.common
 import qs.modules.common.widgets as W
 import qs.modules.common.functions
 import qs.modules.settingsPc as Pc
-import qs.modules.settingsPc.pages as Pages
 import qs.modules.ii.wallpaperSelector as WP
 
 Item {
@@ -306,7 +305,9 @@ Item {
             Layout.fillHeight: true
             active: root.currentPage === root.homePage
             visible: active
-            sourceComponent: Pages.QuickConfig {}
+            sourceComponent: DashboardHomePage {
+                pager: root
+            }
         }
 
         Loader {

@@ -25,6 +25,22 @@ Singleton {
     property string desktopEnvironment: ""
     property string windowingSystem: ""
 
+    property string cpu: ""
+    property string gpu: ""
+    property string shell: ""
+    property string kernelVersion: ""
+
+    function refresh() {
+        if (Platform.isWindows) {
+            getWindowsHardware.running = false; getWindowsHardware.running = true
+            return;
+        }
+        getCpu.running = false;       getCpu.running = true
+        getGpu.running = false;       getGpu.running = true
+        getShell.running = false;     getShell.running = true
+        getKernel.running = false;    getKernel.running = true
+    }
+
     property string windowsBuild: ""
     function loadWindowsInfo() {
         const info = WindowsNative.session?.osInfo() ?? ({});
@@ -116,6 +132,69 @@ Singleton {
             }
 
         }
+    }
+
+    Process {
+        id: getWindowsHardware
+        running: false
+        command: ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", `
+            $ErrorActionPreference = 'SilentlyContinue'
+            $cpu = (Get-CimInstance Win32_Processor | Select-Object -First 1).Name
+            $cards = @(Get-CimInstance Win32_VideoController | Where-Object { $_.Name -notmatch 'Microsoft|Virtual|Remote' })
+            $gpu = ($cards | Where-Object { $_.Name -notmatch 'Intel' } | Select-Object -First 1).Name
+            if (-not $gpu) { $gpu = ($cards | Select-Object -First 1).Name }
+            $nt = Get-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion'
+            $kernel = '10.0.' + $nt.CurrentBuild + '.' + $nt.UBR
+            $shell = 'PowerShell'
+            $terminal = Join-Path $env:LOCALAPPDATA 'Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json'
+            if (Test-Path $terminal) {
+                $settings = (Get-Content -Raw $terminal) -replace '(?m)^\\s*//.*$', '' | ConvertFrom-Json
+                $profile = $settings.profiles.list | Where-Object { $_.guid -eq $settings.defaultProfile } | Select-Object -First 1
+                if ($profile.name) { $shell = $profile.name }
+            }
+            @{ cpu = "$cpu"; gpu = "$gpu"; kernel = $kernel; shell = $shell } | ConvertTo-Json -Compress
+        `]
+        stdout: StdioCollector {
+            id: windowsHardwareCollector
+            onStreamFinished: {
+                try {
+                    const info = JSON.parse(windowsHardwareCollector.text.trim());
+                    root.cpu = (info.cpu ?? "").trim().replace("Intel(R)", "Intel®").replace("Core(TM)", "Core™")
+                        .replace("CPU ", "").replace(/  +/g, " ").replace(/ @ */, " @");
+                    root.gpu = (info.gpu ?? "").trim();
+                    root.kernelVersion = info.kernel ?? "";
+                    root.shell = info.shell ?? "";
+                } catch (e) {}
+            }
+        }
+    }
+
+    Process {
+        id: getKernel
+        running: false
+        command: ["uname", "-r"]
+        stdout: SplitParser { onRead: data => root.kernelVersion = data.trim() }
+    }
+
+    Process {
+        id: getCpu
+        running: false
+        command: ["bash", "-c", "grep -m1 'model name' /proc/cpuinfo | cut -d':' -f2- | sed 's/^ //' | sed 's/Intel(R)/Intel®/' | sed 's/Core(TM)/Core™/' | sed 's/CPU //' | sed 's/  */ /g' | sed 's/ @ */ @/'"]
+        stdout: SplitParser { onRead: data => root.cpu = data.trim() }
+    }
+
+    Process {
+        id: getGpu
+        running: false
+        command: ["bash", "-c", "lspci | grep -iE 'vga|3d|display' | grep -vi 'Intel Corporation' | head -1 | sed -E 's/.*: //; s/ *\\(rev [0-9a-f]+\\)//; s/.*\\[([^]]+)\\]$/\\1/'"]
+        stdout: SplitParser { onRead: data => root.gpu = data.trim() }
+    }
+
+    Process {
+        id: getShell
+        running: false
+        command: ["bash", "-c", "echo $SHELL | awk -F'/' '{print $NF}'"]
+        stdout: SplitParser { onRead: data => root.shell = data.trim() }
     }
 
     Process {
