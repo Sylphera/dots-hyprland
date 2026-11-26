@@ -8,6 +8,9 @@ Singleton {
     readonly property bool vertical: position !== "bottom"
     readonly property bool hug: Config.options.dock.style === "hug"
     readonly property bool pcFeatures: Config.options.appearance.visualStyle === "end4pc"
+    readonly property bool magnifying: pcFeatures && position === "bottom" && (Config.options.dock.magnify ?? false)
+    readonly property real magnification: Math.max(1, Math.min(2.2, Config.options.dock.magnification ?? 1.2))
+    readonly property real headroom: magnifying ? Math.ceil((magnification - 1) * (iconSize + 14)) + 6 : 0
 
     function mTop(inner, outer, alongStart) {
         return vertical ? (alongStart ?? 0) : inner;

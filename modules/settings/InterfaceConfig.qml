@@ -474,6 +474,23 @@ ContentPage {
                 checked: Config.options.dock.scrollToCycleWindows
                 onCheckedChanged: { Config.options.dock.scrollToCycleWindows = checked }
             }
+            ConfigSwitch {
+                visible: Config.options.appearance.visualStyle === "end4pc" && (Config.options.dock.position ?? "bottom") === "bottom"
+                buttonIcon: "zoom_in"
+                text: Translation.tr("Magnify icons on hover")
+                checked: Config.options.dock.magnify
+                onCheckedChanged: { Config.options.dock.magnify = checked }
+            }
+            ConfigSlider {
+                visible: Config.options.appearance.visualStyle === "end4pc" && (Config.options.dock.position ?? "bottom") === "bottom" && Config.options.dock.magnify
+                text: Translation.tr("Magnification")
+                buttonIcon: "zoom_in"
+                usePercentTooltip: false
+                from: 1.05
+                to: 2.2
+                value: Config.options.dock.magnification
+                onValueChanged: { Config.options.dock.magnification = value }
+            }
             ConfigSpinBox {
                 icon: "photo_size_select_large"
                 text: Translation.tr("Icon size")

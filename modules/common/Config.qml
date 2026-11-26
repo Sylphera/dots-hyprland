@@ -647,6 +647,8 @@ Singleton {
                 property bool showPreviews: true
                 property bool showTooltips: true
                 property bool scrollToCycleWindows: false
+                property bool magnify: false
+                property real magnification: 1.2
                 property real iconSize: 35
                 property real iconSpacing: 0
                 property bool showPinButton: true

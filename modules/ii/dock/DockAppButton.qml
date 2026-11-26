@@ -23,14 +23,23 @@ DockButton {
     property bool justReordered: false
     enabled: !isSeparator
     implicitWidth: isSeparator ? 1 : naturalWidth
-    z: root.reordering ? 10 : 0
-    scale: root.reordering ? 1.08 : 1
+    property int magnifyId: -1
+    readonly property var magnifyValue: root.magnifyId >= 0 ? (DockMagnify.values[root.magnifyId] ?? null) : null
+    readonly property bool magnifyActive: DockStyle.magnifying && !root.isSeparator && root.magnifyValue !== null
+    z: root.reordering ? 10 : root.magnifyActive ? root.magnifyValue.scale : 0
+    scale: root.reordering ? 1.08 : root.magnifyActive ? root.magnifyValue.scale : 1
+    transformOrigin: DockStyle.magnifying ? Item.Bottom : Item.Center
+    Component.onCompleted: if (!root.isSeparator) root.magnifyId = DockMagnify.register(root)
+    Component.onDestruction: DockMagnify.unregister(root.magnifyId)
 
     Behavior on scale {
+        enabled: !root.magnifyActive
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
     }
 
-    transform: Translate {
+    transform: [Translate {
+        x: root.magnifyActive ? root.magnifyValue.shift : 0
+    }, Translate {
         x: DockStyle.vertical ? 0 : root.reorderShift
         y: DockStyle.vertical ? root.reorderShift : 0
 
@@ -42,7 +51,7 @@ DockButton {
             enabled: !root.reordering && !appListRoot.reorderSettling
             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
-    }
+    }]
 
     DragHandler {
         target: null

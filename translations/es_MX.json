@@ -748,5 +748,7 @@
   "Utility buttons": "Botones de utilidad",
   "App name tooltips": "Nombre de la app al pasar el ratón",
   "Window previews": "Vistas previas de ventanas",
-  "Scroll on an app to switch its windows": "Rueda sobre una app para cambiar entre sus ventanas"
+  "Scroll on an app to switch its windows": "Rueda sobre una app para cambiar entre sus ventanas",
+  "Magnify icons on hover": "Agrandar los iconos al pasar el ratón",
+  "Magnification": "Aumento"
 }

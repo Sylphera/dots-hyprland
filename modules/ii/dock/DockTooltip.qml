@@ -53,7 +53,7 @@ Item {
                     : DockStyle.position === "right"
                         ? Appearance.sizes.elevationMargin - root.gap
                         : popup.center.x
-                rect.y: DockStyle.vertical ? popup.center.y : Appearance.sizes.elevationMargin - root.gap
+                rect.y: DockStyle.vertical ? popup.center.y : DockStyle.magnifying ? 0 : Appearance.sizes.elevationMargin - root.gap
                 rect.width: 1
                 rect.height: 1
                 edges: root.awayEdge
