@@ -176,24 +176,25 @@ FloatingWindow {
                         onClicked: root.setRailOpen(true)
                     }
 
-                    MaterialShapeWrappedMaterialSymbol {
-                        Layout.alignment: Qt.AlignHCenter
-                        readonly property var current: root.environments.find(environment => environment.value === root.currentEnvironment) ?? root.environments[0]
-                        shape: current.shape
-                        text: current.icon
-                        iconSize: 18
-                        fill: 1
-                        padding: 8
-                        color: Appearance.colors.colPrimary
-                        colSymbol: Appearance.colors.colOnPrimary
-                    }
-
                     Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
+                        TextMetrics {
+                            id: foldedLabelMetrics
+                            font: foldedLabel.font
+                            text: foldedLabel.text
+                        }
+
+                        FontMetrics {
+                            id: foldedLabelFont
+                            font: foldedLabel.font
+                        }
+
                         StyledText {
+                            id: foldedLabel
                             anchors.centerIn: parent
+                            anchors.horizontalCenterOffset: foldedLabel.height / 2 - (foldedLabelFont.ascent + foldedLabelMetrics.tightBoundingRect.y + foldedLabelMetrics.tightBoundingRect.height / 2)
                             rotation: -90
                             text: Translation.tr("Environments").toUpperCase()
                             font.pixelSize: Appearance.font.pixelSize.smallest
