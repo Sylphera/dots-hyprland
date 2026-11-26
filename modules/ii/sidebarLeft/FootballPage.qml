@@ -83,7 +83,7 @@ Item {
     }
 
     function lineOf(pick) {
-        return ({ o15: "1.5", o25: "2.5", c85: "8.5", c75: "9.5", c105: "10.5" })[pick] ?? "";
+        return ({ o15: "1.5", o25: "2.5", c85: "8.5", c95: "9.5", c105: "10.5" })[pick] ?? "";
     }
 
     function toggleMarket(id) {
@@ -1042,7 +1042,7 @@ Item {
                                     ProbChip { caption: Translation.tr("+1.5 goals"); value: card.probs ? card.probs.o15 : 0 }
                                     ProbChip { caption: Translation.tr("+2.5 goals"); value: card.probs ? card.probs.o25 : 0 }
                                     ProbChip { caption: Translation.tr("+8.5 corners"); value: card.probs ? card.probs.c85 : 0 }
-                                    ProbChip { caption: Translation.tr("+9.5 corners"); value: card.probs ? card.probs.c75 : 0 }
+                                    ProbChip { caption: Translation.tr("+9.5 corners"); value: card.probs ? card.probs.c95 : 0 }
                                 }
 
                                 StyledText {
