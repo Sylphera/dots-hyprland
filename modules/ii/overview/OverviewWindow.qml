@@ -67,7 +67,7 @@ Item { // Window
     property real bottomLeftRadius
     property real bottomRightRadius
 
-    layer.enabled: !Platform.isWindows
+    layer.enabled: true
     layer.effect: OpacityMask {
         maskSource: Rectangle {
             width: root.width

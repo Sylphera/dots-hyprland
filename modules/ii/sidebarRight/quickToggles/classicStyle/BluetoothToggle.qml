@@ -19,7 +19,10 @@ QuickToggleButton {
             Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled
     }
     altAction: () => {
-        Quickshell.execDetached(["bash", "-c", `${Config.options.apps.bluetooth}`])
+        if (Platform.isWindows)
+            Qt.openUrlExternally("ms-settings:bluetooth")
+        else
+            Quickshell.execDetached(["bash", "-c", `${Config.options.apps.bluetooth}`])
         GlobalStates.sidebarRightOpen = false
     }
     StyledToolTip {
