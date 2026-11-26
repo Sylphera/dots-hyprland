@@ -7,7 +7,6 @@ Singleton {
     id: root
 
     readonly property list<string> styles: ["ii", "end4pc"]
-    readonly property list<string> layoutStyles: ["ii", "end4pc"]
     readonly property string selected: Config.options.appearance.visualStyle
     readonly property string applied: Config.options.appearance.visualStyleApplied
 
@@ -49,10 +48,6 @@ Singleton {
             layouts.rightLayout = BarLayouts.end4pcRight;
     }
 
-    function layoutStyle(style) {
-        return style;
-    }
-
     function defaultLayout(style) {
         const pc = style === "end4pc";
         return {
@@ -73,8 +68,8 @@ Singleton {
     function switchLayout(from, to) {
         const layouts = Config.options.bar.layouts;
         const kept = layouts.kept;
-        const custom = !root.layoutStyles.some(style => root.isDefaultLayout(style));
-        if (custom && !root.layoutStyles.includes(from))
+        const custom = !root.styles.some(style => root.isDefaultLayout(style));
+        if (custom && !root.styles.includes(from))
             return;
         if (custom && from !== to) {
             kept[from + "Left"] = [...layouts.leftLayout];
@@ -100,7 +95,7 @@ Singleton {
     function applyNewKeys(pc, from) {
         Config.options.bar.resources.showValue = !pc;
         Config.options.bar.utilButtons.showWallpaperToggle = pc;
-        root.switchLayout(root.layoutStyle(from), pc ? "end4pc" : "ii");
+        root.switchLayout(from, pc ? "end4pc" : "ii");
         Config.options.sidebar.banner = pc;
         Config.options.sidebar.sectionOrder = pc ? ["banner", "quickToggles", "sliders", "media", "notifications", "bottom"] : ["banner", "sliders", "quickToggles", "media", "notifications", "bottom"];
     }
