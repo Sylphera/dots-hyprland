@@ -94,6 +94,29 @@ QtObject {
         "windows:Konachan spicy": { type: "switch", get: () => Config.options.background.konachanSpicy && SpicyStuff.allowed, set: v => { if (SpicyStuff.allowed) Config.options.background.konachanSpicy = v; } },
         "windows:Konachan only yuri": { type: "switch", get: () => Config.options.background.konachanOnlyYuri, set: v => { Config.options.background.konachanOnlyYuri = v; } },
         "windows:Konachan extra tags": { type: "text", get: () => Config.options.background.konachanExtraTags, set: v => { Config.options.background.konachanExtraTags = v; } },
+        "windows:Native taskbar": { type: "switch", get: () => Config.options.windowsPort.nativeTaskbar, set: v => { Config.options.windowsPort.nativeTaskbar = v; } },
+        "windows:Taskbar hover only": { type: "switch", get: () => Config.options.windowsPort.taskbarHoverOnly, set: v => { Config.options.windowsPort.taskbarHoverOnly = v; } },
+        "windows:Touchpad swipe": { type: "switch", get: () => Config.options.windowsPort.touchpadSwipe, set: v => { Config.options.windowsPort.touchpadSwipe = v; } },
+        "windows:Touchpad move": { type: "switch", get: () => Config.options.windowsPort.touchpadMove, set: v => { Config.options.windowsPort.touchpadMove = v; } },
+        "windows:Remove empty desktops": { type: "switch", get: () => Config.options.windowsPort.removeEmptyDesktops, set: v => { Config.options.windowsPort.removeEmptyDesktops = v; } },
+        "windows:Window rules": { type: "switch", get: () => Config.options.windowsPort.windowRules, set: v => { Config.options.windowsPort.windowRules = v; } },
+        "windows:Dim inactive": { type: "switch", get: () => Config.options.windowsPort.dimInactive, set: v => { Config.options.windowsPort.dimInactive = v; } },
+        "windows:Super drag": { type: "switch", get: () => Config.options.windowsPort.superDrag, set: v => { Config.options.windowsPort.superDrag = v; } },
+        "windows:Gaps in": { type: "spin", get: () => Config.options.windowsPort.tiling.gapsIn, set: v => { Config.options.windowsPort.tiling.gapsIn = v; }, from: 0, to: 64, stepSize: 1 },
+        "windows:Gaps out": { type: "spin", get: () => Config.options.windowsPort.tiling.gapsOut, set: v => { Config.options.windowsPort.tiling.gapsOut = v; }, from: 0, to: 64, stepSize: 1 },
+        "windows:Preserve split": { type: "switch", get: () => Config.options.windowsPort.tiling.preserveSplit, set: v => { Config.options.windowsPort.tiling.preserveSplit = v; } },
+        "windows:Tiling excluded": { type: "text", get: () => Config.options.windowsPort.tiling.excluded.join(", "), set: v => { Config.options.windowsPort.tiling.excluded = String(v).split(",").map(s => s.trim()).filter(s => s.length > 0); } },
+        "windows:Keep settings open": { type: "switch", get: () => Config.options.settings.keepOpen, set: v => { Config.options.settings.keepOpen = v; } },
+        "windows:Brightness OSD outside": { type: "switch", get: () => Config.options.osd.showBrightnessOutsideChanges, set: v => { Config.options.osd.showBrightnessOutsideChanges = v; } },
+        "windows:Pause video wallpaper": { type: "switch", get: () => Config.options.background.pauseVideoWhenCovered, set: v => { Config.options.background.pauseVideoWhenCovered = v; } },
+        "windows:Wpp folder": { type: "text", get: () => Config.options.wallpaperSelector.wppFolder ?? "", set: v => { Config.options.wallpaperSelector.wppFolder = v; } },
+        "windows:Wpp spicy folder": { type: "text", get: () => Config.options.wallpaperSelector.wppSpicyFolder ?? "", set: v => { Config.options.wallpaperSelector.wppSpicyFolder = v; } },
+        "windows:Lock pinned apps": { type: "switch", get: () => Config.options.dock.lockPinnedApps, set: v => { Config.options.dock.lockPinnedApps = v; } },
+        "windows:Calendar events": { type: "switch", get: () => Config.options.calendar.events.enable, set: v => { Config.options.calendar.events.enable = v; } },
+        "windows:Calendar refresh": { type: "spin", get: () => Config.options.calendar.events.refreshMinutes, set: v => { Config.options.calendar.events.refreshMinutes = v; }, from: 5, to: 180, stepSize: 5 },
+        "windows:Cheatsheet AI usage": { type: "switch", get: () => Config.options.cheatsheet.aiUsage.enable, set: v => { Config.options.cheatsheet.aiUsage.enable = v; } },
+        "windows:Cheatsheet AI refresh": { type: "spin", get: () => Config.options.cheatsheet.aiUsage.refreshSeconds, set: v => { Config.options.cheatsheet.aiUsage.refreshSeconds = v; }, from: 30, to: 900, stepSize: 30 },
+        "windows:Cheatsheet hide elements": { type: "switch", get: () => Config.options.cheatsheet.hideElements, set: v => { Config.options.cheatsheet.hideElements = v; } },
         "windows:Notify on low peripheral battery": { type: "switch", get: () => Config.options.battery.peripheralNotify, set: v => { Config.options.battery.peripheralNotify = v; } },
         "windows:Peripheral low warning": { type: "spin", get: () => Config.options.battery.peripheralLow, set: v => { Config.options.battery.peripheralLow = v; }, from: 0, to: 100, stepSize: 5 },
         "windows:Peripheral critical warning": { type: "spin", get: () => Config.options.battery.peripheralCritical, set: v => { Config.options.battery.peripheralCritical = v; }, from: 0, to: 100, stepSize: 5 },
@@ -354,7 +377,23 @@ QtObject {
         {
             page: Translation.tr("Windows"), title: Translation.tr("Tiling"), icon: "responsive_layout", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Tiling", title: Translation.tr("Windows tiling"), icon: "grid_view", kw: "tiling tile windows auto" },
-                { type: "select", key: "windows:Tiling Layout", title: Translation.tr("Tiling Layout"), icon: "responsive_layout", kw: "layout dwindle master scrolling niri" }
+                { type: "select", key: "windows:Tiling Layout", title: Translation.tr("Tiling Layout"), icon: "responsive_layout", kw: "layout dwindle master scrolling niri" },
+                { type: "toggle", w: 2, key: "windows:Window rules", title: Translation.tr("Place dialogs and picture-in-picture"), icon: "picture_in_picture", kw: "dialogs picture in picture window rules center" },
+                { type: "toggle", w: 2, key: "windows:Dim inactive", title: Translation.tr("Dim inactive windows"), icon: "brightness_6", kw: "dim inactive windows focus" },
+                { type: "toggle", w: 2, key: "windows:Super drag", title: Translation.tr("Super + drag moves and resizes windows"), icon: "open_with", kw: "super drag move resize windows" },
+                { type: "toggle", w: 2, key: "windows:Preserve split", title: Translation.tr("Keep each split's direction"), icon: "splitscreen", kw: "split direction preserve tiling" },
+                { type: "spin", w: 2, key: "windows:Gaps in", title: Translation.tr("Gap between windows (px)"), icon: "space_bar", kw: "gaps between windows tiling" },
+                { type: "spin", w: 2, key: "windows:Gaps out", title: Translation.tr("Gap to screen edges (px)"), icon: "fit_screen", kw: "gaps screen edges tiling" },
+                { type: "text", w: 4, key: "windows:Tiling excluded", title: Translation.tr("Apps that always float"), icon: "filter_none", placeholder: "notepad.exe, title:<pattern>", kw: "float exclude tiling apps process title" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Taskbar & touchpad"), icon: "swipe", when: "windows", cards: [
+                { type: "toggle", w: 2, key: "windows:Native taskbar", title: Translation.tr("Use the Windows taskbar instead of ii's bar"), icon: "call_to_action", kw: "windows taskbar native bar" },
+                { type: "toggle", w: 2, key: "windows:Taskbar hover only", title: Translation.tr("Show only when the cursor touches its screen edge"), icon: "vertical_align_bottom", kw: "taskbar hover edge auto hide" },
+                { type: "toggle", w: 2, key: "windows:Touchpad swipe", title: Translation.tr("Four fingers switch workspaces"), icon: "swipe", kw: "touchpad four fingers swipe workspaces overview gesture" },
+                { type: "toggle", w: 2, key: "windows:Touchpad move", title: Translation.tr("Three fingers move the window"), icon: "pan_tool", kw: "touchpad three fingers move window pinch fullscreen gesture" },
+                { type: "toggle", w: 2, key: "windows:Remove empty desktops", title: Translation.tr("Remove empty workspaces"), icon: "delete_sweep", kw: "remove empty workspaces desktops" }
             ]
         },
         {
@@ -510,6 +549,17 @@ QtObject {
         },
         {
             page: Translation.tr("Windows"), title: Translation.tr("ii-windows"), icon: "deployed_code", when: "windows", cards: [
+                { type: "toggle", w: 2, key: "windows:Keep settings open", title: Translation.tr("Keep settings open when clicking outside"), icon: "push_pin", kw: "settings keep open click outside" },
+                { type: "toggle", w: 2, key: "windows:Brightness OSD outside", title: Translation.tr("Brightness indicator for changes made outside ii"), icon: "brightness_medium", kw: "osd brightness indicator outside fn keys" },
+                { type: "toggle", w: 2, key: "windows:Pause video wallpaper", title: Translation.tr("Pause the live wallpaper when covered"), icon: "pause_circle", kw: "live video wallpaper pause covered window" },
+                { type: "toggle", w: 2, key: "windows:Lock pinned apps", title: Translation.tr("Lock the order of pinned apps"), icon: "lock", kw: "dock pinned apps order lock" },
+                { type: "toggle", w: 2, key: "windows:Calendar events", title: Translation.tr("Show calendar events"), icon: "event", kw: "calendar events outlook" },
+                { type: "spin", w: 2, key: "windows:Calendar refresh", title: Translation.tr("Calendar refresh (minutes)"), icon: "update", kw: "calendar events refresh interval" },
+                { type: "toggle", w: 2, key: "windows:Cheatsheet AI usage", title: Translation.tr("AI usage tab in the cheatsheet"), icon: "neurology", kw: "cheatsheet ai usage tab" },
+                { type: "spin", w: 2, key: "windows:Cheatsheet AI refresh", title: Translation.tr("AI usage refresh (seconds)"), icon: "timer", kw: "cheatsheet ai usage refresh" },
+                { type: "toggle", w: 2, key: "windows:Cheatsheet hide elements", title: Translation.tr("Remove the Elements tab from the cheatsheet"), icon: "science", kw: "cheatsheet elements periodic table hide" },
+                { type: "text", w: 2, key: "windows:Wpp folder", title: Translation.tr("Wpp folder"), icon: "folder", kw: "wpp wallpaper folder" },
+                { type: "text", w: 2, key: "windows:Wpp spicy folder", title: Translation.tr("Wpp (Spicy) folder"), icon: "folder_special", kw: "wpp spicy wallpaper folder" },
                 { type: "embed", h: 2, key: "windows:Updates panel", embed: "WindowsUpdatesPanel.qml", title: Translation.tr("ii-windows updates"), icon: "update", kw: "update updates version preview stable patch fix self update ii-windows" },
                 { type: "embed", h: 2, key: "windows:Report panel", embed: "WindowsReportPanel.qml", title: Translation.tr("Report a problem"), icon: "bug_report", kw: "report problem bug issue logs crash dump github" }
             ]

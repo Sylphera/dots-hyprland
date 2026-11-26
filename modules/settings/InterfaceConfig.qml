@@ -1,118 +1,11 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
-import Quickshell
-import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 
 ContentPage {
-    id: page
     forceWidth: true
-
-    readonly property var forceMonitorOptions: Quickshell.screens.map(screen => screen.name)
-        .concat(Config.options.notifications.forceMonitor.name.length > 0 && !Quickshell.screens.some(screen => screen.name === Config.options.notifications.forceMonitor.name) ? [Config.options.notifications.forceMonitor.name] : [])
-        .map(name => ({ displayName: name, value: name }))
-
-    ContentSection {
-        icon: "view_quilt"
-        title: Translation.tr("Panel style")
-
-        ConfigSelectionArray {
-            currentValue: Config.options.panelFamily
-            onSelected: newValue => {
-                Config.options.panelFamily = newValue;
-            }
-            options: [
-                { displayName: Translation.tr("illogical-impulse"), icon: "view_quilt", value: "ii" },
-                { displayName: Translation.tr("Waffle"), icon: "widgets", value: "waffle" }
-            ]
-        }
-    }
-
-    ContentSection {
-        icon: "settings"
-        title: Translation.tr("Settings panel")
-
-        ContentSubsection {
-            title: Translation.tr("Style")
-            ConfigSelectionArray {
-                currentValue: Config.options.settings.style
-                onSelected: newValue => {
-                    Config.options.settings.style = newValue;
-                }
-                options: [
-                    { displayName: Translation.tr("Default"), icon: "settings_panorama", value: "default" },
-                    { displayName: Translation.tr("Minimal"), icon: "settings_heart", value: "minimal" },
-                    { displayName: Translation.tr("Dashboard"), icon: "dashboard", value: "dashboard" }
-                ]
-            }
-            StyledText {
-                text: Translation.tr("Minimal and Dashboard apply to the end4-pC settings layout")
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Dashboard animation speed")
-            ConfigSelectionArray {
-                enabled: Config.options.settings.style === "dashboard"
-                currentValue: Config.options.settings.animationSpeed
-                onSelected: newValue => {
-                    Config.options.settings.animationSpeed = newValue;
-                }
-                options: [
-                    { displayName: "1x", icon: "slow_motion_video", value: 1 },
-                    { displayName: "1.5x", icon: "play_arrow", value: 1.5 },
-                    { displayName: "2x", icon: "fast_forward", value: 2 },
-                    { displayName: "3x", icon: "bolt", value: 3 }
-                ]
-            }
-        }
-
-        ConfigSpinBox {
-            icon: "border_style"
-            text: Translation.tr("Border width")
-            value: Config.options.settings.borderSize
-            from: 0
-            to: 10
-            stepSize: 1
-            onValueChanged: { Config.options.settings.borderSize = value }
-        }
-        ColorSelectionArray {
-            icon: "format_paint"
-            text: Translation.tr("Border color")
-            options: ["primary", "secondary", "tertiary", "primaryContainer", "secondaryContainer", "tertiaryContainer", "layer0Border"]
-            currentValue: Config.options.settings.borderColor
-            onSelected: newValue => {
-                Config.options.settings.borderColor = newValue;
-            }
-        }
-        ConfigSwitch {
-            buttonIcon: "keep"
-            text: Translation.tr("Keep open when clicking outside")
-            checked: Config.options.settings.keepOpen
-            onCheckedChanged: {
-                Config.options.settings.keepOpen = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("The end4-pC settings card then closes only with its close button or Esc")
-            }
-        }
-        RippleButtonWithIcon {
-            Layout.fillWidth: true
-            materialIcon: "expand_all"
-            mainText: Translation.tr("Expand all collapsed sections")
-            colBackground: Appearance.colors.colSecondaryContainer
-            colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-            colRipple: Appearance.colors.colSecondaryContainerActive
-            onClicked: {
-                Config.options.settings.collapsedSections = [];
-            }
-        }
-    }
 
     ContentSection {
         icon: "keyboard"
@@ -205,39 +98,6 @@ ContentPage {
                 Config.options.cheatsheet.fontSize.comment = value;
             }
         }
-        ConfigSwitch {
-            buttonIcon: "data_usage"
-            text: Translation.tr("AI usage tab")
-            checked: Config.options.cheatsheet.aiUsage.enable
-            onCheckedChanged: {
-                Config.options.cheatsheet.aiUsage.enable = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Shows your Claude and Codex plan limits, read from the local Claude Code and Codex logins, and how much Claude Code used on this PC this week")
-            }
-        }
-        ConfigSpinBox {
-            visible: Config.options.cheatsheet.aiUsage.enable
-            text: Translation.tr("AI usage refresh (seconds)")
-            value: Config.options.cheatsheet.aiUsage.refreshSeconds
-            from: 30
-            to: 900
-            stepSize: 30
-            onValueChanged: {
-                Config.options.cheatsheet.aiUsage.refreshSeconds = value;
-            }
-        }
-        ConfigSwitch {
-            buttonIcon: "experiment"
-            text: Translation.tr("Remove the Elements tab from the cheatsheet")
-            checked: Config.options.cheatsheet.hideElements
-            onCheckedChanged: {
-                Config.options.cheatsheet.hideElements = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("If you're wondering what this is: it's literally a periodic table that serves no purpose and comes built into ii and end4-pC")
-            }
-        }
     }
     ContentSection {
         icon: "call_to_action"
@@ -272,14 +132,6 @@ ContentPage {
             }
         }
         ConfigSwitch {
-            buttonIcon: "lock"
-            text: Translation.tr("Lock the order of pinned apps")
-            checked: Config.options.dock.lockPinnedApps
-            onCheckedChanged: {
-                Config.options.dock.lockPinnedApps = checked;
-            }
-        }
-        ConfigSwitch {
             buttonIcon: "colors"
             text: Translation.tr("Tint app icons")
             checked: Config.options.dock.monochromeIcons
@@ -287,837 +139,113 @@ ContentPage {
                 Config.options.dock.monochromeIcons = checked;
             }
         }
+    }
 
-        ConfigSpinBox {
-            icon: "height"
-            text: Translation.tr("Height (px)")
-            value: Config.options.dock.height
-            from: 20
-            to: 200
-            stepSize: 1
-            onValueChanged: {
-                Config.options.dock.height = value;
-            }
-        }
-        ConfigSpinBox {
-            icon: "swipe_up"
-            text: Translation.tr("Hover region height (px)")
-            value: Config.options.dock.hoverRegionHeight
-            from: 1
-            to: 50
-            stepSize: 1
-            onValueChanged: {
-                Config.options.dock.hoverRegionHeight = value;
+    ContentSection {
+        visible: !Platform.isWindows
+        icon: "lock"
+        title: Translation.tr("Lock screen")
+
+        ConfigSwitch {
+            buttonIcon: "water_drop"
+            text: Translation.tr('Use Hyprlock (instead of Quickshell)')
+            checked: Config.options.lock.useHyprlock
+            onCheckedChanged: {
+                Config.options.lock.useHyprlock = checked;
             }
             StyledToolTip {
-                text: Translation.tr("How tall the strip at the screen edge has to be hovered to reveal the dock")
+                text: Translation.tr("If you want to somehow use fingerprint unlock...")
             }
         }
 
-        ConfigRow {
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("App IDs to hide from the dock, as regexes, comma-separated (e.g. explorer.exe, ^Shell_)")
-                text: Config.options.dock.ignoredAppRegexes.join(", ")
-                wrapMode: TextEdit.Wrap
-                onEditingFinished: {
-                    const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
-                    if (items.join(", ") !== Config.options.dock.ignoredAppRegexes.join(", "))
-                        Config.options.dock.ignoredAppRegexes = items;
+        ConfigSwitch {
+            buttonIcon: "account_circle"
+            text: Translation.tr('Launch on startup')
+            checked: Config.options.lock.launchOnStartup
+            onCheckedChanged: {
+                Config.options.lock.launchOnStartup = checked;
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Security")
+
+            ConfigSwitch {
+                buttonIcon: "settings_power"
+                text: Translation.tr('Require password to power off/restart')
+                checked: Config.options.lock.security.requirePasswordToPower
+                onCheckedChanged: {
+                    Config.options.lock.security.requirePasswordToPower = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Remember that on most devices one can always hold the power button to force shutdown\nThis only makes it a tiny bit harder for accidents to happen")
+                }
+            }
+
+            ConfigSwitch {
+                buttonIcon: "key_vertical"
+                text: Translation.tr('Also unlock keyring')
+                checked: Config.options.lock.security.unlockKeyring
+                onCheckedChanged: {
+                    Config.options.lock.security.unlockKeyring = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("This is usually safe and needed for your browser and AI sidebar anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)")
                 }
             }
         }
 
         ContentSubsection {
-            title: Translation.tr("Show dock on")
-            visible: Quickshell.screens.length > 1 || Config.options.dock.screenList.length > 0
+            title: Translation.tr("Style: general")
 
-            Flow {
-                Layout.fillWidth: true
-                spacing: 2
-
-                SelectionGroupButton {
-                    leftmost: true
-                    rightmost: Quickshell.screens.length === 0
-                    buttonIcon: "tv_displays"
-                    buttonText: Translation.tr("All")
-                    toggled: Config.options.dock.screenList.length === 0
-                    onClicked: Config.options.dock.screenList = []
+            ConfigSwitch {
+                buttonIcon: "center_focus_weak"
+                text: Translation.tr('Center clock')
+                checked: Config.options.lock.centerClock
+                onCheckedChanged: {
+                    Config.options.lock.centerClock = checked;
                 }
+            }
 
-                Repeater {
-                    model: Quickshell.screens
-                    delegate: SelectionGroupButton {
-                        id: dockScreenButton
-                        required property var modelData
-                        required property int index
-                        rightmost: index === Quickshell.screens.length - 1
-                        buttonIcon: "monitor"
-                        buttonText: dockScreenButton.modelData.name
-                        toggled: Config.options.dock.screenList.includes(dockScreenButton.modelData.name)
-                        onClicked: {
-                            const name = dockScreenButton.modelData.name;
-                            const current = Array.from(Config.options.dock.screenList);
-                            const next = current.includes(name) ? current.filter(s => s !== name) : current.concat([name]);
-                            if (next.length === 0)
-                                return;
-                            const allNames = Quickshell.screens.map(s => s.name);
-                            Config.options.dock.screenList = allNames.every(n => next.includes(n)) ? [] : next;
-                        }
-                    }
+            ConfigSwitch {
+                buttonIcon: "info"
+                text: Translation.tr('Show "Locked" text')
+                checked: Config.options.lock.showLockedText
+                onCheckedChanged: {
+                    Config.options.lock.showLockedText = checked;
+                }
+            }
+
+            ConfigSwitch {
+                buttonIcon: "shapes"
+                text: Translation.tr('Use varying shapes for password characters')
+                checked: Config.options.lock.materialShapeChars
+                onCheckedChanged: {
+                    Config.options.lock.materialShapeChars = checked;
                 }
             }
         }
-
         ContentSubsection {
-            title: Translation.tr("Appearance")
+            title: Translation.tr("Style: Blurred")
 
-            ContentSubsection {
-                title: Translation.tr("Style")
-                ConfigSelectionArray {
-                    currentValue: Config.options.dock.style
-                    onSelected: newValue => { Config.options.dock.style = newValue }
-                    options: [
-                        { displayName: Translation.tr("Float"), icon: "call_to_action", value: "float" },
-                        { displayName: Translation.tr("Hug"), icon: "dock_to_bottom", value: "hug" }
-                    ]
+            ConfigSwitch {
+                buttonIcon: "blur_on"
+                text: Translation.tr('Enable blur')
+                checked: Config.options.lock.blur.enable
+                onCheckedChanged: {
+                    Config.options.lock.blur.enable = checked;
                 }
             }
-            ContentSubsection {
-                title: Translation.tr("Position")
-                ConfigSelectionArray {
-                    currentValue: Config.options.dock.position
-                    onSelected: newValue => { Config.options.dock.position = newValue }
-                    options: [
-                        { displayName: Translation.tr("Left"), icon: "dock_to_left", value: "left" },
-                        { displayName: Translation.tr("Bottom"), icon: "dock_to_bottom", value: "bottom" },
-                        { displayName: Translation.tr("Right"), icon: "dock_to_right", value: "right" }
-                    ]
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "background_dot_small"
-                text: Translation.tr("Background")
-                checked: Config.options.dock.showBackground
-                onCheckedChanged: { Config.options.dock.showBackground = checked }
-            }
+
             ConfigSpinBox {
-                icon: "rounded_corner"
-                text: Translation.tr("Corner radius")
-                value: Config.options.dock.radius
-                from: 0
-                to: 40
-                stepSize: 1
-                onValueChanged: { Config.options.dock.radius = value }
-            }
-            ColorSelectionArray {
-                icon: "format_paint"
-                text: Translation.tr("Background color")
-                options: ["layer0", "layer1", "primaryContainer", "secondaryContainer", "tertiaryContainer", "primary", "secondary", "tertiary"]
-                currentValue: Config.options.dock.backgroundColor
-                onSelected: newValue => { Config.options.dock.backgroundColor = newValue }
-            }
-            ConfigSwitch {
-                enabled: Config.options.dock.style === "hug"
-                buttonIcon: "filter_frames"
-                text: Translation.tr("Follow frame color")
-                checked: Config.options.dock.followFrameColor
-                onCheckedChanged: { Config.options.dock.followFrameColor = checked }
-            }
-            ConfigSwitch {
-                enabled: Config.options.dock.style !== "hug"
-                buttonIcon: "border_style"
-                text: Translation.tr("Border")
-                checked: Config.options.dock.showBorder
-                onCheckedChanged: { Config.options.dock.showBorder = checked }
-            }
-            ConfigSpinBox {
-                enabled: Config.options.dock.showBorder && Config.options.dock.style !== "hug"
-                icon: "line_weight"
-                text: Translation.tr("Border width")
-                value: Config.options.dock.borderWidth
+                icon: "loupe"
+                text: Translation.tr("Extra wallpaper zoom (%)")
+                value: Config.options.lock.blur.extraZoom * 100
                 from: 1
-                to: 10
-                stepSize: 1
-                onValueChanged: { Config.options.dock.borderWidth = value }
-            }
-            ColorSelectionArray {
-                enabled: Config.options.dock.showBorder && Config.options.dock.style !== "hug"
-                icon: "format_paint"
-                text: Translation.tr("Border color")
-                options: ["layer0Border", "primary", "secondary", "tertiary", "primaryContainer", "secondaryContainer", "tertiaryContainer", "layer1"]
-                currentValue: Config.options.dock.borderColor
-                onSelected: newValue => { Config.options.dock.borderColor = newValue }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Icons")
-
-            ConfigSwitch {
-                buttonIcon: "preview"
-                text: Translation.tr("Window previews")
-                checked: Config.options.dock.showPreviews
-                onCheckedChanged: { Config.options.dock.showPreviews = checked }
-            }
-            ConfigSwitch {
-                visible: Config.options.appearance.visualStyle === "end4pc"
-                buttonIcon: "tooltip"
-                text: Translation.tr("App name tooltips")
-                checked: Config.options.dock.showTooltips
-                onCheckedChanged: { Config.options.dock.showTooltips = checked }
-            }
-            ConfigSwitch {
-                visible: Config.options.appearance.visualStyle === "end4pc"
-                buttonIcon: "swap_vert"
-                text: Translation.tr("Scroll on an app to switch its windows")
-                checked: Config.options.dock.scrollToCycleWindows
-                onCheckedChanged: { Config.options.dock.scrollToCycleWindows = checked }
-            }
-            ConfigSwitch {
-                visible: Config.options.appearance.visualStyle === "end4pc" && (Config.options.dock.position ?? "bottom") === "bottom"
-                buttonIcon: "zoom_in"
-                text: Translation.tr("Magnify icons on hover")
-                checked: Config.options.dock.magnify
-                onCheckedChanged: { Config.options.dock.magnify = checked }
-            }
-            ConfigSlider {
-                visible: Config.options.appearance.visualStyle === "end4pc" && (Config.options.dock.position ?? "bottom") === "bottom" && Config.options.dock.magnify
-                text: Translation.tr("Magnification")
-                buttonIcon: "zoom_in"
-                usePercentTooltip: false
-                from: 1.05
-                to: 2.2
-                value: Config.options.dock.magnification
-                onValueChanged: { Config.options.dock.magnification = value }
-            }
-            ConfigSpinBox {
-                icon: "photo_size_select_large"
-                text: Translation.tr("Icon size")
-                value: Config.options.dock.iconSize
-                from: 20
-                to: 48
-                stepSize: 1
-                onValueChanged: { Config.options.dock.iconSize = value }
-            }
-            ConfigSpinBox {
-                icon: "space_bar"
-                text: Translation.tr("Icon spacing")
-                value: Config.options.dock.iconSpacing
-                from: 0
-                to: 12
-                stepSize: 1
-                onValueChanged: { Config.options.dock.iconSpacing = value }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Buttons & Media")
-
-            ConfigSwitch {
-                buttonIcon: "music_note"
-                text: Translation.tr("Media Player")
-                checked: Config.options.dock.showMedia
-                onCheckedChanged: { Config.options.dock.showMedia = checked }
-            }
-            ConfigSwitch {
-                buttonIcon: "keep"
-                text: Translation.tr("Show Pin Button")
-                checked: Config.options.dock.showPinButton
-                onCheckedChanged: { Config.options.dock.showPinButton = checked }
-            }
-            ConfigSwitch {
-                buttonIcon: "apps"
-                text: Translation.tr("Show Apps Button")
-                checked: Config.options.dock.showAppsButton
-                onCheckedChanged: { Config.options.dock.showAppsButton = checked }
-            }
-        }
-    }
-
-    ContentSection {
-        visible: Config.options.appearance.visualStyle === "nabyscape" || Config.options.nabyIsland.enable
-        icon: "toolbar"
-        title: Translation.tr("NabyScape island")
-
-        ConfigSwitch {
-            buttonIcon: "check"
-            text: Translation.tr("Enable")
-            checked: Config.options.nabyIsland.enable
-            onCheckedChanged: {
-                Config.options.nabyIsland.enable = checked;
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Show the island on")
-            visible: Quickshell.screens.length > 1 || Config.options.nabyIsland.screen !== "" || Config.options.nabyIsland.followCursor
-
-            Flow {
-                Layout.fillWidth: true
-                spacing: 2
-
-                SelectionGroupButton {
-                    leftmost: true
-                    rightmost: Quickshell.screens.length === 0
-                    buttonIcon: "star"
-                    buttonText: Translation.tr("Primary")
-                    toggled: Config.options.nabyIsland.screen === ""
-                    onClicked: Config.options.nabyIsland.screen = ""
-                }
-
-                Repeater {
-                    model: Quickshell.screens
-                    delegate: SelectionGroupButton {
-                        id: islandScreenButton
-                        required property var modelData
-                        required property int index
-                        rightmost: index === Quickshell.screens.length - 1
-                        buttonIcon: "monitor"
-                        buttonText: islandScreenButton.modelData.name
-                        toggled: Config.options.nabyIsland.screen === islandScreenButton.modelData.name
-                        onClicked: Config.options.nabyIsland.screen = islandScreenButton.modelData.name
-                    }
-                }
-            }
-
-            ConfigSwitch {
-                buttonIcon: "arrow_selector_tool"
-                text: Translation.tr("Follow the cursor's monitor")
-                checked: Config.options.nabyIsland.followCursor
-                onCheckedChanged: {
-                    Config.options.nabyIsland.followCursor = checked;
-                }
-                StyledToolTip {
-                    text: Translation.tr("Moves the island to the monitor the cursor is on once it stays there for a moment. It starts on the monitor chosen above")
-                }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Show in the island")
-
-            ConfigRow {
-                uniform: true
-                ConfigSwitch {
-                    buttonIcon: "volume_up"
-                    text: Translation.tr("Volume and brightness")
-                    checked: Config.options.nabyIsland.showOsd
-                    onCheckedChanged: {
-                        Config.options.nabyIsland.showOsd = checked;
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("Volume and brightness changes show in the island instead of the on-screen display")
-                    }
-                }
-                ConfigSwitch {
-                    buttonIcon: "notifications"
-                    text: Translation.tr("Notifications")
-                    checked: Config.options.nabyIsland.showNotifications
-                    onCheckedChanged: {
-                        Config.options.nabyIsland.showNotifications = checked;
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("New notifications show in the island for a few seconds instead of popping up. Click one to open the notification center")
-                    }
-                }
-            }
-
-            ConfigRow {
-                uniform: true
-                ConfigSwitch {
-                    buttonIcon: "timer"
-                    text: Translation.tr("Timers")
-                    checked: Config.options.nabyIsland.showTimers
-                    onCheckedChanged: {
-                        Config.options.nabyIsland.showTimers = checked;
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("A pomodoro, timer or stopwatch in progress replaces the clock. Click it to open the Focus tab")
-                    }
-                }
-                ConfigSwitch {
-                    buttonIcon: "graphic_eq"
-                    text: Translation.tr("Music waveform")
-                    checked: Config.options.nabyIsland.showWaveform
-                    onCheckedChanged: {
-                        Config.options.nabyIsland.showWaveform = checked;
-                    }
-                }
-            }
-        }
-    }
-
-    ContentSection {
-        visible: Platform.isWindows
-        icon: "toolbar"
-        title: Translation.tr("Windows taskbar")
-
-        ConfigSwitch {
-            buttonIcon: "dock_to_bottom"
-            text: Translation.tr("Use the Windows taskbar instead of ii's bar")
-            checked: Config.options.windowsPort.nativeTaskbar
-            onCheckedChanged: {
-                Config.options.windowsPort.nativeTaskbar = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Hides ii's bar and brings back the normal Windows taskbar. Desktop widgets, sidebars, search and shortcuts stay as they are. Ctrl+Super+P switches it")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "web_traffic"
-            enabled: !Config.options.windowsPort.nativeTaskbar
-            text: Translation.tr("Show only when the cursor touches its screen edge")
-            checked: Config.options.windowsPort.taskbarHoverOnly
-            onCheckedChanged: {
-                Config.options.windowsPort.taskbarHoverOnly = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Keeps Windows from bringing the taskbar up when an app flashes or nothing else is focused.\nTurns on the taskbar's auto-hide while enabled. Turn it off to keep the taskbar on screen together with ii's bar.")
-            }
-        }
-    }
-
-    ContentSection {
-        visible: Platform.isWindows
-        icon: "gesture"
-        title: Translation.tr("Touchpad and workspaces")
-
-        ConfigSwitch {
-            buttonIcon: "swipe"
-            text: Translation.tr("Four fingers switch workspaces")
-            checked: Config.options.windowsPort.touchpadSwipe
-            onCheckedChanged: {
-                Config.options.windowsPort.touchpadSwipe = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Swipe sideways to slide between workspaces, up or down for the overview.\nTakes the place of the four finger Windows gestures while ii runs.")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "drag_pan"
-            text: Translation.tr("Three fingers move the window, pinching toggles fullscreen")
-            checked: Config.options.windowsPort.touchpadMove
-            onCheckedChanged: {
-                Config.options.windowsPort.touchpadMove = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Moves the focused window; with tiling on, it moves the tile in that direction.\nTakes the place of the three finger Windows swipes while ii runs.")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "auto_delete"
-            text: Translation.tr("Remove empty workspaces")
-            checked: Config.options.windowsPort.removeEmptyDesktops
-            onCheckedChanged: {
-                Config.options.windowsPort.removeEmptyDesktops = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Removes the empty workspaces behind the last one that has windows, like Hyprland does.")
-            }
-        }
-    }
-
-    ContentSection {
-        visible: Platform.isWindows
-        icon: "dashboard"
-        title: Translation.tr("Windows tiling")
-
-        ConfigSwitch {
-            buttonIcon: "grid_view"
-            text: Translation.tr("Tile windows")
-            checked: Config.options.windowsPort.tiling.enable
-            onCheckedChanged: {
-                Config.options.windowsPort.tiling.enable = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Arranges windows in a dwindle layout (like Hyprland) inside the space left by the bar and the taskbar.\nOff by default; turning it off puts every window back where it was before tiling.")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "picture_in_picture_center"
-            text: Translation.tr("Place dialogs and picture-in-picture")
-            checked: Config.options.windowsPort.windowRules
-            onCheckedChanged: {
-                Config.options.windowsPort.windowRules = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Dialogs open centered and file dialogs with a comfortable size.\nPicture-in-picture goes to its corner and stays on every workspace.")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "contrast"
-            text: Translation.tr("Dim inactive windows")
-            checked: Config.options.windowsPort.dimInactive
-            onCheckedChanged: {
-                Config.options.windowsPort.dimInactive = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Darkens the windows without focus a little, like Hyprland.")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "open_with"
-            text: Translation.tr("Super + drag moves and resizes windows")
-            checked: Config.options.windowsPort.superDrag
-            onCheckedChanged: {
-                Config.options.windowsPort.superDrag = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Hold the Windows key and drag with the left button to move a window, or with the right button to resize it from the nearest corner.\nWorks with tiling on or off; with tiling on, dropping a window on another one swaps them and resizing moves the split.")
-            }
-        }
-
-        ConfigSpinBox {
-            icon: "space_bar"
-            text: Translation.tr("Gap between windows (px)")
-            value: Config.options.windowsPort.tiling.gapsIn
-            from: 0
-            to: 64
-            stepSize: 1
-            onValueChanged: {
-                Config.options.windowsPort.tiling.gapsIn = value;
-            }
-        }
-
-        ConfigSpinBox {
-            icon: "space_dashboard"
-            text: Translation.tr("Gap to screen edges (px)")
-            value: Config.options.windowsPort.tiling.gapsOut
-            from: 0
-            to: 64
-            stepSize: 1
-            onValueChanged: {
-                Config.options.windowsPort.tiling.gapsOut = value;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "splitscreen"
-            text: Translation.tr("Keep each split's direction")
-            checked: Config.options.windowsPort.tiling.preserveSplit
-            onCheckedChanged: {
-                Config.options.windowsPort.tiling.preserveSplit = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("A split keeps the direction it was made with until Super+\\ flips it.\nOff: a split follows its area's shape instead.")
-            }
-        }
-
-        ConfigRow {
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Apps that always float, one per line: process name (notepad.exe), app id, window class, or title:<pattern>")
-                text: Config.options.windowsPort.tiling.excluded.join("\n")
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.windowsPort.tiling.excluded = text.split("\n").map(s => s.trim());
-                }
-            }
-        }
-    }
-
-    ContentSection {
-        icon: "swipe"
-        title: Translation.tr("Interactions")
-
-        ConfigSwitch {
-            buttonIcon: "swipe"
-            text: Translation.tr("Faster touchpad/mouse scrolling")
-            checked: Config.options.interactions.scrolling.fasterTouchpadScroll
-            onCheckedChanged: {
-                Config.options.interactions.scrolling.fasterTouchpadScroll = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Replaces the default scroll handling with an animated one, using the factors below")
-            }
-        }
-
-        ConfigSpinBox {
-            enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-            icon: "mouse"
-            text: Translation.tr("Mouse wheel detection threshold")
-            value: Config.options.interactions.scrolling.mouseScrollDeltaThreshold
-            from: 1
-            to: 1000
-            stepSize: 10
-            onValueChanged: {
-                Config.options.interactions.scrolling.mouseScrollDeltaThreshold = value;
-            }
-            StyledToolTip {
-                text: Translation.tr("A scroll delta at or above this is treated as a mouse wheel notch instead of a touchpad swipe")
-            }
-        }
-
-        ConfigSpinBox {
-            enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-            icon: "mouse"
-            text: Translation.tr("Mouse scroll factor")
-            value: Config.options.interactions.scrolling.mouseScrollFactor
-            from: 10
-            to: 2000
-            stepSize: 10
-            onValueChanged: {
-                Config.options.interactions.scrolling.mouseScrollFactor = value;
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Inertial scrolling (touchpad)")
-            tooltip: Translation.tr("Fling and bounce physics used for touchpad input once faster scrolling is enabled above.")
-
-            ConfigRow {
-                uniform: true
-                ConfigSpinBox {
-                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                    icon: "swipe"
-                    text: Translation.tr("Touchpad sensitivity")
-                    value: Math.round(Config.options.interactions.scrolling.touchpadSensitivity * 100)
-                    from: 50
-                    to: 2000
-                    stepSize: 10
-                    onValueChanged: {
-                        Config.options.interactions.scrolling.touchpadSensitivity = value / 100;
-                    }
-                }
-                ConfigSpinBox {
-                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                    icon: "speed"
-                    text: Translation.tr("Fling friction")
-                    value: Math.round(Config.options.interactions.scrolling.flingFriction * 10000)
-                    from: 1
-                    to: 500
-                    stepSize: 1
-                    onValueChanged: {
-                        Config.options.interactions.scrolling.flingFriction = value / 10000;
-                    }
-                }
-            }
-            ConfigRow {
-                uniform: true
-                ConfigSpinBox {
-                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                    icon: "stop_circle"
-                    text: Translation.tr("Fling stop threshold")
-                    value: Math.round(Config.options.interactions.scrolling.flingStopThreshold * 1000)
-                    from: 1
-                    to: 200
-                    stepSize: 1
-                    onValueChanged: {
-                        Config.options.interactions.scrolling.flingStopThreshold = value / 1000;
-                    }
-                }
-                ConfigSpinBox {
-                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                    icon: "vertical_align_center"
-                    text: Translation.tr("Bounce damping")
-                    value: Math.round(Config.options.interactions.scrolling.bounceDamping * 100)
-                    from: 0
-                    to: 100
-                    stepSize: 5
-                    onValueChanged: {
-                        Config.options.interactions.scrolling.bounceDamping = value / 100;
-                    }
-                }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Inertial scrolling (mouse wheel)")
-
-            ConfigSpinBox {
-                enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                icon: "mouse"
-                text: Translation.tr("Wheel scroll amount")
-                value: Config.options.interactions.scrolling.wheelScrollAmount
-                from: 10
-                to: 2000
-                stepSize: 10
+                to: 150
+                stepSize: 2
                 onValueChanged: {
-                    Config.options.interactions.scrolling.wheelScrollAmount = value;
-                }
-            }
-            ConfigRow {
-                uniform: true
-                ConfigSpinBox {
-                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                    icon: "timer"
-                    text: Translation.tr("Minimum duration (ms)")
-                    value: Config.options.interactions.scrolling.wheelDurationMin
-                    from: 50
-                    to: 1000
-                    stepSize: 10
-                    onValueChanged: {
-                        Config.options.interactions.scrolling.wheelDurationMin = value;
-                    }
-                }
-                ConfigSpinBox {
-                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                    icon: "timer"
-                    text: Translation.tr("Maximum duration (ms)")
-                    value: Config.options.interactions.scrolling.wheelDurationMax
-                    from: 50
-                    to: 2000
-                    stepSize: 10
-                    onValueChanged: {
-                        Config.options.interactions.scrolling.wheelDurationMax = value;
-                    }
-                }
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "border_right"
-            text: Translation.tr("Dead pixel workaround")
-            checked: Config.options.interactions.deadPixelWorkaround.enable
-            onCheckedChanged: {
-                Config.options.interactions.deadPixelWorkaround.enable = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Shifts the bar and screen corners 1px so a display that leaves out its edge pixel still gets full hover/click coverage")
-            }
-        }
-    }
-
-    Loader {
-        Layout.fillWidth: true
-        active: !Platform.isWindows
-        visible: active
-        sourceComponent: ContentSection {
-            icon: "lock"
-            title: Translation.tr("Lock screen")
-
-            ConfigSwitch {
-                buttonIcon: "water_drop"
-                text: Translation.tr('Use Hyprlock (instead of Quickshell)')
-                checked: Config.options.lock.useHyprlock
-                onCheckedChanged: {
-                    Config.options.lock.useHyprlock = checked;
-                }
-                StyledToolTip {
-                    text: Translation.tr("If you want to somehow use fingerprint unlock...")
-                }
-            }
-
-            ConfigSwitch {
-                buttonIcon: "account_circle"
-                text: Translation.tr('Launch on startup')
-                checked: Config.options.lock.launchOnStartup
-                onCheckedChanged: {
-                    Config.options.lock.launchOnStartup = checked;
-                }
-            }
-
-            ConfigSwitch {
-                visible: Platform.isWindows
-                buttonIcon: "passkey"
-                text: Translation.tr("Unlock with Windows Hello instead of a password")
-                checked: Config.options.lock.windowsUnlock === "hello"
-                onCheckedChanged: {
-                    if (checked)
-                        Config.options.lock.windowsUnlock = "hello";
-                    else if (Config.options.lock.windowsUnlock === "hello")
-                        Config.options.lock.windowsUnlock = WindowsNative.session?.hasLockPassword() ? "password" : "";
-                }
-            }
-
-            RippleButtonWithIcon {
-                visible: Platform.isWindows && Config.options.lock.windowsUnlock === "password"
-                Layout.fillWidth: true
-                materialIcon: "password"
-                mainText: Translation.tr("Change the lock screen password (asked on the next lock)")
-                onClicked: {
-                    WindowsNative.session?.clearLockPassword();
-                    Config.options.lock.windowsUnlock = "";
-                }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Security")
-
-                ConfigSwitch {
-                    buttonIcon: "settings_power"
-                    text: Translation.tr('Require password to power off/restart')
-                    checked: Config.options.lock.security.requirePasswordToPower
-                    onCheckedChanged: {
-                        Config.options.lock.security.requirePasswordToPower = checked;
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("Remember that on most devices one can always hold the power button to force shutdown\nThis only makes it a tiny bit harder for accidents to happen")
-                    }
-                }
-
-                ConfigSwitch {
-                    buttonIcon: "key_vertical"
-                    text: Translation.tr('Also unlock keyring')
-                    checked: Config.options.lock.security.unlockKeyring
-                    onCheckedChanged: {
-                        Config.options.lock.security.unlockKeyring = checked;
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("This is usually safe and needed for your browser and AI sidebar anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)")
-                    }
-                }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Style: general")
-
-                ConfigSwitch {
-                    buttonIcon: "center_focus_weak"
-                    text: Translation.tr('Center clock')
-                    checked: Config.options.lock.centerClock
-                    onCheckedChanged: {
-                        Config.options.lock.centerClock = checked;
-                    }
-                }
-
-                ConfigSwitch {
-                    buttonIcon: "info"
-                    text: Translation.tr('Show "Locked" text')
-                    checked: Config.options.lock.showLockedText
-                    onCheckedChanged: {
-                        Config.options.lock.showLockedText = checked;
-                    }
-                }
-
-                ConfigSwitch {
-                    buttonIcon: "shapes"
-                    text: Translation.tr('Use varying shapes for password characters')
-                    checked: Config.options.lock.materialShapeChars
-                    onCheckedChanged: {
-                        Config.options.lock.materialShapeChars = checked;
-                    }
-                }
-            }
-            ContentSubsection {
-                title: Translation.tr("Style: Blurred")
-
-                ConfigSwitch {
-                    buttonIcon: "blur_on"
-                    text: Translation.tr('Enable blur')
-                    checked: Config.options.lock.blur.enable
-                    onCheckedChanged: {
-                        Config.options.lock.blur.enable = checked;
-                    }
-                }
-
-                ConfigSpinBox {
-                    icon: "loupe"
-                    text: Translation.tr("Extra wallpaper zoom (%)")
-                    value: Math.round(Config.options.lock.blur.extraZoom * 100)
-                    from: 1
-                    to: 150
-                    stepSize: 2
-                    onValueChanged: {
-                        Config.options.lock.blur.extraZoom = value / 100;
-                    }
+                    Config.options.lock.blur.extraZoom = value / 100;
                 }
             }
         }
@@ -1126,62 +254,6 @@ ContentPage {
     ContentSection {
         icon: "notifications"
         title: Translation.tr("Notifications")
-
-        ContentSubsection {
-            title: Translation.tr("Popup position")
-            ConfigRow {
-                uniform: true
-                ConfigSelectionArray {
-                    currentValue: Config.options.notifications.position
-                    onSelected: newValue => {
-                        Config.options.notifications.position = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Top left"),
-                            icon: "north_west",
-                            value: "top_left"
-                        },
-                        {
-                            displayName: Translation.tr("Top center"),
-                            icon: "north",
-                            value: "top_center"
-                        },
-                        {
-                            displayName: Translation.tr("Top right"),
-                            icon: "north_east",
-                            value: "top_right"
-                        }
-                    ]
-                }
-            }
-            ConfigRow {
-                uniform: true
-                ConfigSelectionArray {
-                    currentValue: Config.options.notifications.position
-                    onSelected: newValue => {
-                        Config.options.notifications.position = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Bottom left"),
-                            icon: "south_west",
-                            value: "bottom_left"
-                        },
-                        {
-                            displayName: Translation.tr("Bottom center"),
-                            icon: "south",
-                            value: "bottom_center"
-                        },
-                        {
-                            displayName: Translation.tr("Bottom right"),
-                            icon: "south_east",
-                            value: "bottom_right"
-                        }
-                    ]
-                }
-            }
-        }
 
         ConfigSpinBox {
             icon: "av_timer"
@@ -1209,34 +281,14 @@ ContentPage {
 
         ConfigRow {
             enabled: Config.options.notifications.forceMonitor.enable
-            StyledComboBox {
+            MaterialTextArea {
                 Layout.fillWidth: true
-                textRole: "displayName"
-                model: page.forceMonitorOptions
-                currentIndex: {
-                    const index = model.findIndex(item => item.value === Config.options.notifications.forceMonitor.name);
-                    return index !== -1 ? index : 0;
+                placeholderText: Translation.tr("Monitor name to show notifications on (e.g., eDP-1)")
+                text: Config.options.notifications.forceMonitor.name
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.notifications.forceMonitor.name = text;
                 }
-                onActivated: index => {
-                    Config.options.notifications.forceMonitor.name = model[index].value;
-                }
-            }
-        }
-    }
-
-    ContentSection {
-        icon: "music_note"
-        title: Translation.tr("Media")
-
-        ConfigSwitch {
-            buttonIcon: "music_note"
-            text: Translation.tr("Filter duplicate players")
-            checked: Config.options.media.filterDuplicatePlayers
-            onCheckedChanged: {
-                Config.options.media.filterDuplicatePlayers = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Hides a player that looks like a duplicate of another one (e.g. a browser's native player showing up alongside its tab-aggregated one)")
             }
         }
     }
@@ -1259,20 +311,6 @@ ContentPage {
             checked: Config.options.overlay.darkenScreen
             onCheckedChanged: {
                 Config.options.overlay.darkenScreen = checked;
-            }
-        }
-        ConfigSpinBox {
-            icon: "opacity"
-            text: Translation.tr("Clickthrough widget opacity (%)")
-            value: Math.round(Config.options.overlay.clickthroughOpacity * 100)
-            from: 0
-            to: 100
-            stepSize: 5
-            onValueChanged: {
-                Config.options.overlay.clickthroughOpacity = value / 100;
-            }
-            StyledToolTip {
-                text: Translation.tr("How visible pinned, clickthrough overlay widgets (like the floating image) stay while the overlay menu is closed")
             }
         }
     }
@@ -1329,21 +367,6 @@ ContentPage {
                 Config.options.overlay.floatingImage.imageSource = text;
             }
         }
-
-        ConfigSpinBox {
-            icon: "loupe"
-            text: Translation.tr("Scale (%)")
-            value: Math.round(Config.options.overlay.floatingImage.scale * 100)
-            from: 10
-            to: 500
-            stepSize: 10
-            onValueChanged: {
-                Config.options.overlay.floatingImage.scale = value / 100;
-            }
-            StyledToolTip {
-                text: Translation.tr("Can also be changed by scrolling on the image itself")
-            }
-        }
     }
 
     ContentSection {
@@ -1381,90 +404,8 @@ ContentPage {
                     }
                 }
             }
-
-            ConfigSwitch {
-                buttonIcon: "label"
-                text: Translation.tr("Show label")
-                checked: Config.options.regionSelector.targetRegions.showLabel
-                onCheckedChanged: {
-                    Config.options.regionSelector.targetRegions.showLabel = checked;
-                }
-                StyledToolTip {
-                    text: Translation.tr("Shows the app/window name on top of a hinted region")
-                }
-            }
-
-            ConfigRow {
-                uniform: true
-                ConfigSpinBox {
-                    icon: "opacity"
-                    text: Translation.tr("Window/layer opacity (%)")
-                    value: Math.round(Config.options.regionSelector.targetRegions.opacity * 100)
-                    from: 0
-                    to: 100
-                    stepSize: 5
-                    onValueChanged: {
-                        Config.options.regionSelector.targetRegions.opacity = value / 100;
-                    }
-                }
-                Loader {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 8
-                    Layout.rightMargin: 8
-                    active: !Platform.isWindows
-                    visible: active
-                    sourceComponent: ConfigSpinBox {
-                        icon: "opacity"
-                        text: Translation.tr("Content region opacity (%)")
-                        value: Math.round(Config.options.regionSelector.targetRegions.contentRegionOpacity * 100)
-                        from: 0
-                        to: 100
-                        stepSize: 5
-                        onValueChanged: {
-                            Config.options.regionSelector.targetRegions.contentRegionOpacity = value / 100;
-                        }
-                    }
-                }
-            }
-
-            ConfigSpinBox {
-                icon: "screenshot_frame_2"
-                text: Translation.tr("Selection padding (px)")
-                value: Config.options.regionSelector.targetRegions.selectionPadding
-                from: 0
-                to: 50
-                stepSize: 1
-                onValueChanged: {
-                    Config.options.regionSelector.targetRegions.selectionPadding = value;
-                }
-                StyledToolTip {
-                    text: Translation.tr("Extra padding added around a hinted region when it's picked as the selection")
-                }
-            }
         }
-
-        Loader {
-            Layout.fillWidth: true
-            Layout.topMargin: 4
-            active: !Platform.isWindows
-            visible: active
-            sourceComponent: ContentSubsection {
-                title: Translation.tr("Annotation")
-
-                ConfigSwitch {
-                    buttonIcon: "draw"
-                    text: Translation.tr("Use Satty")
-                    checked: Config.options.regionSelector.annotation.useSatty
-                    onCheckedChanged: {
-                        Config.options.regionSelector.annotation.useSatty = checked;
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("Needs satty installed. When off, uses swappy instead")
-                    }
-                }
-            }
-        }
-
+        
         ContentSubsection {
             title: Translation.tr("Google Lens")
             
@@ -1523,35 +464,6 @@ ContentPage {
     }
 
     ContentSection {
-        icon: "keyboard"
-        title: Translation.tr("On-screen keyboard")
-
-        ContentSubsection {
-            title: Translation.tr("Layout")
-            ConfigSelectionArray {
-                currentValue: Config.options.osk.layout
-                onSelected: newValue => {
-                    Config.options.osk.layout = newValue;
-                }
-                options: [
-                    { displayName: Translation.tr("English (US)"), value: "English (US)" },
-                    { displayName: Translation.tr("German"), value: "German" },
-                    { displayName: Translation.tr("Russian"), value: "Russian" }
-                ]
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "keep"
-            text: Translation.tr("Pinned on startup")
-            checked: Config.options.osk.pinnedOnStartup
-            onCheckedChanged: {
-                Config.options.osk.pinnedOnStartup = checked;
-            }
-        }
-    }
-
-    ContentSection {
         icon: "side_navigation"
         title: Translation.tr("Sidebars")
 
@@ -1573,112 +485,6 @@ ContentPage {
             checked: Config.options.sidebar.translator.enable
             onCheckedChanged: {
                 Config.options.sidebar.translator.enable = checked;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "music_note"
-            text: Translation.tr('Enable media tab in left sidebar')
-            checked: Config.options.sidebar.media.enable
-            onCheckedChanged: {
-                Config.options.sidebar.media.enable = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Adds a Media tab next to Intelligence, Translator and Anime in the left sidebar")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "wallpaper"
-            text: Translation.tr('Show banner')
-            checked: Config.options.sidebar.banner
-            onCheckedChanged: {
-                Config.options.sidebar.banner = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Shows a banner image at the top of the right sidebar.\nDrag an image onto it to set it, right-click to reset")
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "calendar_month"
-            text: Translation.tr('Show bottom group')
-            checked: Config.options.sidebar.bottomGroup
-            onCheckedChanged: {
-                Config.options.sidebar.bottomGroup = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Calendar, to-do list and timer at the bottom of the right sidebar")
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Media player")
-
-            ConfigSwitch {
-                buttonIcon: "check"
-                text: Translation.tr("Show in sidebar")
-                checked: Config.options.sidebar.mediaPlayer
-                onCheckedChanged: {
-                    Config.options.sidebar.mediaPlayer = checked;
-                }
-            }
-
-
-            ConfigSwitch {
-                buttonIcon: "lyrics"
-                text: Translation.tr("Show lyrics")
-                enabled: Config.options.sidebar.mediaPlayer
-                checked: Config.options.sidebar.media.showLyrics
-                onCheckedChanged: {
-                    Config.options.sidebar.media.showLyrics = checked;
-                }
-            }
-
-            ConfigSwitch {
-                buttonIcon: "palette"
-                text: Translation.tr("Color from album art")
-                enabled: Config.options.sidebar.mediaPlayer
-                checked: Config.options.sidebar.media.artColors
-                onCheckedChanged: {
-                    Config.options.sidebar.media.artColors = checked;
-                }
-            }
-
-            ConfigSwitch {
-                buttonIcon: "blur_on"
-                text: Translation.tr("Blurred art background")
-                enabled: Config.options.sidebar.mediaPlayer
-                checked: Config.options.sidebar.media.blurredBackground
-                onCheckedChanged: {
-                    Config.options.sidebar.media.blurredBackground = checked;
-                }
-            }
-
-            ConfigRow {
-                uniform: true
-                ConfigSwitch {
-                    buttonIcon: "shapes"
-                    text: Translation.tr("Shaped art")
-                    enabled: Config.options.sidebar.mediaPlayer
-                    checked: Config.options.sidebar.media.shapeArt
-                    onCheckedChanged: {
-                        Config.options.sidebar.media.shapeArt = checked;
-                    }
-                }
-                StyledComboBox {
-                    id: mediaArtShapeSelector
-                    enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.shapeArt
-                    textRole: "displayName"
-                    model: GlobalStates.centeredShapeOptions.map(shape => ({ displayName: shape, value: shape }))
-                    currentIndex: {
-                        const index = model.findIndex(item => item.value === Config.options.sidebar.media.artShape);
-                        return index !== -1 ? index : 0;
-                    }
-                    onActivated: index => {
-                        Config.options.sidebar.media.artShape = model[index].value;
-                    }
-                }
             }
         }
 
@@ -1764,7 +570,7 @@ ContentPage {
 
         ContentSubsection {
             title: Translation.tr("Corner open")
-            tooltip: Translation.tr("Allows you to open sidebars by clicking or hovering screen corners regardless of bar position. To require a click everywhere, turn off both \"Hover to trigger\" and \"Force hover open at absolute corner\" below")
+            tooltip: Translation.tr("Allows you to open sidebars by clicking or hovering screen corners regardless of bar position")
             ConfigRow {
                 uniform: true
                 ConfigSwitch {
@@ -1785,7 +591,7 @@ ContentPage {
                 }
 
                 StyledToolTip {
-                    text: Translation.tr("When this is off you'll have to click, except right at the corner's edge if \"Force hover open at absolute corner\" below is on")
+                    text: Translation.tr("When this is off you'll have to click")
                 }
             }
             Row {
@@ -1798,7 +604,7 @@ ContentPage {
                     }
 
                     StyledToolTip {
-                        text: Translation.tr("Opens on hover right at the corner's edge even when \"Hover to trigger\" above is off — this is usually what catches an accidental flick of the mouse into a corner. Turn this off too for click-only. The remaining area can still be used for volume/brightness scroll")
+                        text: Translation.tr("When the previous option is off and this is on,\nyou can still hover the corner's end to open sidebar,\nand the remaining area can be used for volume/brightness scroll")
                     }
                 }
                 ConfigSpinBox {
@@ -1883,53 +689,6 @@ ContentPage {
                     }
                 }
             }
-            ConfigRow {
-                uniform: true
-                Column {
-                    Layout.fillWidth: true
-                    spacing: 4
-                    StyledText {
-                        text: Translation.tr("Bottom-left corner")
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colSubtext
-                    }
-                    StyledComboBox {
-                        id: bottomLeftActionSelector
-                        buttonIcon: "first_page"
-                        textRole: "displayName"
-                        model: GlobalStates.hotCornerOptions
-                        currentIndex: {
-                            const index = model.findIndex(item => item.value === Config.options.sidebar.cornerOpen.bottomLeftAction);
-                            return index !== -1 ? index : 0;
-                        }
-                        onActivated: index => {
-                            Config.options.sidebar.cornerOpen.bottomLeftAction = model[index].value;
-                        }
-                    }
-                }
-                Column {
-                    Layout.fillWidth: true
-                    spacing: 4
-                    StyledText {
-                        text: Translation.tr("Bottom-right corner")
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colSubtext
-                    }
-                    StyledComboBox {
-                        id: bottomRightActionSelector
-                        buttonIcon: "last_page"
-                        textRole: "displayName"
-                        model: GlobalStates.hotCornerOptions
-                        currentIndex: {
-                            const index = model.findIndex(item => item.value === Config.options.sidebar.cornerOpen.bottomRightAction);
-                            return index !== -1 ? index : 0;
-                        }
-                        onActivated: index => {
-                            Config.options.sidebar.cornerOpen.bottomRightAction = model[index].value;
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -1946,14 +705,6 @@ ContentPage {
             stepSize: 100
             onValueChanged: {
                 Config.options.osd.timeout = value;
-            }
-        }
-        ConfigSwitch {
-            buttonIcon: "brightness_6"
-            text: Translation.tr("Show the brightness indicator for changes made outside ii")
-            checked: Config.options.osd.showBrightnessOutsideChanges
-            onCheckedChanged: {
-                Config.options.osd.showBrightnessOutsideChanges = checked;
             }
         }
     }
@@ -1978,31 +729,10 @@ ContentPage {
                 Config.options.overview.centerIcons = checked;
             }
         }
-        ConfigRow {
-            uniform: true
-            ConfigSelectionArray {
-                currentValue: Config.options.overview.style
-                onSelected: newValue => {
-                    Config.options.overview.style = newValue;
-                }
-                options: [
-                    {
-                        displayName: Translation.tr("Default"),
-                        icon: "grid_on",
-                        value: "default"
-                    },
-                    {
-                        displayName: Translation.tr("Niri-like"),
-                        icon: "view_agenda",
-                        value: "niri"
-                    }
-                ]
-            }
-        }
         ConfigSpinBox {
             icon: "loupe"
             text: Translation.tr("Scale (%)")
-            value: Math.round(Config.options.overview.scale * 100)
+            value: Config.options.overview.scale * 100
             from: 1
             to: 100
             stepSize: 1
@@ -2012,8 +742,6 @@ ContentPage {
         }
         ConfigRow {
             uniform: true
-            enabled: Config.options.overview.style !== "niri"
-            opacity: enabled ? 1 : 0.4
             ConfigSpinBox {
                 icon: "splitscreen_bottom"
                 text: Translation.tr("Rows")
@@ -2039,8 +767,6 @@ ContentPage {
         }
         ConfigRow {
             uniform: true
-            enabled: Config.options.overview.style !== "niri"
-            opacity: enabled ? 1 : 0.4
             ConfigSelectionArray {
                 currentValue: Config.options.overview.orderRightLeft
                 onSelected: newValue => {
@@ -2081,300 +807,6 @@ ContentPage {
     }
 
     ContentSection {
-        icon: "widgets"
-        title: Translation.tr("Waffle panel")
-
-        ContentSubsection {
-            title: Translation.tr("Tweaks")
-            tooltip: Translation.tr("Some spots are a bit janky; turning these off makes them match for accuracy instead")
-
-            ConfigSwitch {
-                buttonIcon: "toggle_on"
-                text: Translation.tr("Fix switch handle position")
-                checked: Config.options.waffles.tweaks.switchHandlePositionFix
-                onCheckedChanged: {
-                    Config.options.waffles.tweaks.switchHandlePositionFix = checked;
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "menu_open"
-                text: Translation.tr("Smoother menu animations")
-                checked: Config.options.waffles.tweaks.smootherMenuAnimations
-                onCheckedChanged: {
-                    Config.options.waffles.tweaks.smootherMenuAnimations = checked;
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "search"
-                text: Translation.tr("Smoother search bar")
-                checked: Config.options.waffles.tweaks.smootherSearchBar
-                onCheckedChanged: {
-                    Config.options.waffles.tweaks.smootherSearchBar = checked;
-                }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Bar")
-            ConfigRow {
-                uniform: true
-                ConfigSwitch {
-                    buttonIcon: "vertical_align_bottom"
-                    text: Translation.tr("Bar at bottom")
-                    checked: Config.options.waffles.bar.bottom
-                    onCheckedChanged: {
-                        Config.options.waffles.bar.bottom = checked;
-                    }
-                }
-                ConfigSwitch {
-                    buttonIcon: "format_align_left"
-                    text: Translation.tr("Left-align apps")
-                    checked: Config.options.waffles.bar.leftAlignApps
-                    onCheckedChanged: {
-                        Config.options.waffles.bar.leftAlignApps = checked;
-                    }
-                }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Calendar")
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Locale for the calendar, e.g. en-GB")
-                text: Config.options.calendar.locale
-                wrapMode: TextEdit.NoWrap
-                onTextChanged: {
-                    Config.options.calendar.locale = text;
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "calendar_view_week"
-                text: Translation.tr("Short day-of-week labels")
-                checked: Config.options.waffles.calendar.force2CharDayOfWeek
-                onCheckedChanged: {
-                    Config.options.waffles.calendar.force2CharDayOfWeek = checked;
-                }
-                StyledToolTip {
-                    text: Translation.tr("Shortens the day of week to 2 characters (e.g. \"Mo\" instead of \"Monday\")")
-                }
-            }
-        }
-    }
-
-    ContentSection {
-        visible: Platform.isWindows
-        icon: "event"
-        title: Translation.tr("Calendar events")
-
-        Component.onCompleted: {
-            if (visible)
-                CalendarEvents.markOpened();
-        }
-        onVisibleChanged: {
-            if (visible)
-                CalendarEvents.markOpened();
-        }
-
-        StyledText {
-            Layout.fillWidth: true
-            text: Translation.tr("Shows events and birthdays from a Google/Outlook iCal link in the sidebar, clock and notification center.")
-            font.pixelSize: Appearance.font.pixelSize.smaller
-            color: Appearance.colors.colSubtext
-            wrapMode: Text.Wrap
-        }
-
-        ConfigSwitch {
-            buttonIcon: "event"
-            text: Translation.tr("Show calendar events")
-            checked: Config.options.calendar.events.enable
-            onCheckedChanged: {
-                Config.options.calendar.events.enable = checked;
-            }
-        }
-
-        ConfigSpinBox {
-            icon: "update"
-            text: Translation.tr("Refresh interval (minutes)")
-            value: Config.options.calendar.events.refreshMinutes
-            from: 5
-            to: 180
-            stepSize: 5
-            onValueChanged: {
-                Config.options.calendar.events.refreshMinutes = value;
-            }
-        }
-
-        StyledText {
-            Layout.fillWidth: true
-            Layout.topMargin: 4
-            visible: CalendarEvents.configSources.length === 0
-            text: Translation.tr("No calendars yet")
-            color: Appearance.colors.colSubtext
-            font.pixelSize: Appearance.font.pixelSize.small
-        }
-
-        Repeater {
-            model: CalendarEvents.configSources
-
-            delegate: RowLayout {
-                id: calendarSourceRow
-                required property var modelData
-                Layout.fillWidth: true
-                Layout.topMargin: 4
-                spacing: 10
-
-                Rectangle {
-                    Layout.preferredWidth: 12
-                    Layout.preferredHeight: 12
-                    radius: 6
-                    color: CalendarEvents.colorFor(calendarSourceRow.modelData.id)
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: calendarSourceRow.modelData.name
-                        color: Appearance.colors.colOnLayer1
-                        elide: Text.ElideRight
-                    }
-                    StyledText {
-                        Layout.fillWidth: true
-                        property var sourceStatus: CalendarEvents.statusFor(calendarSourceRow.modelData.id)
-                        text: sourceStatus
-                            ? (sourceStatus.ok
-                                ? Translation.tr("%1 events · updated %2").arg(sourceStatus.events).arg(Qt.locale().toString(sourceStatus.updated, "hh:mm"))
-                                : (sourceStatus.error || Translation.tr("Could not fetch")))
-                            : Translation.tr("Not fetched yet")
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: (sourceStatus && !sourceStatus.ok) ? Appearance.colors.colError : Appearance.colors.colSubtext
-                        elide: Text.ElideRight
-                    }
-                }
-
-                StyledSwitch {
-                    scale: 0.65
-                    checked: calendarSourceRow.modelData.enabled !== false
-                    onToggled: CalendarEvents.setSourceEnabled(calendarSourceRow.modelData.id, checked)
-                }
-
-                RippleButton {
-                    implicitWidth: 36
-                    implicitHeight: 36
-                    buttonRadius: 18
-                    colBackground: "transparent"
-                    colBackgroundHover: Qt.rgba(1, 1, 1, 0.12)
-                    colRipple: Qt.rgba(1, 1, 1, 0.2)
-                    onClicked: CalendarEvents.removeSource(calendarSourceRow.modelData.id)
-                    contentItem: MaterialSymbol {
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        text: "delete"
-                        iconSize: 20
-                        color: Appearance.colors.colOnLayer1
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("Remove")
-                    }
-                }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Add calendar")
-
-            MaterialTextArea {
-                id: calendarNameInput
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Name, e.g. Personal")
-                wrapMode: TextEdit.NoWrap
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 8
-
-                TextField {
-                    id: calendarUrlInput
-                    Layout.fillWidth: true
-                    echoMode: TextInput.Password
-                    placeholderText: Translation.tr("Secret iCal/ICS URL")
-                    color: Appearance.colors.colOnLayer1
-                    background: Rectangle {
-                        color: Appearance.colors.colLayer1
-                        radius: Appearance.rounding.small
-                        border.width: 1
-                        border.color: calendarUrlInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
-                    }
-                }
-
-                RippleButton {
-                    implicitHeight: 36
-                    buttonRadius: Appearance.rounding.normal
-                    enabled: calendarNameInput.text.trim() !== "" && calendarUrlInput.text.trim() !== ""
-                    colBackground: Appearance.colors.colSecondaryContainer
-                    colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                    colRipple: Appearance.colors.colSecondaryContainerActive
-                    onClicked: {
-                        CalendarEvents.addSource(calendarNameInput.text.trim(), calendarUrlInput.text.trim());
-                        calendarNameInput.text = "";
-                        calendarUrlInput.text = "";
-                    }
-                    contentItem: RowLayout {
-                        spacing: 6
-                        MaterialSymbol {
-                            text: "add"
-                            iconSize: 18
-                            fill: 1
-                            color: Appearance.colors.colOnSecondaryContainer
-                        }
-                        StyledText {
-                            text: Translation.tr("Add")
-                            color: Appearance.colors.colOnSecondaryContainer
-                        }
-                    }
-                }
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                wrapMode: Text.Wrap
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
-                text: Translation.tr("Google Calendar: Settings → your calendar → Integrate calendar → Secret address in iCal format. Outlook: Settings → Calendar → Shared calendars → Publish a calendar → ICS link. Anyone with the link can read the calendar, so ii keeps it in Windows Credential Manager.")
-            }
-        }
-
-        RippleButton {
-            Layout.topMargin: 4
-            implicitWidth: 140
-            implicitHeight: 36
-            buttonRadius: Appearance.rounding.normal
-            colBackground: Appearance.colors.colSecondaryContainer
-            colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-            colRipple: Appearance.colors.colSecondaryContainerActive
-            onClicked: CalendarEvents.refresh()
-            contentItem: RowLayout {
-                spacing: 6
-                Item { Layout.fillWidth: true }
-                MaterialSymbol {
-                    text: "refresh"
-                    iconSize: 18
-                    color: Appearance.colors.colOnSecondaryContainer
-                }
-                StyledText {
-                    text: Translation.tr("Refresh now")
-                    color: Appearance.colors.colOnSecondaryContainer
-                }
-                Item { Layout.fillWidth: true }
-            }
-        }
-    }
-
-    ContentSection {
         icon: "wallpaper_slideshow"
         title: Translation.tr("Wallpaper selector")
 
@@ -2384,357 +816,6 @@ ContentPage {
             checked: Config.options.wallpaperSelector.useSystemFileDialog
             onCheckedChanged: {
                 Config.options.wallpaperSelector.useSystemFileDialog = checked;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "home"
-            text: Translation.tr('Show home directory in quick access')
-            checked: Config.options.wallpaperSelector.showHomePath
-            onCheckedChanged: {
-                Config.options.wallpaperSelector.showHomePath = checked;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "done"
-            text: Translation.tr('Close after selection')
-            checked: Config.options.wallpaperSelector.closeAfterSelection
-            onCheckedChanged: {
-                Config.options.wallpaperSelector.closeAfterSelection = checked;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "blur_on"
-            text: Translation.tr('Show blur background')
-            checked: Config.options.wallpaperSelector.showBlurBackground
-            onCheckedChanged: {
-                Config.options.wallpaperSelector.showBlurBackground = checked;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "search"
-            text: Translation.tr('Always show search bar')
-            checked: Config.options.wallpaperSelector.showSearchbar
-            onCheckedChanged: {
-                Config.options.wallpaperSelector.showSearchbar = checked;
-            }
-        }
-
-        ConfigSpinBox {
-            icon: "grid_on"
-            text: Translation.tr("Columns in grid view")
-            value: Config.options.wallpaperSelector.columns
-            from: 3
-            to: 10
-            stepSize: 1
-            onValueChanged: {
-                Config.options.wallpaperSelector.columns = value;
-            }
-        }
-
-        ConfigSpinBox {
-            icon: "timer"
-            text: Translation.tr("Wallpaper change interval (min)")
-            value: Config.options.wallpaperSelector.changeInterval / 60000
-            from: 0
-            to: 1440
-            stepSize: 5
-            onValueChanged: {
-                Config.options.wallpaperSelector.changeInterval = value * 60000;
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Sort wallpapers by")
-            ConfigSelectionArray {
-                currentValue: Config.options.wallpaperSelector.sortMode
-                options: [
-                    { "displayName": Translation.tr("Newest first"), "icon": "schedule", "value": "time" },
-                    { "displayName": Translation.tr("Oldest first"), "icon": "history", "value": "time_rev" },
-                    { "displayName": Translation.tr("Name A-Z"), "icon": "sort_by_alpha", "value": "name" },
-                    { "displayName": Translation.tr("Name Z-A"), "icon": "sort_by_alpha", "value": "name_rev" },
-                    { "displayName": Translation.tr("Largest first"), "icon": "straighten", "value": "size" },
-                    { "displayName": Translation.tr("Smallest first"), "icon": "straighten", "value": "size_rev" },
-                ]
-                onSelected: newValue => {
-                    Config.options.wallpaperSelector.sortMode = newValue;
-                }
-            }
-        }
-
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Custom wallpaper folder, e.g. C:/Users/you/Pictures")
-            text: Config.options.wallpaperSelector.userPath ?? ""
-            wrapMode: TextEdit.NoWrap
-            onTextChanged: {
-                Config.options.wallpaperSelector.userPath = text;
-            }
-        }
-
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Live wallpaper folder, e.g. C:/Users/you/Videos/Wallpapers")
-            text: Config.options.wallpaperSelector.liveWallpapersPath ?? ""
-            wrapMode: TextEdit.NoWrap
-            onTextChanged: {
-                Config.options.wallpaperSelector.liveWallpapersPath = text;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "pause_circle"
-            text: Translation.tr("Pause the live wallpaper when a window covers the desktop")
-            checked: Config.options.background.pauseVideoWhenCovered
-            onCheckedChanged: {
-                Config.options.background.pauseVideoWhenCovered = checked;
-            }
-        }
-
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Wpp folder")
-            text: Config.options.wallpaperSelector.wppFolder ?? ""
-            wrapMode: TextEdit.NoWrap
-            onTextChanged: {
-                Config.options.wallpaperSelector.wppFolder = text;
-            }
-        }
-
-        MaterialTextArea {
-            Layout.fillWidth: true
-            enabled: SpicyStuff.allowed
-            placeholderText: Translation.tr("Wpp (Spicy) folder")
-            text: Config.options.wallpaperSelector.wppSpicyFolder ?? ""
-            wrapMode: TextEdit.NoWrap
-            onTextChanged: {
-                Config.options.wallpaperSelector.wppSpicyFolder = text;
-            }
-            StyledToolTip {
-                text: Translation.tr("Wallpapers here stay blurred and can't be applied unless Spicy Stuff is available on this account")
-            }
-        }
-    }
-
-    ContentSection {
-        icon: "travel_explore"
-        title: Translation.tr("Wallhaven")
-
-        StyledText {
-            Layout.fillWidth: true
-            wrapMode: Text.Wrap
-            color: Appearance.colors.colSubtext
-            text: Translation.tr("Search filters can also be changed from the wallpaper selector's own Wallhaven tab.")
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.leftMargin: 8
-            Layout.rightMargin: 8
-            spacing: 10
-
-            StyledText {
-                text: Translation.tr("Wallhaven API key")
-            }
-            TextField {
-                id: wallhavenApiKeyField
-                Layout.fillWidth: true
-                echoMode: TextInput.Password
-                placeholderText: Translation.tr("Optional — needed for Spicy results")
-                text: WallhavenSearch.apiKey
-                color: Appearance.colors.colOnLayer1
-                background: Rectangle {
-                    color: Appearance.colors.colLayer1
-                    radius: Appearance.rounding.small
-                    border.width: 1
-                    border.color: wallhavenApiKeyField.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
-                }
-                onEditingFinished: WallhavenSearch.setApiKey(text)
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Default sort")
-            ConfigSelectionArray {
-                currentValue: Config.options.wallpaperSelector.wallhavenSorting
-                options: [
-                    { "displayName": Translation.tr("Relevance"), "icon": "search", "value": "relevance" },
-                    { "displayName": Translation.tr("Date Added"), "icon": "schedule", "value": "date_added" },
-                    { "displayName": Translation.tr("Top List"), "icon": "trending_up", "value": "toplist" },
-                    { "displayName": Translation.tr("Random"), "icon": "casino", "value": "random" },
-                ]
-                onSelected: newValue => {
-                    Config.options.wallpaperSelector.wallhavenSorting = newValue;
-                    WallhavenSearch.sorting = newValue;
-                }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Order")
-            ConfigSelectionArray {
-                currentValue: Config.options.wallpaperSelector.wallhavenOrder
-                options: [
-                    { "displayName": Translation.tr("Descending"), "icon": "arrow_downward", "value": "desc" },
-                    { "displayName": Translation.tr("Ascending"), "icon": "arrow_upward", "value": "asc" },
-                ]
-                onSelected: newValue => {
-                    Config.options.wallpaperSelector.wallhavenOrder = newValue;
-                    WallhavenSearch.order = newValue;
-                }
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Top list range")
-            ConfigSelectionArray {
-                currentValue: Config.options.wallpaperSelector.wallhavenTopRange
-                options: [
-                    { "displayName": Translation.tr("1 Day"), "icon": "today", "value": "1d" },
-                    { "displayName": Translation.tr("1 Week"), "icon": "view_week", "value": "1w" },
-                    { "displayName": Translation.tr("1 Month"), "icon": "calendar_month", "value": "1m" },
-                    { "displayName": Translation.tr("1 Year"), "icon": "event_repeat", "value": "1y" },
-                ]
-                onSelected: newValue => {
-                    Config.options.wallpaperSelector.wallhavenTopRange = newValue;
-                    WallhavenSearch.topRange = newValue;
-                }
-            }
-        }
-
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                buttonIcon: "category"
-                text: Translation.tr('General')
-                checked: Config.options.wallpaperSelector.wallhavenCategories.charAt(0) === "1"
-                onCheckedChanged: {
-                    const c = Config.options.wallpaperSelector.wallhavenCategories;
-                    Config.options.wallpaperSelector.wallhavenCategories = (checked ? "1" : "0") + c.charAt(1) + c.charAt(2);
-                    WallhavenSearch.categories = Config.options.wallpaperSelector.wallhavenCategories;
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "animation"
-                text: Translation.tr('Anime')
-                checked: Config.options.wallpaperSelector.wallhavenCategories.charAt(1) === "1"
-                onCheckedChanged: {
-                    const c = Config.options.wallpaperSelector.wallhavenCategories;
-                    Config.options.wallpaperSelector.wallhavenCategories = c.charAt(0) + (checked ? "1" : "0") + c.charAt(2);
-                    WallhavenSearch.categories = Config.options.wallpaperSelector.wallhavenCategories;
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "people"
-                text: Translation.tr('People')
-                checked: Config.options.wallpaperSelector.wallhavenCategories.charAt(2) === "1"
-                onCheckedChanged: {
-                    const c = Config.options.wallpaperSelector.wallhavenCategories;
-                    Config.options.wallpaperSelector.wallhavenCategories = c.charAt(0) + c.charAt(1) + (checked ? "1" : "0");
-                    WallhavenSearch.categories = Config.options.wallpaperSelector.wallhavenCategories;
-                }
-            }
-        }
-
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                buttonIcon: "wb_sunny"
-                text: "SFW"
-                checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(0) === "1"
-                onCheckedChanged: {
-                    const p = Config.options.wallpaperSelector.wallhavenPurity;
-                    Config.options.wallpaperSelector.wallhavenPurity = (checked ? "1" : "0") + p.charAt(1) + p.charAt(2);
-                    WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
-                }
-            }
-            ConfigSwitch {
-                buttonIcon: "warning"
-                text: Translation.tr('Sketchy')
-                enabled: SpicyStuff.allowed
-                checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(1) === "1" && SpicyStuff.allowed
-                onCheckedChanged: {
-                    if (!SpicyStuff.allowed)
-                        return;
-                    const p = Config.options.wallpaperSelector.wallhavenPurity;
-                    Config.options.wallpaperSelector.wallhavenPurity = p.charAt(0) + (checked ? "1" : "0") + p.charAt(2);
-                    WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
-                }
-            }
-            ConfigSwitch {
-                visible: WallhavenSearch.apiKey.length > 0
-                buttonIcon: "whatshot"
-                text: Translation.tr('Spicy')
-                enabled: SpicyStuff.allowed
-                checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(2) === "1" && SpicyStuff.allowed
-                onCheckedChanged: {
-                    if (!SpicyStuff.allowed)
-                        return;
-                    const p = Config.options.wallpaperSelector.wallhavenPurity;
-                    Config.options.wallpaperSelector.wallhavenPurity = p.charAt(0) + p.charAt(1) + (checked ? "1" : "0");
-                    WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
-                }
-            }
-        }
-
-        NoticeBox {
-            Layout.fillWidth: true
-            visible: !SpicyStuff.allowed
-            materialIcon: SpicyStuff.checking ? "hourglass_top" : "lock"
-            text: SpicyStuff.restriction
-
-            Item {
-                Layout.fillWidth: true
-            }
-            RippleButtonWithIcon {
-                Layout.fillWidth: false
-                visible: SpicyStuff.needsAgeConfirmation
-                buttonRadius: Appearance.rounding.small
-                materialIcon: "verified_user"
-                mainText: Translation.tr("I'm 18 or older")
-                onClicked: SpicyStuff.confirmAge()
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Aspect ratio")
-            ConfigSelectionArray {
-                currentValue: Config.options.wallpaperSelector.wallhavenRatios
-                options: [
-                    { "displayName": Translation.tr("Any"), "icon": "crop_free", "value": "" },
-                    { "displayName": "16x9", "icon": "crop_16_9", "value": "16x9" },
-                    { "displayName": "21x9", "icon": "panorama_wide_angle", "value": "21x9" },
-                    { "displayName": "9x16", "icon": "crop_portrait", "value": "9x16" },
-                    { "displayName": "1x1", "icon": "crop_square", "value": "1x1" },
-                ]
-                onSelected: newValue => {
-                    Config.options.wallpaperSelector.wallhavenRatios = newValue;
-                    WallhavenSearch.ratios = newValue;
-                }
-            }
-        }
-
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Default search query")
-            text: Config.options.wallpaperSelector.wallhavenQuery ?? ""
-            wrapMode: TextEdit.NoWrap
-            onTextChanged: {
-                Config.options.wallpaperSelector.wallhavenQuery = text;
-            }
-        }
-
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Color filter, comma-separated hex (e.g. cc0000,0066cc)")
-            text: Config.options.wallpaperSelector.wallhavenColors ?? ""
-            wrapMode: TextEdit.NoWrap
-            onTextChanged: {
-                Config.options.wallpaperSelector.wallhavenColors = text;
-                WallhavenSearch.colors = text;
             }
         }
     }
