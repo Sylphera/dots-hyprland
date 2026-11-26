@@ -159,74 +159,6 @@ ContentPage {
             }
         }
 
-        ContentSubsection {
-            title: Translation.tr("Automatic theme")
-            tooltip: Translation.tr("Switches between light and dark on its own. Using the Light/Dark buttons above switches this back to \"Off\".")
-
-            ConfigSelectionArray {
-                currentValue: Config.options.appearance.autoTheme.mode
-                onSelected: newValue => {
-                    Config.options.appearance.autoTheme.mode = newValue;
-                }
-                options: Platform.isWindows ? [
-                    {
-                        displayName: Translation.tr("Off"),
-                        icon: "close",
-                        value: "off"
-                    },
-                    {
-                        displayName: Translation.tr("Follow Windows"),
-                        icon: "desktop_windows",
-                        value: "followWindows"
-                    },
-                    {
-                        displayName: Translation.tr("Schedule"),
-                        icon: "schedule",
-                        value: "schedule"
-                    }
-                ] : [
-                    {
-                        displayName: Translation.tr("Off"),
-                        icon: "close",
-                        value: "off"
-                    },
-                    {
-                        displayName: Translation.tr("Schedule"),
-                        icon: "schedule",
-                        value: "schedule"
-                    }
-                ]
-            }
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Schedule")
-            tooltip: Translation.tr("Format: \"HH:mm\", 24-hour time")
-            visible: Config.options.appearance.autoTheme.mode === "schedule"
-
-            ConfigRow {
-                uniform: true
-                MaterialTextArea {
-                    Layout.fillWidth: true
-                    placeholderText: Translation.tr("Light at")
-                    text: Config.options.appearance.autoTheme.scheduleLightTime
-                    wrapMode: TextEdit.Wrap
-                    onTextChanged: {
-                        Config.options.appearance.autoTheme.scheduleLightTime = text;
-                    }
-                }
-                MaterialTextArea {
-                    Layout.fillWidth: true
-                    placeholderText: Translation.tr("Dark at")
-                    text: Config.options.appearance.autoTheme.scheduleDarkTime
-                    wrapMode: TextEdit.Wrap
-                    onTextChanged: {
-                        Config.options.appearance.autoTheme.scheduleDarkTime = text;
-                    }
-                }
-            }
-        }
-
         ConfigSelectionArray {
             currentValue: Config.options.appearance.palette.type
             onSelected: newValue => {
@@ -271,62 +203,6 @@ ContentPage {
                     "displayName": Translation.tr("Tonal Spot")
                 }
             ]
-        }
-
-        ContentSubsection {
-            title: Translation.tr("Named color scheme")
-            tooltip: Translation.tr("Pick a fixed palette instead of colors extracted from the wallpaper.")
-            visible: Platform.isWindows
-
-            StyledComboBox {
-                id: namedSchemeSelector
-                buttonIcon: "palette"
-                textRole: "displayName"
-                model: ColorSchemes.schemeOptions()
-                currentIndex: {
-                    const index = model.findIndex(item => item.value === Config.options.appearance.palette.namedScheme);
-                    return index !== -1 ? index : 0;
-                }
-                onActivated: index => {
-                    Config.options.appearance.palette.namedScheme = model[index].value;
-                    Config.options.appearance.palette.namedSchemePrimary = "";
-                    Config.options.appearance.palette.namedSchemeSecondary = "";
-                    Wallpapers.reapplyPalette();
-                }
-            }
-
-            ConfigRow {
-                uniform: true
-                visible: Config.options.appearance.palette.namedScheme !== ""
-                StyledComboBox {
-                    id: namedSchemePrimarySelector
-                    buttonIcon: "colors"
-                    textRole: "displayName"
-                    model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
-                    currentIndex: {
-                        const index = model.findIndex(item => item.value === Config.options.appearance.palette.namedSchemePrimary);
-                        return index !== -1 ? index : 0;
-                    }
-                    onActivated: index => {
-                        Config.options.appearance.palette.namedSchemePrimary = model[index].value;
-                        Wallpapers.reapplyPalette();
-                    }
-                }
-                StyledComboBox {
-                    id: namedSchemeSecondarySelector
-                    buttonIcon: "colors"
-                    textRole: "displayName"
-                    model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
-                    currentIndex: {
-                        const index = model.findIndex(item => item.value === Config.options.appearance.palette.namedSchemeSecondary);
-                        return index !== -1 ? index : 0;
-                    }
-                    onActivated: index => {
-                        Config.options.appearance.palette.namedSchemeSecondary = model[index].value;
-                        Wallpapers.reapplyPalette();
-                    }
-                }
-            }
         }
 
         ConfigSwitch {
@@ -391,11 +267,6 @@ ContentPage {
                             value: 0
                         },
                         {
-                            displayName: Translation.tr("Split Hug"),
-                            icon: "splitscreen",
-                            value: 6
-                        },
-                        {
                             displayName: Translation.tr("Float"),
                             icon: "page_header",
                             value: 1
@@ -404,21 +275,6 @@ ContentPage {
                             displayName: Translation.tr("Rect"),
                             icon: "toolbar",
                             value: 2
-                        },
-                        {
-                            displayName: Translation.tr("M3"),
-                            icon: "interests",
-                            value: 3
-                        },
-                        {
-                            displayName: Translation.tr("M3 Hug"),
-                            icon: "category",
-                            value: 4
-                        },
-                        {
-                            displayName: Translation.tr("Panel"),
-                            icon: "call_to_action",
-                            value: 5
                         }
                     ]
                 }
@@ -459,7 +315,7 @@ ContentPage {
 
     NoticeBox {
         Layout.fillWidth: true
-        text: Translation.tr('Almost every option is in this app. The few left in the config file are lists that ii edits for you (pinned apps, quick toggles) and extra AI models: open it with the "Config file" button on the top-left corner or at %1.').arg(Directories.shellConfigPath)
+        text: Translation.tr('Not all options are available in this app. You should also check the config file by hitting the "Config file" button on the topleft corner or opening %1 manually.').arg(Directories.shellConfigPath)
 
         Item {
             Layout.fillWidth: true

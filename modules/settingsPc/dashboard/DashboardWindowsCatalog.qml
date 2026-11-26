@@ -34,6 +34,57 @@ QtObject {
     }
 
     readonly property var controls: ({
+        "windows:Avatar picture": {
+            type: "text",
+            get: () => Config.options.profile.avatarPicture,
+            set: v => {
+                const path = String(v).trim().replace(/^file:\/\/\/?/, "");
+                Config.options.profile.avatarPicture = path;
+                Config.options.profile.avatarPath = path === "" ? "" : path.substring(0, path.lastIndexOf("/"));
+            }
+        },
+        "windows:Display name": { type: "text", get: () => Config.options.profile.displayName, set: v => { Config.options.profile.displayName = v; } },
+        "windows:Hide computer name": { type: "switch", get: () => Config.options.profile.hideHostname, set: v => { Config.options.profile.hideHostname = v; } },
+        "windows:Description text": {
+            type: "select",
+            get: () => Config.options.profile.descriptionText === "::uptime::" ? "uptime" : "distro",
+            set: v => { Config.options.profile.descriptionText = v === "uptime" ? "::uptime::" : "::distro::"; },
+            options: [
+                { displayName: Translation.tr("Distro"), icon: "deployed_code", value: "distro" },
+                { displayName: Translation.tr("Uptime"), icon: "timelapse", value: "uptime" }
+            ]
+        },
+        "windows:Online presets": { type: "switch", get: () => Config.options.profile.onlinePresets, set: v => { Config.options.profile.onlinePresets = v; } },
+        "windows:Extra background tint": { type: "switch", get: () => Config.options.appearance.extraBackgroundTint, set: v => { Config.options.appearance.extraBackgroundTint = v; } },
+        "windows:UI background": {
+            type: "select",
+            get: () => Config.options.appearance.uiBackground,
+            set: v => { Config.options.appearance.uiBackground = v; },
+            options: [
+                { displayName: Translation.tr("Themed"), icon: "palette", value: "themed" },
+                { displayName: Translation.tr("OLED"), icon: "contrast", value: "oled" }
+            ]
+        },
+        "windows:Automatic transparency": { type: "switch", get: () => Config.options.appearance.transparency.automatic, set: v => { Config.options.appearance.transparency.automatic = v; } },
+        "windows:Background transparency": { type: "slider", get: () => Config.options.appearance.transparency.backgroundTransparency, set: v => { Config.options.appearance.transparency.backgroundTransparency = v; }, from: 0, to: 1, stopIndicatorValues: [], usePercentTooltip: true },
+        "windows:Content transparency": { type: "slider", get: () => Config.options.appearance.transparency.contentTransparency, set: v => { Config.options.appearance.transparency.contentTransparency = v; }, from: 0, to: 1, stopIndicatorValues: [], usePercentTooltip: true },
+        "windows:Accent color override": {
+            type: "text",
+            get: () => Config.options.appearance.palette.accentColor,
+            set: v => {
+                const value = String(v).trim();
+                if (value === Config.options.appearance.palette.accentColor)
+                    return;
+                if (value === "")
+                    Wallpapers.setAccentColor("clear");
+                else if (/^#?[0-9a-fA-F]{6}$/.test(value))
+                    Wallpapers.setAccentColor(value);
+            }
+        },
+        "windows:Notify on low peripheral battery": { type: "switch", get: () => Config.options.battery.peripheralNotify, set: v => { Config.options.battery.peripheralNotify = v; } },
+        "windows:Peripheral low warning": { type: "spin", get: () => Config.options.battery.peripheralLow, set: v => { Config.options.battery.peripheralLow = v; }, from: 0, to: 100, stepSize: 5 },
+        "windows:Peripheral critical warning": { type: "spin", get: () => Config.options.battery.peripheralCritical, set: v => { Config.options.battery.peripheralCritical = v; }, from: 0, to: 100, stepSize: 5 },
+        "windows:Show date": { type: "switch", get: () => Config.options.time.showDate, set: v => { Config.options.time.showDate = v; } },
         "windows:Background behind icons": { type: "switch", get: () => Config.options.windowsPort.backgroundBehindIcons, set: v => { Config.options.windowsPort.backgroundBehindIcons = v; } },
         "windows:Draw own wallpaper": { type: "switch", get: () => Config.options.windowsPort.ownWallpaper, set: v => { Config.options.windowsPort.ownWallpaper = v; } },
         "windows:Tiling": { type: "switch", get: () => Config.options.windowsPort.tiling.enable, set: v => { Config.options.windowsPort.tiling.enable = v; } },
@@ -388,6 +439,39 @@ QtObject {
         {
             page: Translation.tr("Windows"), title: Translation.tr("Autostart"), icon: "rocket_launch", when: "windows", cards: [
                 { type: "embed", h: 5, key: "windows:Autostart panel", embed: "WindowsAutostartPanel.qml", title: Translation.tr("Autostart"), icon: "rocket_launch", kw: "autostart startup sign in apps launch boot task registry" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Profile"), icon: "account_circle", when: "windows", cards: [
+                { type: "text", w: 2, key: "windows:Avatar picture", title: Translation.tr("Avatar picture"), icon: "account_circle", placeholder: Translation.tr("Empty: Windows account picture"), kw: "profile avatar picture image photo account" },
+                { type: "text", w: 2, key: "windows:Display name", title: Translation.tr("Display name"), icon: "badge", placeholder: Translation.tr("Your name"), kw: "profile name display" },
+                { type: "toggle", w: 2, key: "windows:Hide computer name", title: Translation.tr("Hide computer name"), icon: "visibility_off", kw: "profile hostname computer name hide screenshots" },
+                { type: "select", w: 2, key: "windows:Description text", title: Translation.tr("Description text"), icon: "short_text", kw: "profile description distro uptime" },
+                { type: "toggle", w: 2, key: "windows:Online presets", title: Translation.tr("Show online presets"), icon: "cloud_download", kw: "profile online presets download" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Appearance"), icon: "palette", when: "windows", cards: [
+                { type: "toggle", w: 2, key: "windows:Extra background tint", title: Translation.tr("Extra background tint"), icon: "format_color_fill", kw: "appearance background tint accent panels" },
+                { type: "select", w: 2, key: "windows:UI background", title: Translation.tr("UI background"), icon: "contrast", kw: "appearance ui background oled black themed" },
+                { type: "toggle", w: 2, key: "windows:Automatic transparency", title: Translation.tr("Auto transparency"), icon: "auto_awesome", kw: "appearance transparency automatic wallpaper" },
+                { type: "text", w: 2, key: "windows:Accent color override", title: Translation.tr("Accent color override"), icon: "colorize", placeholder: "#a7c0ff", kw: "appearance accent color hex override" },
+                { type: "slider", w: 2, key: "windows:Background transparency", title: Translation.tr("Background"), icon: "opacity", kw: "appearance transparency background" },
+                { type: "slider", w: 2, key: "windows:Content transparency", title: Translation.tr("Panel content"), icon: "opacity", kw: "appearance transparency content panel" },
+                { type: "toggle", w: 2, key: "windows:Show date", title: Translation.tr("Show date"), icon: "date_range", kw: "date clock bar show" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("Bluetooth peripherals"), icon: "bluetooth", when: "windows", cards: [
+                { type: "toggle", w: 2, key: "windows:Notify on low peripheral battery", title: Translation.tr("Notify on low peripheral battery"), icon: "notifications", kw: "bluetooth peripheral battery low notify mouse headphones" },
+                { type: "spin", key: "windows:Peripheral low warning", title: Translation.tr("Low warning"), icon: "battery_alert", kw: "peripheral battery low warning" },
+                { type: "spin", key: "windows:Peripheral critical warning", title: Translation.tr("Critical warning"), icon: "battery_0_bar", kw: "peripheral battery critical warning" }
+            ]
+        },
+        {
+            page: Translation.tr("Windows"), title: Translation.tr("ii-windows"), icon: "deployed_code", when: "windows", cards: [
+                { type: "embed", h: 2, key: "windows:Updates panel", embed: "WindowsUpdatesPanel.qml", title: Translation.tr("ii-windows updates"), icon: "update", kw: "update updates version preview stable patch fix self update ii-windows" },
+                { type: "embed", h: 2, key: "windows:Report panel", embed: "WindowsReportPanel.qml", title: Translation.tr("Report a problem"), icon: "bug_report", kw: "report problem bug issue logs crash dump github" }
             ]
         },
         {
