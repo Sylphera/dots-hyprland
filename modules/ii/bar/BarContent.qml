@@ -105,7 +105,7 @@ Item { // Bar content region
 
     // Background shadow
     Loader {
-        active: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && Config.options.bar.floatStyleShadow && !SekaiTheme.active
+        active: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && Config.options.bar.floatStyleShadow
         anchors.fill: barBackground
         sourceComponent: StyledRectangularShadow {
             anchors.fill: undefined // The loader's anchors act on this, and this should not have any anchor
@@ -119,9 +119,9 @@ Item { // Bar content region
             fill: parent
             margins: Config.options.bar.cornerStyle === 1 ? (Appearance.sizes.hyprlandGapsOut) : 0 // idk why but +1 is needed
         }
-        color: Config.options.bar.showBackground && !SekaiTheme.active ? Appearance.colors.colLayer0 : "transparent"
+        color: Config.options.bar.showBackground ? Appearance.colors.colLayer0 : "transparent"
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
-        border.width: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && !SekaiTheme.active ? 1 : 0
+        border.width: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
     }
 
@@ -161,23 +161,9 @@ Item { // Bar content region
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        Loader {
-            active: SekaiTheme.active
-            readonly property real startX: leftSidebarButton.visible ? leftSidebarButton.x : activeWindow.x
-            readonly property real endX: activeWindow.visible ? activeWindow.x + Math.min(activeWindow.width, activeWindow.implicitWidth) : leftSidebarButton.x + leftSidebarButton.width
-            x: startX - 8
-            y: 2
-            width: endX - startX + 16
-            height: parent.height - 4
-            sourceComponent: SekaiBlock {
-                cornerRadius: capHeight / 2
-            }
-        }
-
         RowLayout {
             id: leftSectionRowLayout
             anchors.fill: parent
-            anchors.bottomMargin: SekaiTheme.active ? SekaiTheme.shadowOffset : 0
             spacing: 0
 
             LeftSidebarButton { // Left sidebar button
@@ -335,23 +321,9 @@ Item { // Bar content region
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        Loader {
-            active: SekaiTheme.active
-            readonly property real startX: sysTray.visible && sysTray.width > 0 ? sysTray.x : rightSidebarButton.x
-            readonly property real endX: rightSidebarButton.x + rightSidebarButton.width
-            x: startX - 8
-            y: 2
-            width: endX - startX + 16
-            height: parent.height - 4
-            sourceComponent: SekaiBlock {
-                cornerRadius: capHeight / 2
-            }
-        }
-
         RowLayout {
             id: rightSectionRowLayout
             anchors.fill: parent
-            anchors.bottomMargin: SekaiTheme.active ? SekaiTheme.shadowOffset : 0
             spacing: 5
             layoutDirection: Qt.RightToLeft
 
@@ -450,7 +422,6 @@ Item { // Bar content region
             }
 
             SysTray {
-                id: sysTray
                 classic: true
                 visible: root.useShortenedForm === 0
                 Layout.fillWidth: false

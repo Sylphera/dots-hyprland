@@ -115,15 +115,6 @@ Item { // Wrapper
 
     StyledRectangularShadow {
         target: searchWidgetContent
-        visible: !SekaiTheme.active
-    }
-    SekaiBlock {
-        visible: SekaiTheme.active
-        x: searchWidgetContent.x
-        y: searchWidgetContent.y
-        width: searchWidgetContent.width
-        height: searchWidgetContent.height + SekaiTheme.shadowOffset
-        cornerRadius: searchWidgetContent.radius
     }
     Rectangle { // Background
         id: searchWidgetContent
@@ -136,7 +127,7 @@ Item { // Wrapper
         implicitWidth: columnLayout.implicitWidth
         implicitHeight: columnLayout.implicitHeight
         radius: searchBar.height / 2 + searchBar.verticalPadding
-        color: SekaiTheme.active ? "transparent" : Appearance.colors.colUiSurfaceContainer
+        color: Appearance.colors.colUiSurfaceContainer
 
         Behavior on implicitHeight {
             id: searchHeightBehavior

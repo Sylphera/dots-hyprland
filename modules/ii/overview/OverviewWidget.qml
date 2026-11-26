@@ -131,7 +131,6 @@ Item {
 
     StyledRectangularShadow {
         target: overviewBackground
-        visible: !SekaiTheme.active
     }
     Rectangle { // Background
         id: overviewBackground
@@ -142,12 +141,6 @@ Item {
         implicitWidth: workspaceColumnLayout.implicitWidth + padding * 2
         implicitHeight: workspaceColumnLayout.implicitHeight + padding * 2
         radius: root.largeWorkspaceRadius + padding
-        SekaiShadow {
-            radius: overviewBackground.radius
-        }
-        SekaiFrame {
-            radius: overviewBackground.radius
-        }
         color: Appearance.colors.colUiSurfaceContainer
 
         Column { // Workspaces

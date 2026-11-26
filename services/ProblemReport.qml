@@ -17,8 +17,7 @@ Singleton {
     readonly property string newIssueUrl: "https://github.com/nunreasonable/ii-windows/issues/new"
     readonly property var styleNames: ({
             "ii": "illogical-impulse (ii)",
-            "end4pc": "end4-pC",
-            "sekaipop": "SekaiPop"
+            "end4pc": "end4-pC"
         })
     property string arch: ""
 

@@ -13,16 +13,6 @@ import qs.modules.settingsPc.widgets
 ContentPage {
     id: page
     property string openPopup: ""
-    readonly property var sekaiThemes: [
-        { displayName: Translation.tr("Mint"), icon: "circle", value: "mint" },
-        { displayName: Translation.tr("Indigo"), icon: "circle", value: "indigo" },
-        { displayName: Translation.tr("Lime"), icon: "circle", value: "lime" },
-        { displayName: Translation.tr("Rose"), icon: "circle", value: "rose" },
-        { displayName: Translation.tr("Amber"), icon: "circle", value: "amber" },
-        { displayName: Translation.tr("Violet"), icon: "circle", value: "violet" },
-        { displayName: Translation.tr("Monochrome"), icon: "contrast", value: "mono" },
-        { displayName: Translation.tr("Wallpaper"), icon: "wallpaper", value: "wallpaper" }
-    ]
     forceWidth: true
     baseWidth: Math.max(600, Math.min(700, page.width - 40))
     bottomContentPadding: 35
@@ -732,7 +722,7 @@ ContentPage {
             icon: "style"
             shape: W.MaterialShape.Shape.SoftBurst
             title: Translation.tr("Style")
-            hint: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults. A bar layout you changed is kept and comes back with its style") + " " + Translation.tr("SekaiPop draws the bar as outlined blocks with a hard shadow that sink when pressed, inspired by SekaiPop by Blapples")
+            hint: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults. A bar layout you changed is kept and comes back with its style")
 
             GroupedList {
                 ConfigSelectionArray {
@@ -752,25 +742,8 @@ ContentPage {
                             displayName: "end4-pC",
                             icon: "dashboard_customize",
                             value: "end4pc"
-                        },
-                        {
-                            displayName: "SekaiPop",
-                            icon: "interests",
-                            value: "sekaipop"
                         }
                     ]
-                }
-                ConfigComboBox {
-                    visible: Config.options.appearance.visualStyle === "sekaipop"
-                    buttonIcon: "colors"
-                    text: Translation.tr("SekaiPop theme")
-                    fieldWidth: 220
-                    fixedWidth: true
-                    currentValue: Config.options.appearance.sekaipop.theme
-                    model: page.sekaiThemes
-                    onSelected: newValue => {
-                        Config.options.appearance.sekaipop.theme = newValue;
-                    }
                 }
                 ConfigSelectionArray {
                     text: Translation.tr("Settings layout")

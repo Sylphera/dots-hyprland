@@ -26,8 +26,7 @@ FloatingWindow {
 
     readonly property var environments: [
         { value: "ii", name: "illogical-impulse", note: "end-4", icon: "auto_awesome", shape: MaterialShape.Shape.Sunny },
-        { value: "end4pc", name: "end4-pC", note: "pctrade", icon: "dashboard_customize", shape: MaterialShape.Shape.Cookie9Sided },
-        { value: "sekaipop", name: "SekaiPop", note: "Blapples", icon: "interests", shape: MaterialShape.Shape.Clover8Leaf }
+        { value: "end4pc", name: "end4-pC", note: "pctrade", icon: "dashboard_customize", shape: MaterialShape.Shape.Cookie9Sided }
     ].filter(environment => VisualStyle.styles.includes(environment.value))
 
     function hideTitleBar() {

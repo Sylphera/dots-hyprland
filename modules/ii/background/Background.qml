@@ -156,7 +156,6 @@ Variants {
             && (!GlobalStates.screenLocked || !centeredWallpaper.centeredWallpaperEnabled || bgRoot.blurFullScreen)
 
         readonly property var transitionShaders: ["circlePit", "circleSelect", "magic", "Doom", "Peel", "transition", "pixelate", "stripes", "crt", "dissolve", "glitch", "ripple", "shatter", "colonies"]
-        readonly property var sekaiTransitionShaders: ["sekaiRing", "sekaiIris", "sekaiStar", "sekaiBlocks"]
         readonly property string wallpaperAnimation: Config.options.background.wallpaperAnimation ?? "random"
         property string transitionShader: "transition"
         property bool transitionLive: false
@@ -253,8 +252,8 @@ Variants {
         function pickTransitionShader(toVideo) {
             if (toVideo)
                 return "transition";
-            if (bgRoot.wallpaperAnimation === "random") {
-                const pool = SekaiTheme.active ? bgRoot.sekaiTransitionShaders : bgRoot.transitionShaders;
+            if (bgRoot.wallpaperAnimation === "random" || (bgRoot.wallpaperAnimation !== "" && !bgRoot.transitionShaders.includes(bgRoot.wallpaperAnimation))) {
+                const pool = bgRoot.transitionShaders;
                 return pool[Math.floor(Math.random() * pool.length)];
             }
             return bgRoot.wallpaperAnimation;
@@ -272,7 +271,7 @@ Variants {
             const switchHidden = desktopSwitch && Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons;
             if (!switchHidden && bgRoot.canAnimateWallpaperChange()) {
                 bgRoot.transitionShader = desktopSwitch ? "transition" : bgRoot.pickTransitionShader(toVideo);
-                bgRoot.transitionDuration = desktopSwitch ? 450 : bgRoot.transitionShader === "colonies" ? 1600 : bgRoot.transitionShader === "sekaiBlocks" ? 1200 : 1000;
+                bgRoot.transitionDuration = desktopSwitch ? 450 : bgRoot.transitionShader === "colonies" ? 1600 : 1000;
                 bgRoot.transitionProgress = 0;
                 bgRoot.transitionPending = true;
                 bgRoot.pendingWallpaperPath = next;

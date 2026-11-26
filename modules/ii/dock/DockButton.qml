@@ -27,7 +27,7 @@ RippleButton {
     leftInset: baseLeftInset + (DockStyle.vertical ? crossExtra / 2 : 0)
     rightInset: baseRightInset + (DockStyle.vertical ? crossExtra / 2 : 0)
     implicitWidth: naturalWidth
-    buttonRadius: SekaiTheme.active ? Appearance.rounding.full : Appearance.rounding.normal
+    buttonRadius: Appearance.rounding.normal
     colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colOnLayer0, 0.88)
 
     background.implicitHeight: DockStyle.buttonBase

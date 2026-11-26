@@ -10,13 +10,7 @@ import QtQuick.Layouts
 Rectangle {
     id: root
     radius: Appearance.rounding.normal
-    SekaiShadow {
-        radius: root.radius
-    }
-    SekaiFrame {
-        radius: root.radius
-    }
-    color: SekaiTheme.active ? SekaiTheme.fill : Appearance.colors.colLayer1
+    color: Appearance.colors.colLayer1
 
     NotificationList {
         anchors.fill: parent

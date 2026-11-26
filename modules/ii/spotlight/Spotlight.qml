@@ -567,26 +567,16 @@ q="$1"; h="$2"
 
             StyledRectangularShadow {
                 target: panel
-                visible: !SekaiTheme.active
-            }
-
-            SekaiBlock {
-                visible: SekaiTheme.active
-                x: panel.x
-                y: panel.y
-                width: panel.width
-                height: panel.height + SekaiTheme.shadowOffset
-                cornerRadius: panel.radius
             }
 
             Rectangle {
                 id: panel
                 width: root.expanded ? content.width : pillWidth
                 readonly property real pillWidth: 600
-                height: header.height + (root.expanded ? body.height + (SekaiTheme.active ? 18 : 8) : 0)
+                height: header.height + (root.expanded ? body.height + 8 : 0)
                 radius: root.expanded ? Appearance.rounding.large : height / 2
-                color: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer0
-                border.width: SekaiTheme.active ? 0 : 1
+                color: Appearance.colors.colLayer0
+                border.width: 1
                 border.color: Appearance.colors.colLayer0Border
                 clip: true
 
@@ -748,7 +738,7 @@ q="$1"; h="$2"
                         top: header.bottom
                         left: parent.left
                         right: parent.right
-                        margins: SekaiTheme.active ? 12 : 8
+                        margins: 8
                         topMargin: 0
                     }
                     height: {
