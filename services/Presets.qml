@@ -1247,6 +1247,75 @@ Singleton {
         sharedFile.setText(JSON.stringify(root.sharedNames));
     }
 
+    function checkOwnership(name) {
+        if (root.githubBusy || ownedProc.running || root.githubLogin === "")
+            return;
+        ownedProc.presetName = name;
+        ownedProc.stage = "folder";
+        root._runOwnedStep(`https://api.github.com/repos/${root.githubRepo}/contents/presets/${name}?ref=main`);
+    }
+
+    function _runOwnedStep(url) {
+        ownedProc.command = [root.curlBin, "-sS", "-m", "20", "-w", "\nHTTP_STATUS:%{http_code}",
+            "-H", "Accept: application/vnd.github+json",
+            "-H", "X-GitHub-Api-Version: 2022-11-28",
+            "-H", "User-Agent: ii-windows-presets",
+            url];
+        ownedProc.running = true;
+    }
+
+    function _settleOwnership(name, author) {
+        if (author === "")
+            return;
+        const cache = Object.assign({}, root.ownedCache);
+        cache[name] = author.toLowerCase() === root.githubLogin.toLowerCase();
+        root.ownedCache = cache;
+    }
+
+    Process {
+        id: ownedProc
+        property string presetName: ""
+        property string stage: ""
+        stdout: StdioCollector { id: ownedOut }
+        onExited: code => {
+            if (code !== 0)
+                return;
+            const parsed = root._parseGhResponse(ownedOut.text);
+            const name = ownedProc.presetName;
+            if (ownedProc.stage === "folder") {
+                if (parsed.status === 404) {
+                    root.forgetShared(name);
+                    return;
+                }
+                if (parsed.status !== 200)
+                    return;
+                ownedProc.stage = "meta";
+                Qt.callLater(() => root._runOwnedStep(`https://api.github.com/repos/${root.githubRepo}/contents/presets/${name}/meta.json?ref=main`));
+            } else if (ownedProc.stage === "meta") {
+                let author = "";
+                if (parsed.status === 200 && parsed.body?.content) {
+                    try {
+                        author = JSON.parse(root._b64Decode(parsed.body.content))?.author ?? "";
+                    } catch (e) {}
+                }
+                if (author !== "") {
+                    root._settleOwnership(name, author);
+                    return;
+                }
+                ownedProc.stage = "commits";
+                Qt.callLater(() => root._runOwnedStep(`https://api.github.com/repos/${root.githubRepo}/commits?path=presets/${name}&per_page=100`));
+            } else if (ownedProc.stage === "commits" && Array.isArray(parsed.body)) {
+                for (let i = parsed.body.length - 1; i >= 0; i--) {
+                    const login = parsed.body[i]?.author?.login;
+                    if (login) {
+                        root._settleOwnership(name, login);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     function forgetShared(name) {
         const cache = Object.assign({}, root.ownedCache);
         cache[name] = false;

@@ -676,7 +676,10 @@ Item {
             visible: active
             active: root.currentPage === root.presetsPage
 
-            sourceComponent: DashboardPresetsPage {}
+            sourceComponent: DashboardPresetsPage {
+                pager: root
+                staggerMs: root.staggerMs
+            }
         }
 
         Loader {
