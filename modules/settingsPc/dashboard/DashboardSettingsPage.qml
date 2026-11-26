@@ -26,27 +26,48 @@ Item {
         id: catalog
     }
 
-    property string forcedGroup: ""
-    readonly property string windowsGroup: Translation.tr("Windows")
-    readonly property string group: root.forcedGroup !== "" ? root.forcedGroup : GlobalStates.dashboardGroup
+    property bool globalMode: false
+    property string globalGroup: ""
+    readonly property string group: root.globalMode ? root.globalGroup : GlobalStates.dashboardGroup
+
+    function pickGroup(id) {
+        if (root.globalMode)
+            root.globalGroup = id;
+        else
+            GlobalStates.dashboardGroup = id;
+    }
+
+    function isGlobalGroup(id) {
+        return String(id ?? "").startsWith("global:");
+    }
+
+    function groupName(id) {
+        return root.groupDefs.find(g => (g.id ?? g.name) === id)?.name ?? id;
+    }
 
     readonly property var groupDefs: {
         const c = Appearance.colors;
         const mix = (a, b) => ColorUtils.mix(a, b, 0.5);
-        return [
+        const environment = [
             { name: Translation.tr("General"), icon: "browse", container: mix(c.colPrimaryContainer, c.colTertiaryContainer), onContainer: mix(c.colOnPrimaryContainer, c.colOnTertiaryContainer), accent: mix(c.colPrimary, c.colTertiary), onAccent: mix(c.colOnPrimary, c.colOnTertiary) },
             { name: Translation.tr("Interface"), icon: "bottom_app_bar", container: c.colPrimaryContainer, onContainer: c.colOnPrimaryContainer, accent: c.colPrimary, onAccent: c.colOnPrimary },
             { name: Translation.tr("Bar"), icon: "toast", rotation: 180, container: c.colSecondaryContainer, onContainer: c.colOnSecondaryContainer, accent: c.colSecondary, onAccent: c.colOnSecondary },
             { name: Translation.tr("Desktop"), icon: "texture", container: c.colTertiaryContainer, onContainer: c.colOnTertiaryContainer, accent: c.colTertiary, onAccent: c.colOnTertiary },
             { name: Translation.tr("Hyprland"), icon: "select_window_2", container: mix(c.colPrimaryContainer, c.colSecondaryContainer), onContainer: mix(c.colOnPrimaryContainer, c.colOnSecondaryContainer), accent: mix(c.colPrimary, c.colSecondary), onAccent: mix(c.colOnPrimary, c.colOnSecondary) },
             { name: Translation.tr("Services"), icon: "settings", container: mix(c.colSecondaryContainer, c.colTertiaryContainer), onContainer: mix(c.colOnSecondaryContainer, c.colOnTertiaryContainer), accent: mix(c.colSecondary, c.colTertiary), onAccent: mix(c.colOnSecondary, c.colOnTertiary) }
-        ].filter(g => !(Platform.isWindows && g.name === Translation.tr("Hyprland"))).concat(Platform.isWindows ? [
-            { name: Translation.tr("Windows"), icon: "desktop_windows", container: mix(c.colTertiaryContainer, c.colPrimaryContainer), onContainer: mix(c.colOnTertiaryContainer, c.colOnPrimaryContainer), accent: mix(c.colTertiary, c.colPrimary), onAccent: mix(c.colOnTertiary, c.colOnPrimary) }
-        ] : []);
+        ].filter(g => !(Platform.isWindows && g.name === Translation.tr("Hyprland")));
+        const global = [
+            { id: "global:system", name: Translation.tr("System"), icon: "computer", container: c.colPrimaryContainer, onContainer: c.colOnPrimaryContainer, accent: c.colPrimary, onAccent: c.colOnPrimary },
+            { id: "global:windows", name: Translation.tr("Windows"), icon: "select_window", container: c.colSecondaryContainer, onContainer: c.colOnSecondaryContainer, accent: c.colSecondary, onAccent: c.colOnSecondary },
+            { id: "global:desktop", name: Translation.tr("Desktop"), icon: "desktop_windows", container: c.colTertiaryContainer, onContainer: c.colOnTertiaryContainer, accent: c.colTertiary, onAccent: c.colOnTertiary },
+            { id: "global:appearance", name: Translation.tr("Appearance"), icon: "palette", container: mix(c.colPrimaryContainer, c.colTertiaryContainer), onContainer: mix(c.colOnPrimaryContainer, c.colOnTertiaryContainer), accent: mix(c.colPrimary, c.colTertiary), onAccent: mix(c.colOnPrimary, c.colOnTertiary) },
+            { id: "global:iiwindows", name: "ii-windows", icon: "deployed_code", container: mix(c.colSecondaryContainer, c.colTertiaryContainer), onContainer: mix(c.colOnSecondaryContainer, c.colOnTertiaryContainer), accent: mix(c.colSecondary, c.colTertiary), onAccent: mix(c.colOnSecondary, c.colOnTertiary) }
+        ];
+        return root.globalMode ? global : environment;
     }
 
     readonly property var groupColors: {
-        const found = groupDefs.find(g => g.name === group);
+        const found = groupDefs.find(g => (g.id ?? g.name) === group);
         return found ?? { container: Appearance.m3colors.m3surfaceContainerHighest, onContainer: Appearance.m3colors.m3onSurface, accent: Appearance.m3colors.m3onSurface, onAccent: Appearance.m3colors.m3surface };
     }
 
@@ -60,7 +81,7 @@ Item {
         name: Translation.tr("All"), icon: "apps",
         container: Appearance.m3colors.m3surfaceContainerHighest, onContainer: Appearance.m3colors.m3onSurface,
         accent: Appearance.m3colors.m3onSurface, onAccent: Appearance.m3colors.m3surface
-    })].concat(groupDefs.filter(g => root.forcedGroup !== "" || g.name !== root.windowsGroup).map(g => Object.assign({ id: g.name, count: allEntries.filter(e => e.kind === "card" && e.group === g.name && isVisibleEntry(e)).length }, g)))
+    })].concat(groupDefs.map(g => Object.assign({ id: g.id ?? g.name, count: allEntries.filter(e => e.kind === "card" && e.group === (g.id ?? g.name) && isVisibleEntry(e)).length }, g)))
 
     readonly property var railDimmed: {
         const dim = {};
@@ -100,7 +121,8 @@ Item {
         return [2, 1];
     }
 
-    readonly property var heroEntries: [
+    readonly property var heroEntries: root.globalMode ? catalog.windows.heroes : root.environmentHeroes
+    readonly property var environmentHeroes: [
         { id: "hero:animationSpeed", type: "select", w: 2, key: "interface:Settings animation speed", title: Translation.tr("Settings animation speed"), icon: "speed", section: Translation.tr("Interface"), kw: "settings panel animation speed fast slow" },
         { id: "hero:blur", type: "toggle", key: "desktop:Blur wall", title: Translation.tr("Blur wallpaper"), icon: "blur_on", section: Translation.tr("Desktop"), kw: "blur wallpaper background" },
         { id: "hero:transparency", type: "toggle", key: "interface:Transparency/Enable", title: Translation.tr("Transparency"), icon: "opacity", section: Translation.tr("Interface"), kw: "transparency opacity" },
@@ -129,7 +151,7 @@ Item {
         heroEntries.forEach(e => { heroGroups[e.section] = (heroGroups[e.section] ?? 0) + 1; });
         Object.keys(heroGroups).forEach(name => list.push({
             id: "hsection:" + name, kind: "header", searchOnly: true, requires: "",
-            title: name, icon: name === "Desktop" ? "texture" : name === "Bar" ? "toast" : "bottom_app_bar",
+            title: root.groupName(name), icon: root.groupDefs.find(g => (g.id ?? g.name) === name)?.icon ?? (name === "Desktop" ? "texture" : name === "Bar" ? "toast" : "bottom_app_bar"),
             page: name, group: name, section: name, count: heroGroups[name]
         }));
         return list.map(e => Object.assign(e, {
@@ -182,10 +204,7 @@ Item {
     }
 
     function isVisibleEntry(e) {
-        if (e.group !== undefined) {
-            if (root.forcedGroup !== "" && e.group !== root.forcedGroup) return false;
-            if (root.forcedGroup === "" && e.group === root.windowsGroup) return false;
-        }
+        if (e.group !== undefined && root.isGlobalGroup(e.group) !== root.globalMode) return false;
         if (Platform.isWindows && !root.windowsUsable(e)) return false;
         if (typeof e.when === "string" && (e.when === "windows" || e.when.startsWith("win")) && !root.isVisibleWindowsEntry(e.when)) return false;
         if (e.when === "material" && ColorSchemes.current !== "") return false;
@@ -468,8 +487,7 @@ Item {
     property string pendingSection: ""
 
     function openSection(groupName, sectionTitle) {
-        if (root.forcedGroup === "")
-            GlobalStates.dashboardGroup = groupName;
+        root.pickGroup(groupName);
         root.pendingSection = sectionTitle;
         pendingScrollTimer.restart();
     }
@@ -499,12 +517,11 @@ Item {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: root.forcedGroup !== "" ? 0 : 70
-            visible: root.forcedGroup === ""
+            width: 70
             groups: root.railGroups
             current: root.group
             dimmed: root.railDimmed
-            onPicked: id => { GlobalStates.dashboardGroup = id; }
+            onPicked: id => root.pickGroup(id)
         }
 
         Flickable {
@@ -732,7 +749,7 @@ Item {
 
                                 StyledText {
                                     visible: slot.modelData.page !== ""
-                                    text: slot.modelData.page.toUpperCase()
+                                    text: root.groupName(slot.modelData.page).toUpperCase()
                                     font.pixelSize: Appearance.font.pixelSize.smaller
                                     font.weight: Font.Bold
                                     font.letterSpacing: 1.5

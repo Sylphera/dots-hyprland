@@ -48,7 +48,7 @@ Item {
 
             MaterialShapeWrappedMaterialSymbol {
                 shape: MaterialShape.Shape.Cookie9Sided
-                text: "desktop_windows"
+                text: "public"
                 iconSize: 24
                 fill: 1
                 padding: 10
@@ -61,14 +61,14 @@ Item {
                 spacing: 0
 
                 StyledText {
-                    text: Translation.tr("Windows")
+                    text: Translation.tr("Global")
                     font.pixelSize: Appearance.font.pixelSize.title
                     font.family: Appearance.font.family.title
                     color: Appearance.colors.colOnLayer0
                 }
 
                 StyledText {
-                    text: Translation.tr("Settings for Windows itself, the same in every environment")
+                    text: Translation.tr("Settings that apply to every environment")
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                 }
@@ -112,7 +112,7 @@ Item {
                         StyledText {
                             anchors.verticalCenter: parent.verticalCenter
                             visible: searchInput.text === ""
-                            text: Translation.tr("Search Windows settings")
+                            text: Translation.tr("Search global settings")
                             font.pixelSize: Appearance.font.pixelSize.normal
                             color: Appearance.colors.colSubtext
                         }
@@ -126,7 +126,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             pager: root
-            forcedGroup: page.windowsGroup
+            globalMode: true
         }
     }
 }

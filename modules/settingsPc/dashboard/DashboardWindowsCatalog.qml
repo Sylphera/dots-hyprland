@@ -361,21 +361,32 @@ QtObject {
         "windows:Minimize and maximize animations": nativeToggle("input", "minimizeRestoreAnimations", true)
     })
 
+    readonly property var heroes: [
+        { id: "hero:tiling", type: "toggle", w: 2, searchable: true, key: "windows:Tiling", title: Translation.tr("Windows tiling"), icon: "grid_view", section: "global:windows", kw: "tiling tile windows" },
+        { id: "hero:layout", type: "select", w: 2, searchable: true, key: "windows:Tiling Layout", title: Translation.tr("Tiling Layout"), icon: "responsive_layout", section: "global:windows", kw: "layout dwindle master scrolling" },
+        { id: "hero:taskbar", type: "toggle", w: 2, searchable: true, key: "windows:Native taskbar", title: Translation.tr("Use the Windows taskbar instead of ii's bar"), icon: "call_to_action", section: "global:desktop", kw: "windows taskbar native" },
+        { id: "hero:behindIcons", type: "toggle", w: 2, searchable: true, key: "windows:Background behind icons", title: Translation.tr("Put the background behind the desktop icons"), icon: "layers", section: "global:desktop", kw: "desktop icons background behind" },
+        { id: "hero:ownWallpaper", type: "toggle", w: 2, searchable: true, when: "winbehindicons", key: "windows:Draw own wallpaper", title: Translation.tr("Draw ii's own wallpaper"), icon: "wallpaper", section: "global:desktop", kw: "own wallpaper blur centered transitions" },
+        { id: "hero:swipe", type: "toggle", w: 2, searchable: true, key: "windows:Touchpad swipe", title: Translation.tr("Four fingers switch workspaces"), icon: "swipe", section: "global:windows", kw: "touchpad swipe workspaces gesture" },
+        { id: "hero:borders", type: "select", w: 2, searchable: true, when: "windwm", key: "windows:Window borders", title: Translation.tr("Window borders"), icon: "border_outer", section: "global:windows", kw: "window borders" },
+        { id: "hero:animations", type: "toggle", w: 2, searchable: true, key: "windows:Panel animations", title: Translation.tr("Animate panels when they open and close"), icon: "side_navigation", section: "global:appearance", kw: "panel animations" }
+    ]
+
     readonly property var sections: [
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Displays"), icon: "monitor", when: "windows", cards: [
+            page: "global:system", title: Translation.tr("Displays"), icon: "monitor", when: "windows", cards: [
                 { type: "embed", h: 5, key: "windows:Displays panel", embed: "WindowsDisplaysPanel.qml", title: Translation.tr("Displays"), icon: "monitor", kw: "display monitor screen resolution refresh rate orientation scale hdr sdr brightness main primary" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Windows desktop"), icon: "desktop_windows", when: "windows", cards: [
+            page: "global:desktop", title: Translation.tr("Windows desktop"), icon: "desktop_windows", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Background behind icons", title: Translation.tr("Put the background behind the desktop icons"), icon: "layers", kw: "desktop icons background behind wallpaper widgets show desktop" },
                 { type: "toggle", w: 2, key: "windows:Wallpaper per desktop", title: Translation.tr("A different wallpaper for each desktop"), icon: "view_carousel", kw: "wallpaper per desktop virtual desktops different each" },
                 { type: "toggle", w: 2, when: "winbehindicons", key: "windows:Draw own wallpaper", title: Translation.tr("Draw ii's own wallpaper"), icon: "wallpaper", kw: "own wallpaper draw blur centered transitions parallax effects native windows" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Tiling"), icon: "responsive_layout", when: "windows", cards: [
+            page: "global:windows", title: Translation.tr("Tiling"), icon: "responsive_layout", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Tiling", title: Translation.tr("Windows tiling"), icon: "grid_view", kw: "tiling tile windows auto" },
                 { type: "select", key: "windows:Tiling Layout", title: Translation.tr("Tiling Layout"), icon: "responsive_layout", kw: "layout dwindle master scrolling niri" },
                 { type: "toggle", w: 2, key: "windows:Window rules", title: Translation.tr("Place dialogs and picture-in-picture"), icon: "picture_in_picture", kw: "dialogs picture in picture window rules center" },
@@ -388,7 +399,7 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Taskbar & touchpad"), icon: "swipe", when: "windows", cards: [
+            page: "global:windows", title: Translation.tr("Taskbar & touchpad"), icon: "swipe", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Native taskbar", title: Translation.tr("Use the Windows taskbar instead of ii's bar"), icon: "call_to_action", kw: "windows taskbar native bar" },
                 { type: "toggle", w: 2, key: "windows:Taskbar hover only", title: Translation.tr("Show only when the cursor touches its screen edge"), icon: "vertical_align_bottom", kw: "taskbar hover edge auto hide" },
                 { type: "toggle", w: 2, key: "windows:Touchpad swipe", title: Translation.tr("Four fingers switch workspaces"), icon: "swipe", kw: "touchpad four fingers swipe workspaces overview gesture" },
@@ -397,14 +408,14 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Dwindle"), icon: "browse", when: "winlayoutdwindle", cards: [
+            page: "global:windows", title: Translation.tr("Dwindle"), icon: "browse", when: "winlayoutdwindle", cards: [
                 { type: "toggle", w: 2, key: "windows:Smart split", title: Translation.tr("Smart split (follow the cursor)"), icon: "smart_toy", kw: "dwindle smart split cursor" },
                 { type: "spin", w: 2, key: "windows:Default split ratio", title: Translation.tr("Default split ratio (%)"), icon: "percent", kw: "dwindle split ratio" },
                 { type: "select", w: 4, when: "winforcesplit", key: "windows:Force split side", title: Translation.tr("Force split side"), icon: "splitscreen", kw: "dwindle force split side" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Master"), icon: "auto_awesome_mosaic", when: "winlayoutmaster", cards: [
+            page: "global:windows", title: Translation.tr("Master"), icon: "auto_awesome_mosaic", when: "winlayoutmaster", cards: [
                 { type: "select", key: "windows:New windows become", title: Translation.tr("New windows become"), icon: "add_box", kw: "master new status slave inherit" },
                 { type: "toggle", key: "windows:New on top", title: Translation.tr("New windows go on top of the stack"), icon: "vertical_align_top", kw: "master new top stack" },
                 { type: "spin", key: "windows:Master size", title: Translation.tr("Master size"), icon: "aspect_ratio", kw: "master size mfact" },
@@ -412,20 +423,20 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Scrolling"), icon: "view_carousel", when: "winlayoutscrolling", cards: [
+            page: "global:windows", title: Translation.tr("Scrolling"), icon: "view_carousel", when: "winlayoutscrolling", cards: [
                 { type: "select", key: "windows:New column width", title: Translation.tr("New column width"), icon: "view_column", kw: "scrolling column width" },
                 { type: "select", key: "windows:Center the focused column", title: Translation.tr("Center the focused column"), icon: "center_focus_strong", kw: "scrolling center column" },
                 { type: "text", w: 4, key: "windows:Width presets", title: Translation.tr("Width presets"), icon: "width_normal", placeholder: "33, 50, 67, 100", kw: "scrolling width presets column" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Borders and corners"), icon: "rounded_corner", when: "windwm", cards: [
+            page: "global:windows", title: Translation.tr("Borders and corners"), icon: "rounded_corner", when: "windwm", cards: [
                 { type: "select", key: "windows:Window borders", title: Translation.tr("Window borders"), icon: "border_outer", kw: "window borders system palette none" },
                 { type: "select", key: "windows:Window corners", title: Translation.tr("Window corners"), icon: "rounded_corner", kw: "window corners rounded square" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Border Color Management"), icon: "border_color", when: "winbordercolors", cards: [
+            page: "global:windows", title: Translation.tr("Border Color Management"), icon: "border_color", when: "winbordercolors", cards: [
                 { type: "swatch", w: 2, key: "windows:Active border", title: Translation.tr("Active border"), icon: "border_color", kw: "active border color" },
                 { type: "swatch", w: 2, key: "windows:Inactive border", title: Translation.tr("Inactive border"), icon: "border_color", kw: "inactive border color" },
                 { type: "spin", w: 2, key: "windows:Active border opacity", title: Translation.tr("Active border opacity"), icon: "opacity", kw: "active border opacity" },
@@ -433,20 +444,20 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Window opacity"), icon: "opacity", when: "windows", cards: [
+            page: "global:windows", title: Translation.tr("Window opacity"), icon: "opacity", when: "windows", cards: [
                 { type: "spin", w: 2, key: "windows:Focused window opacity", title: Translation.tr("Focused window (%)"), icon: "select_window", kw: "window opacity transparent focused active" },
                 { type: "spin", w: 2, key: "windows:Other windows opacity", title: Translation.tr("Other windows (%)"), icon: "opacity", kw: "window opacity transparent inactive" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Workspaces"), icon: "view_carousel", when: "windows", cards: [
+            page: "global:windows", title: Translation.tr("Workspaces"), icon: "view_carousel", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Hide the desktop switch popup", title: Translation.tr("Hide the desktop switch popup"), icon: "visibility_off", kw: "workspace desktop popup label hide" },
                 { type: "toggle", w: 2, key: "windows:Workspace back and forth", title: Translation.tr("Switching to the current workspace goes back"), icon: "swap_horiz", kw: "workspace back and forth" },
                 { type: "toggle", w: 2, key: "windows:Move cursor to the new workspace", title: Translation.tr("Move cursor to the new workspace"), icon: "ads_click", kw: "workspace cursor warp" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Keyboard"), icon: "keyboard", when: "windows", cards: [
+            page: "global:system", title: Translation.tr("Keyboard"), icon: "keyboard", when: "windows", cards: [
                 { type: "select", w: 4, key: "windows:Repeat delay", title: Translation.tr("Repeat delay"), icon: "keyboard_return", kw: "keyboard repeat delay" },
                 { type: "spin", key: "windows:Repeat rate", title: Translation.tr("Repeat rate"), icon: "speed", kw: "keyboard repeat rate" },
                 { type: "toggle", key: "windows:Numlock by default", title: Translation.tr("Numlock by default"), icon: "numbers", kw: "keyboard numlock" },
@@ -454,7 +465,7 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Mouse"), icon: "mouse", when: "windows", cards: [
+            page: "global:system", title: Translation.tr("Mouse"), icon: "mouse", when: "windows", cards: [
                 { type: "spin", key: "windows:Pointer speed", title: Translation.tr("Pointer speed"), icon: "speed", kw: "mouse pointer speed sensitivity" },
                 { type: "toggle", key: "windows:Enhance pointer precision", title: Translation.tr("Enhance pointer precision"), icon: "ads_click", kw: "mouse acceleration precision" },
                 { type: "toggle", key: "windows:Swap mouse buttons", title: Translation.tr("Swap mouse buttons (left-handed)"), icon: "front_hand", kw: "mouse left handed swap buttons" },
@@ -466,7 +477,7 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Touchpad"), icon: "trackpad_input", when: "wintouchpad", cards: [
+            page: "global:system", title: Translation.tr("Touchpad"), icon: "trackpad_input", when: "wintouchpad", cards: [
                 { type: "toggle", key: "windows:Touchpad", title: Translation.tr("Touchpad"), icon: "trackpad_input", kw: "touchpad enable" },
                 { type: "toggle", key: "windows:Tap to click", title: Translation.tr("Tap to click"), icon: "touch_app", kw: "touchpad tap click" },
                 { type: "toggle", w: 2, key: "windows:Natural scrolling", title: Translation.tr("Natural scrolling"), icon: "swap_vert", kw: "touchpad natural scrolling reverse" },
@@ -474,13 +485,13 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Cursor"), icon: "mouse", when: "windows", cards: [
+            page: "global:system", title: Translation.tr("Cursor"), icon: "mouse", when: "windows", cards: [
                 { type: "combo", key: "windows:Cursor scheme", title: Translation.tr("Cursor scheme"), icon: "mouse", kw: "cursor scheme theme pointer" },
                 { type: "spin", w: 2, key: "windows:Cursor size", title: Translation.tr("Cursor size"), icon: "zoom_in", kw: "cursor size pointer" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Idle"), icon: "bedtime", when: "windows", cards: [
+            page: "global:system", title: Translation.tr("Idle"), icon: "bedtime", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Lock after inactivity", title: Translation.tr("Lock after inactivity"), icon: "lock_clock", kw: "idle lock inactivity" },
                 { type: "spin", w: 2, when: "winlock", key: "windows:Lock after", title: Translation.tr("Lock after (minutes)"), icon: "timer", kw: "idle lock minutes" },
                 { type: "spin", w: 2, key: "windows:Screen off plugged in", title: Translation.tr("Turn off screen after (minutes), plugged in"), icon: "monitor", kw: "screen off display timeout power plugged" },
@@ -490,12 +501,12 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Autostart"), icon: "rocket_launch", when: "windows", cards: [
+            page: "global:system", title: Translation.tr("Autostart"), icon: "rocket_launch", when: "windows", cards: [
                 { type: "embed", h: 5, key: "windows:Autostart panel", embed: "WindowsAutostartPanel.qml", title: Translation.tr("Autostart"), icon: "rocket_launch", kw: "autostart startup sign in apps launch boot task registry" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Profile"), icon: "account_circle", when: "windows", cards: [
+            page: "global:appearance", title: Translation.tr("Profile"), icon: "account_circle", when: "windows", cards: [
                 { type: "text", w: 2, key: "windows:Avatar picture", title: Translation.tr("Avatar picture"), icon: "account_circle", placeholder: Translation.tr("Empty: Windows account picture"), kw: "profile avatar picture image photo account" },
                 { type: "text", w: 2, key: "windows:Display name", title: Translation.tr("Display name"), icon: "badge", placeholder: Translation.tr("Your name"), kw: "profile name display" },
                 { type: "toggle", w: 2, key: "windows:Hide computer name", title: Translation.tr("Hide computer name"), icon: "visibility_off", kw: "profile hostname computer name hide screenshots" },
@@ -504,7 +515,7 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Appearance"), icon: "palette", when: "windows", cards: [
+            page: "global:appearance", title: Translation.tr("Appearance"), icon: "palette", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Extra background tint", title: Translation.tr("Extra background tint"), icon: "format_color_fill", kw: "appearance background tint accent panels" },
                 { type: "select", w: 2, key: "windows:UI background", title: Translation.tr("UI background"), icon: "contrast", kw: "appearance ui background oled black themed" },
                 { type: "toggle", w: 2, key: "windows:Automatic transparency", title: Translation.tr("Auto transparency"), icon: "auto_awesome", kw: "appearance transparency automatic wallpaper" },
@@ -515,14 +526,14 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Bluetooth peripherals"), icon: "bluetooth", when: "windows", cards: [
+            page: "global:system", title: Translation.tr("Bluetooth peripherals"), icon: "bluetooth", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Notify on low peripheral battery", title: Translation.tr("Notify on low peripheral battery"), icon: "notifications", kw: "bluetooth peripheral battery low notify mouse headphones" },
                 { type: "spin", key: "windows:Peripheral low warning", title: Translation.tr("Low warning"), icon: "battery_alert", kw: "peripheral battery low warning" },
                 { type: "spin", key: "windows:Peripheral critical warning", title: Translation.tr("Critical warning"), icon: "battery_0_bar", kw: "peripheral battery critical warning" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Now Playing"), icon: "music_note", when: "windows", cards: [
+            page: "global:desktop", title: Translation.tr("Now Playing"), icon: "music_note", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Now Playing", title: Translation.tr("Show a pill when the track changes"), icon: "music_note", kw: "now playing track song pill media" },
                 { type: "spin", w: 2, key: "windows:Now Playing seconds", title: Translation.tr("Seconds on screen"), icon: "timer", kw: "now playing duration seconds" },
                 { type: "toggle", w: 2, key: "windows:Now Playing fly from bar", title: Translation.tr("Cover flies out of the bar"), icon: "flight_takeoff", kw: "now playing cover fly bar animation" },
@@ -533,14 +544,14 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Random Konachan wallpaper"), icon: "casino", when: "winspicy", cards: [
+            page: "global:desktop", title: Translation.tr("Random Konachan wallpaper"), icon: "casino", when: "winspicy", cards: [
                 { type: "toggle", w: 2, key: "windows:Konachan spicy", title: Translation.tr("Spicy Stuff"), icon: "local_fire_department", kw: "konachan random wallpaper spicy rating" },
                 { type: "toggle", w: 2, key: "windows:Konachan only yuri", title: Translation.tr("Only yuri"), icon: "favorite", kw: "konachan random wallpaper yuri" },
                 { type: "text", w: 4, when: "winkonachantags", key: "windows:Konachan extra tags", title: Translation.tr("Extra tags"), icon: "sell", placeholder: Translation.tr("Separated by spaces"), kw: "konachan random wallpaper tags" }
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Services"), icon: "settings", when: "windows", cards: [
+            page: "global:iiwindows", title: Translation.tr("Services"), icon: "settings", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Save screenshots to a folder", title: Translation.tr("Save screenshots to a folder"), icon: "folder_special", kw: "screenshot screen snip save folder file clipboard" },
                 { type: "toggle", w: 2, key: "windows:Spotlight search", title: Translation.tr("Spotlight search"), icon: "search", kw: "spotlight search super workspaces tab" },
                 { type: "toggle", w: 2, key: "services:Enable update checks", title: Translation.tr("App update checks"), icon: "deployed_code_update", kw: "winget app updates check count" },
@@ -548,7 +559,7 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("ii-windows"), icon: "deployed_code", when: "windows", cards: [
+            page: "global:iiwindows", title: Translation.tr("ii-windows"), icon: "deployed_code", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Keep settings open", title: Translation.tr("Keep settings open when clicking outside"), icon: "push_pin", kw: "settings keep open click outside" },
                 { type: "toggle", w: 2, key: "windows:Brightness OSD outside", title: Translation.tr("Brightness indicator for changes made outside ii"), icon: "brightness_medium", kw: "osd brightness indicator outside fn keys" },
                 { type: "toggle", w: 2, key: "windows:Pause video wallpaper", title: Translation.tr("Pause the live wallpaper when covered"), icon: "pause_circle", kw: "live video wallpaper pause covered window" },
@@ -565,7 +576,7 @@ QtObject {
             ]
         },
         {
-            page: Translation.tr("Windows"), title: Translation.tr("Animations"), icon: "animation", when: "windows", cards: [
+            page: "global:appearance", title: Translation.tr("Animations"), icon: "animation", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Panel animations", title: Translation.tr("Animate panels when they open and close"), icon: "side_navigation", kw: "panel animations open close slide" },
                 { type: "select", w: 2, when: "winpanelanim", key: "windows:Animation style", title: Translation.tr("Animation style"), icon: "auto_awesome", kw: "animation style standard expressive" },
                 { type: "toggle", w: 2, key: "windows:Menu and tooltip animations", title: Translation.tr("Menu and tooltip animations"), icon: "check", kw: "menu tooltip animations" },

@@ -209,8 +209,8 @@ FloatingWindow {
 
                     SidebarButton {
                         visible: Platform.isWindows
-                        symbol: "desktop_windows"
-                        label: Translation.tr("Windows")
+                        symbol: "public"
+                        label: Translation.tr("Global")
                         note: Translation.tr("All environments")
                         selected: root.tab === "windows"
                         onClicked: root.tab = "windows"
