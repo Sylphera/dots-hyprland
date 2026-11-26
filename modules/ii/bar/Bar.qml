@@ -372,11 +372,31 @@ Scope {
                             bar.requestedOpen ? barRoot.reservedZone : 0);
                     }
                 }
+                id: reservationWindow
+                property int appliedZone: 0
+                function expectZone() {
+                    if (Platform.isWindows && bar.requestedOpen)
+                        WindowsNative.tiling?.expectBarSpace(barLoader.modelData.name, !Config.options.bar.bottom, barRoot.reservedZone);
+                    zoneDelay.restart();
+                }
+                Component.onCompleted: reservationWindow.expectZone()
+                Timer {
+                    id: zoneDelay
+                    interval: 150
+                    repeat: false
+                    onTriggered: reservationWindow.appliedZone = barRoot.reservedZone
+                }
+                Connections {
+                    target: barRoot
+                    function onReservedZoneChanged() {
+                        reservationWindow.expectZone();
+                    }
+                }
                 WlrLayershell.namespace: "quickshell:bar-reservation"
                 color: "transparent"
                 implicitHeight: 1
                 implicitWidth: 1
-                exclusiveZone: barRoot.reservedZone
+                exclusiveZone: reservationWindow.appliedZone
                 mask: Region {}
                 anchors {
                     top: !Config.options.bar.bottom
