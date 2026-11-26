@@ -274,7 +274,7 @@ ContentPage {
                     spacing: 8
 
                     ConfigSwitch {
-                        buttonIcon: "music_note_2"
+                        buttonIcon: "music_note"
                         text: Translation.tr("Enable media tab")
                         checked: Config.options.sidebar.media.enable
                         onCheckedChanged: { Config.options.sidebar.media.enable = checked }
@@ -2500,7 +2500,7 @@ ContentPage {
                 ConfigTextArea {
                     id: liveWallpapersPathField
                     Layout.fillWidth: true
-                    buttonIcon: "video_template"
+                    buttonIcon: "video_library"
                     text: Translation.tr("Live wallpaper folder")
                     description: Translation.tr("Videos for Live Wallpaper in the desktop menu")
                     placeholderText: Translation.tr("e.g., C:/Users/you/Videos/Wallpapers")
@@ -2848,7 +2848,7 @@ ContentPage {
                 }
                 ConfigComboBox {
                     Layout.fillWidth: true
-                    buttonIcon: "mood_heart"
+                    buttonIcon: "mood"
                     text: Translation.tr("Expressive font")
                     description: Translation.tr("Used for decorative/expressive text")
                     fieldWidth: 260

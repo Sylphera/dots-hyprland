@@ -474,7 +474,7 @@ QtObject {
                 { type: "spin", key: "interface:Columns in grid view", title: Translation.tr("Grid columns"), icon: "grid_view" },
                 { type: "spin", key: "interface:Wallpaper change interval (min)", title: Translation.tr("Change interval (min)"), icon: "timer" },
                 { type: "text", key: "interface:Custom wallpaper folder", title: Translation.tr("Custom wallpaper folder"), icon: "folder", w: 2 },
-                { type: "text", key: "interface:Live wallpaper folder", title: Translation.tr("Live wallpaper folder"), icon: "video_template", w: 2 }
+                { type: "text", key: "interface:Live wallpaper folder", title: Translation.tr("Live wallpaper folder"), icon: "video_library", w: 2 }
             ]
         },
         {

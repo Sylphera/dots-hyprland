@@ -1577,7 +1577,7 @@ ContentPage {
         }
 
         ConfigSwitch {
-            buttonIcon: "music_note_2"
+            buttonIcon: "music_note"
             text: Translation.tr('Enable media tab in left sidebar')
             checked: Config.options.sidebar.media.enable
             onCheckedChanged: {
