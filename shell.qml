@@ -64,7 +64,7 @@ ShellRoot {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.taskbar
         property: "hoverOnly"
-        value: Config.options.windowsPort.taskbarHoverOnly && !Config.options.windowsPort.nativeTaskbar
+        value: Config.options.windowsPort.taskbarHoverOnly && !Config.nativeTaskbar
     }
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
@@ -73,7 +73,7 @@ ShellRoot {
         value: ((Config.options.panelFamily === "ii" && Config.options.dock.enable)
                 || Config.options.panelFamily === "waffle")
             && Config.options.windowsPort.taskbarHoverOnly
-            && !Config.options.windowsPort.nativeTaskbar
+            && !Config.nativeTaskbar
     }
     Binding {
         when: Platform.isWindows && WindowsNative.ready && WindowsNative.taskbar?.suppressSnapBar !== undefined
@@ -121,7 +121,7 @@ ShellRoot {
         property: "dimInactive"
         value: Config.options.windowsPort.dimInactive
     }
-    readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
+    readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
         if (root.nativeTaskbarTakesOver)
             Qt.callLater(() => WindowsNative.taskbar.turnOffAutoHide());

@@ -102,16 +102,7 @@ Singleton {
     }
 
     function applyIsland(naby) {
-        const was = root.applied === "nabyscape";
         Config.options.nabyIsland.enable = naby;
-        if (!Platform.isWindows || naby === was)
-            return;
-        if (naby) {
-            Config.options.nabyIsland.keptNativeTaskbar = Config.options.windowsPort.nativeTaskbar;
-            Config.options.windowsPort.nativeTaskbar = true;
-        } else {
-            Config.options.windowsPort.nativeTaskbar = Config.options.nabyIsland.keptNativeTaskbar;
-        }
     }
 
     function applyPreset(style) {

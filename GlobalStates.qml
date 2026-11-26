@@ -82,7 +82,7 @@ Singleton {
         && Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
     property var islandScreens: ({})
     readonly property bool islandsAllowed: root.dynamicIslandEnabled && root.barOpen && !root.screenLocked
-        && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
+        && !(Platform.isWindows && Config.nativeTaskbar)
     readonly property bool dynamicIslandActive: root.islandsAllowed && Object.keys(root.islandScreens).length > 0
 
     function setIslandShown(screenName, shown) {

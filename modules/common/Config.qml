@@ -61,6 +61,7 @@ Singleton {
         }
     }
 
+    readonly property bool nativeTaskbar: configOptionsJsonAdapter.windowsPort.nativeTaskbar || configOptionsJsonAdapter.nabyIsland.enable
     property string activeEnvironment: ""
     property bool switchingEnvironment: false
 
