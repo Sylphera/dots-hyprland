@@ -214,6 +214,7 @@ Singleton {
                 property string borderColor: "layer0Border"
                 property list<string> collapsedSections: []
                 property bool keepOpen: false
+                property bool environmentRailOpen: false
             }
 
             property JsonObject background: JsonObject {

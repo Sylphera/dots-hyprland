@@ -13,6 +13,13 @@ FloatingWindow {
     signal closeRequested
 
     property string tab: "environment"
+    readonly property bool railOpen: Config.options.settings.environmentRailOpen
+    readonly property real railWidth: 210
+    readonly property bool railOverlay: !root.railOpen && root.tab === "environment" && root.pcLayout
+
+    function setRailOpen(open) {
+        Config.options.settings.environmentRailOpen = open;
+    }
     readonly property bool pcLayout: Config.options.appearance.settingsLayout === "end4pc"
     readonly property string currentEnvironment: Config.options.appearance.visualStyle
     readonly property bool maximized: frame.Window.window?.visibility === Window.Maximized
@@ -107,14 +114,69 @@ FloatingWindow {
 
             Rectangle {
                 id: sidebar
+                z: 2
                 Layout.fillHeight: true
                 Layout.margins: 10
                 Layout.rightMargin: 0
-                implicitWidth: 210
+                implicitWidth: root.railOpen ? root.railWidth : 30
                 radius: Appearance.rounding.large
-                color: Appearance.colors.colLayer1
+                color: root.railOverlay ? Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, collapsedHandle.containsMouse ? 0.75 : 0.45)
+                    : collapsedHandle.containsMouse && !root.railOpen ? Appearance.colors.colLayer1Hover : Appearance.colors.colLayer1
+                clip: true
+
+                Behavior on implicitWidth {
+                    NumberAnimation { duration: 240; easing.type: Easing.OutCubic }
+                }
+                Behavior on color {
+                    ColorAnimation { duration: 140 }
+                }
 
                 MouseArea {
+                    id: collapsedHandle
+                    property point pressPoint
+                    property bool dragged: false
+                    anchors.fill: parent
+                    visible: !root.railOpen
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onPressed: mouse => {
+                        collapsedHandle.pressPoint = Qt.point(mouse.x, mouse.y);
+                        collapsedHandle.dragged = false;
+                    }
+                    onPositionChanged: mouse => {
+                        if (!collapsedHandle.pressed || collapsedHandle.dragged)
+                            return;
+                        if (Math.abs(mouse.x - collapsedHandle.pressPoint.x) + Math.abs(mouse.y - collapsedHandle.pressPoint.y) > 6) {
+                            collapsedHandle.dragged = true;
+                            frame.Window.window?.startSystemMove();
+                        }
+                    }
+                    onClicked: {
+                        if (!collapsedHandle.dragged)
+                            root.setRailOpen(true);
+                    }
+
+                    MaterialSymbol {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.top
+                        anchors.topMargin: 14
+                        text: "chevron_right"
+                        iconSize: Appearance.font.pixelSize.huge
+                        color: Appearance.colors.colOnLayer1
+                    }
+
+                    StyledText {
+                        anchors.centerIn: parent
+                        rotation: -90
+                        text: Translation.tr("Environments") + "  ·  " + Translation.tr("Global")
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        font.weight: Font.Medium
+                        color: Appearance.colors.colSubtext
+                    }
+                }
+
+                MouseArea {
+                    enabled: root.railOpen
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
@@ -132,9 +194,18 @@ FloatingWindow {
                 }
 
                 ColumnLayout {
-                    anchors.fill: parent
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
                     anchors.margins: 12
+                    width: root.railWidth - 24
                     spacing: 6
+                    opacity: root.railOpen ? 1 : 0
+                    visible: opacity > 0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
+                    }
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -167,6 +238,25 @@ FloatingWindow {
                                 text: "ii-windows"
                                 font.pixelSize: Appearance.font.pixelSize.smaller
                                 color: Appearance.colors.colSubtext
+                            }
+                        }
+
+                        RippleButton {
+                            implicitWidth: 32
+                            implicitHeight: 32
+                            buttonRadius: Appearance.rounding.full
+                            colBackground: "transparent"
+                            colBackgroundHover: Appearance.colors.colLayer1Hover
+                            onClicked: root.setRailOpen(false)
+                            contentItem: MaterialSymbol {
+                                anchors.centerIn: parent
+                                horizontalAlignment: Text.AlignHCenter
+                                text: "chevron_left"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnLayer1
+                            }
+                            StyledToolTip {
+                                text: Translation.tr("Hide environments")
                             }
                         }
                     }
@@ -227,6 +317,7 @@ FloatingWindow {
             Loader {
                 id: contentLoader
                 Layout.fillWidth: true
+                Layout.leftMargin: root.railOverlay ? -(sidebar.width + 10) : 0
                 Layout.fillHeight: true
                 focus: true
                 sourceComponent: root.tab === "windows" && Platform.isWindows ? windowsPage
@@ -317,6 +408,7 @@ FloatingWindow {
     Component {
         id: pcDashboardContent
         PcDashboard.SettingsPcDashboardContent {
+            leftInset: root.railOverlay ? sidebar.width + 10 : 0
             onCloseRequested: root.closeRequested()
         }
     }

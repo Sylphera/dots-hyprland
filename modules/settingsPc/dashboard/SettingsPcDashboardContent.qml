@@ -13,6 +13,7 @@ Item {
 
     signal pageExitRequested()
     signal closeRequested()
+    property real leftInset: 0
 
     function focusContent() {
         root.forceActiveFocus();
@@ -300,6 +301,7 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
+        anchors.leftMargin: 16 + root.leftInset
         spacing: 12
 
         Item {
