@@ -1,0 +1,110 @@
+import qs
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
+import qs.modules.end4pc.fullscreenNotice
+import QtQuick
+import QtQuick.Controls
+import Quickshell
+import Quickshell.Wayland
+import Quickshell.Hyprland
+
+Scope {
+    id: notificationPopup
+
+    PanelWindow {
+        id: root
+        readonly property string targetScreenName: Config.options.notifications.forceMonitor.enable ? Config.options.notifications.forceMonitor.name : (Hyprland.focusedMonitor?.name ?? "")
+        readonly property bool fullscreenOnScreen: Notifications.hasFullscreenOnScreen(root.targetScreenName)
+        readonly property bool hasNotice: Platform.isWindows && FullscreenNotice.current !== null
+        visible: (Notifications.popupList.length > 0 || root.hasNotice) && !GlobalStates.screenLocked && !GlobalStates.islandShownOn(root.targetScreenName)
+        screen: Quickshell.screens.find(s => s.name === root.targetScreenName) ?? null
+
+        property string position: {
+            const raw = Config.options.notifications.position ?? "top_right";
+            if (raw === "top") return "top_right";
+            if (raw === "bottom") return "bottom_right";
+            return raw;
+        }
+        readonly property bool isTop: root.position.startsWith("top")
+        readonly property bool isBottom: root.position.startsWith("bottom")
+        readonly property bool isLeft: root.position.endsWith("left")
+        readonly property bool isRight: root.position.endsWith("right")
+        readonly property bool isCenter: root.position.endsWith("center")
+
+        WlrLayershell.namespace: "quickshell:notificationPopup"
+        WlrLayershell.layer: WlrLayer.Overlay
+        exclusiveZone: 0
+        exclusionMode: root.fullscreenOnScreen ? ExclusionMode.Ignore : ExclusionMode.Normal
+
+        anchors {
+            top: true
+            bottom: true
+            left: root.isLeft
+            right: root.isRight
+        }
+
+        mask: Region {
+            item: Platform.isWindows && root.fullscreenOnScreen && !Notifications.popupCursorVisible && !root.hasNotice ? null : listview.contentItem
+        }
+
+        color: "transparent"
+        implicitWidth: Appearance.sizes.notificationPopupWidth
+
+        NotificationListView {
+            id: listview
+            anchors {
+                top: parent.top
+                bottom: parent.bottom
+                topMargin: 4
+                bottomMargin: 4
+                leftMargin: 4
+                rightMargin: 4
+            }
+            implicitWidth: parent.width - Appearance.sizes.elevationMargin * 2
+            popup: true
+            verticalLayoutDirection: root.isBottom ? ListView.BottomToTop : ListView.TopToBottom
+            header: Platform.isWindows ? noticeHeader : null
+
+            Component {
+                id: noticeHeader
+                FullscreenNoticeCard {
+                    width: listview.width
+                }
+            }
+
+            states: [
+                State {
+                    name: "left"
+                    when: root.isLeft
+                    AnchorChanges {
+                        target: listview
+                        anchors.left: listview.parent.left
+                        anchors.right: undefined
+                        anchors.horizontalCenter: undefined
+                    }
+                },
+                State {
+                    name: "center"
+                    when: root.isCenter
+                    AnchorChanges {
+                        target: listview
+                        anchors.left: undefined
+                        anchors.right: undefined
+                        anchors.horizontalCenter: listview.parent.horizontalCenter
+                    }
+                },
+                State {
+                    name: "right"
+                    when: root.isRight
+                    AnchorChanges {
+                        target: listview
+                        anchors.left: undefined
+                        anchors.right: listview.parent.right
+                        anchors.horizontalCenter: undefined
+                    }
+                }
+            ]
+        }
+    }
+}

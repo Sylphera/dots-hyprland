@@ -358,6 +358,13 @@ ShellRoot {
         onTriggered: root.lookReady = true
     }
 
+    readonly property string wantedEnvironmentFamily: Config.options.appearance.visualStyle === "end4pc" ? "end4pc" : "ii"
+    property string environmentFamily: root.wantedEnvironmentFamily
+    onWantedEnvironmentFamilyChanged: {
+        root.environmentFamily = "";
+        Qt.callLater(() => root.environmentFamily = root.wantedEnvironmentFamily);
+    }
+
     component PanelFamilyLoader: LazyLoader {
         required property string identifier
         property bool extraCondition: true
@@ -366,7 +373,14 @@ ShellRoot {
     
     PanelFamilyLoader {
         identifier: "ii"
+        extraCondition: root.environmentFamily === "ii"
         component: IllogicalImpulseFamily {}
+    }
+
+    PanelFamilyLoader {
+        identifier: "ii"
+        extraCondition: root.environmentFamily === "end4pc"
+        component: End4pcFamily {}
     }
 
     PanelFamilyLoader {

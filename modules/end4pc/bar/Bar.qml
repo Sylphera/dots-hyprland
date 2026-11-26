@@ -1,0 +1,454 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import Quickshell
+import Quickshell.Io
+import Quickshell.Wayland
+import Quickshell.Hyprland
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+
+Scope {
+    id: bar
+    property bool showBarBackground: Config.options.bar.showBackground
+    property bool requestedOpen: GlobalStates.barOpen
+    property bool reservationOpen: GlobalStates.barOpen
+    readonly property int showDuration: 160
+    readonly property int hideDuration: 140
+
+    function setOpen(isOpen) {
+        if (!Platform.isWindows) {
+            GlobalStates.barOpen = isOpen;
+            return;
+        }
+        if (requestedOpen === isOpen) return;
+        requestedOpen = isOpen;
+        commitToggle.restart();
+        reservationDelay.restart();
+    }
+
+    Timer {
+        id: commitToggle
+        interval: (bar.requestedOpen ? bar.showDuration : bar.hideDuration) + 20
+        repeat: false
+        onTriggered: GlobalStates.barOpen = bar.requestedOpen
+    }
+
+    Timer {
+        id: reservationDelay
+        interval: 150
+        repeat: false
+        onTriggered: bar.reservationOpen = bar.requestedOpen
+    }
+    Timer {
+        id: relayoutSoon
+        interval: 30
+        repeat: false
+        onTriggered: WindowsNative.tiling?.relayout()
+    }
+    Timer {
+        id: relayoutAfterReservation
+        interval: 150
+        repeat: false
+        onTriggered: WindowsNative.tiling?.relayout()
+    }
+    onRequestedOpenChanged: {
+        if (!Platform.isWindows)
+            return;
+        relayoutSoon.restart();
+        relayoutAfterReservation.restart();
+    }
+    Connections {
+        target: GlobalStates
+        function onBarOpenChanged() {
+            if (Platform.isWindows)
+                relayoutAfterReservation.restart();
+        }
+    }
+
+    Variants {
+        // For each monitor
+        model: {
+            const screens = Quickshell.screens;
+            const list = Config.options.bar.screenList;
+            if (!list || list.length === 0)
+                return screens;
+            return screens.filter(screen => list.includes(screen.name));
+        }
+        LazyLoader {
+            id: barLoader
+            active: (Platform.isWindows || bar.requestedOpen) && !GlobalStates.screenLocked
+            required property ShellScreen modelData
+            component: Scope {
+            PanelWindow {
+                id: barRoot
+                screen: barLoader.modelData
+
+                property real toggleOffset: bar.requestedOpen
+                    ? 0 : (Config.options.bar.bottom ? implicitHeight : -implicitHeight)
+                Behavior on toggleOffset {
+                    NumberAnimation {
+                        duration: bar.requestedOpen ? bar.showDuration : bar.hideDuration
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Timer {
+                    id: showBarTimer
+                    interval: (Config?.options.bar.autoHide.showWhenPressingSuper.delay ?? 100)
+                    repeat: false
+                    onTriggered: {
+                        barRoot.superShow = true
+                    }
+                }
+                Connections {
+                    target: GlobalStates
+                    function onSuperDownChanged() {
+                        if (!Config?.options.bar.autoHide.showWhenPressingSuper.enable) return;
+                        if (GlobalStates.superDown) showBarTimer.restart();
+                        else {
+                            showBarTimer.stop();
+                            barRoot.superShow = false;
+                        }
+                    }
+                }
+                property bool superShow: false
+                property bool mustShow: hoverRegion.containsMouse || superShow
+                    || (Config.options.bar.autoHide.enable && GlobalStates.isFrameHovered(barRoot.screen?.name, Config.options.bar.bottom ? "bottom" : "top"))
+                readonly property bool barClosing: Config.options.bar.autoHide.enable && !barRoot.mustShow
+                property bool contentShown: true
+                onBarClosingChanged: {
+                    if (barRoot.barClosing) {
+                        contentHideTimer.restart();
+                    } else {
+                        contentHideTimer.stop();
+                        barRoot.contentShown = true;
+                    }
+                }
+                onContentShownChanged: GlobalStates.setBarContentShown(barRoot.screen?.name, barRoot.contentShown)
+                Timer {
+                    id: contentHideTimer
+                    interval: Appearance.animation.elementMoveFast.duration
+                    repeat: false
+                    onTriggered: barRoot.contentShown = false
+                }
+                readonly property real frameInset: BarLayouts.windowsFrameInset
+                readonly property int normalExclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 :
+                    Appearance.sizes.baseBarHeight + BarLayouts.styleZone
+                exclusionMode: ExclusionMode.Ignore
+                readonly property int reservedZone: (barContent.centerOnly && Config.options.bar.showFrame && Config.options.bar.centerOnlyReserveFrame)
+                    ? Config.options.bar.frameThickness
+                    : normalExclusiveZone + barRoot.frameInset
+                exclusiveZone: Platform.isWindows ? -1 : reservedZone
+                WlrLayershell.namespace: "quickshell:bar"
+                implicitHeight: Appearance.sizes.barHeight + Appearance.rounding.screenRounding
+                readonly property bool pillMask: barContent.item?.pillMask ?? false
+                mask: Region {
+                    item: barRoot.pillMask ? null : hoverMaskRegion
+                    Region {
+                        item: barRoot.pillMask ? leftPillMask : null
+                    }
+                    Region {
+                        item: barRoot.pillMask ? centerPillMask : null
+                    }
+                    Region {
+                        item: barRoot.pillMask ? rightPillMask : null
+                    }
+                }
+                color: "transparent"
+
+                // Positioning
+                anchors {
+                    top: !Config.options.bar.bottom
+                    bottom: Config.options.bar.bottom
+                    left: true
+                    right: true
+                }
+
+                margins {
+                    top: Config.options.bar.bottom ? 0 : barRoot.frameInset
+                    right: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * -1
+                    bottom: Config.options.bar.bottom ? (barRoot.frameInset - (Config.options.interactions.deadPixelWorkaround.enable ? 1 : 0)) : 0
+                }
+
+                // Include in focus grab
+                Component.onCompleted: {
+                    GlobalFocusGrab.addPersistent(barRoot);
+                    barRoot.contentShown = !barRoot.barClosing;
+                    GlobalStates.setBarContentShown(barRoot.screen?.name, barRoot.contentShown);
+                }
+                Component.onDestruction: {
+                    GlobalFocusGrab.removePersistent(barRoot);
+                    GlobalStates.setBarContentShown(barRoot.screen?.name, true);
+                }
+
+                MouseArea  {
+                    id: hoverRegion
+                    hoverEnabled: true
+                    transform: Translate {
+                        y: Platform.isWindows ? barRoot.toggleOffset : 0
+                    }
+                    anchors {
+                        fill: parent
+                        rightMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * 1
+                        bottomMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * 1
+                    }
+
+                    Item {
+                        id: hoverMaskRegion
+                        anchors {
+                            fill: barContent
+                            topMargin: -Config.options.bar.autoHide.hoverRegionWidth
+                            bottomMargin: -Config.options.bar.autoHide.hoverRegionWidth
+                        }
+                    }
+
+                    Item {
+                        id: leftPillMask
+                        readonly property rect area: barRoot.pillMask ? barContent.item.leftMaskRect : Qt.rect(0, 0, 0, 0)
+                        x: barContent.x + area.x
+                        y: barContent.y + area.y
+                        width: area.width
+                        height: area.height
+                    }
+
+                    Item {
+                        id: centerPillMask
+                        readonly property rect area: barRoot.pillMask ? barContent.item.centerMaskRect : Qt.rect(0, 0, 0, 0)
+                        x: barContent.x + area.x
+                        y: barContent.y + area.y
+                        width: area.width
+                        height: area.height
+                    }
+
+                    Item {
+                        id: rightPillMask
+                        readonly property rect area: barRoot.pillMask ? barContent.item.rightMaskRect : Qt.rect(0, 0, 0, 0)
+                        x: barContent.x + area.x
+                        y: barContent.y + area.y
+                        width: area.width
+                        height: area.height
+                    }
+
+                    Component {
+                        id: classicContent
+                        BarContent {}
+                    }
+
+                    Component {
+                        id: layoutContent
+                        BarLayoutContent {}
+                    }
+
+                    Loader {
+                        id: barContent
+                        readonly property bool centerOnly: barContent.item?.centerOnly ?? false
+
+                        height: Appearance.sizes.barHeight
+                        sourceComponent: BarLayouts.classicContent ? classicContent : layoutContent
+                        anchors {
+                            right: parent.right
+                            left: parent.left
+                            top: parent.top
+                            bottom: undefined
+                            topMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : BarLayouts.edgeGap
+                            bottomMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * -1
+                            rightMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * -1
+                        }
+                        Behavior on anchors.topMargin {
+                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                        }
+                        Behavior on anchors.bottomMargin {
+                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                        }
+
+                        states: State {
+                            name: "bottom"
+                            when: Config.options.bar.bottom
+                            AnchorChanges {
+                                target: barContent
+                                anchors {
+                                    right: parent.right
+                                    left: parent.left
+                                    top: undefined
+                                    bottom: parent.bottom
+                                }
+                            }
+                            PropertyChanges {
+                                target: barContent
+                                anchors.topMargin: 0
+                                anchors.bottomMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : BarLayouts.edgeGap
+                            }
+                        }
+                    }
+
+                    // Round decorators
+                    Loader {
+                        id: roundDecorators
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            top: barContent.bottom
+                            bottom: undefined
+                        }
+                        height: Appearance.rounding.screenRounding
+                        active: (showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.centerOnly)
+                            || Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 6
+
+                        states: State {
+                            name: "bottom"
+                            when: Config.options.bar.bottom
+                            AnchorChanges {
+                                target: roundDecorators
+                                anchors {
+                                    right: parent.right
+                                    left: parent.left
+                                    top: undefined
+                                    bottom: barContent.top
+                                }
+                            }
+                        }
+
+                        sourceComponent: Item {
+                            implicitHeight: Appearance.rounding.screenRounding
+                            readonly property color decoratorColor: (!showBarBackground && Config.options.bar.cornerStyle !== 4 && Config.options.bar.cornerStyle !== 6) ? "transparent" : Config.options.bar.followFrameColor ? Appearance.getColorFromName(Config.options.bar.frameColor) : Appearance.colors.colLayer0
+                            RoundCorner {
+                                id: leftCorner
+                                visible: Config.options.bar.cornerStyle === 0 || (barContent.item?.effectiveLeftLayout.length ?? 0) > 0
+                                anchors {
+                                    top: parent.top
+                                    bottom: parent.bottom
+                                    left: parent.left
+                                }
+
+                                implicitSize: Appearance.rounding.screenRounding
+                                color: parent.decoratorColor
+
+                                corner: RoundCorner.CornerEnum.TopLeft
+                                states: State {
+                                    name: "bottom"
+                                    when: Config.options.bar.bottom
+                                    PropertyChanges {
+                                        leftCorner.corner: RoundCorner.CornerEnum.BottomLeft
+                                    }
+                                }
+                            }
+                            RoundCorner {
+                                id: rightCorner
+                                visible: Config.options.bar.cornerStyle === 0 || (barContent.item?.effectiveRightLayout.length ?? 0) > 0
+                                anchors {
+                                    right: parent.right
+                                    top: !Config.options.bar.bottom ? parent.top : undefined
+                                    bottom: Config.options.bar.bottom ? parent.bottom : undefined
+                                }
+                                implicitSize: Appearance.rounding.screenRounding
+                                color: parent.decoratorColor
+
+                                corner: RoundCorner.CornerEnum.TopRight
+                                states: State {
+                                    name: "bottom"
+                                    when: Config.options.bar.bottom
+                                    PropertyChanges {
+                                        rightCorner.corner: RoundCorner.CornerEnum.BottomRight
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            PanelWindow {
+                screen: barLoader.modelData
+                visible: Platform.isWindows && bar.reservationOpen
+                Connections {
+                    target: bar
+                    function onRequestedOpenChanged() {
+                        if (!Platform.isWindows)
+                            return;
+                        WindowsNative.tiling?.expectBarSpace(barLoader.modelData.name, !Config.options.bar.bottom,
+                            bar.requestedOpen ? barRoot.reservedZone : 0);
+                    }
+                }
+                id: reservationWindow
+                property int appliedZone: 0
+                function expectZone() {
+                    if (Platform.isWindows && bar.requestedOpen)
+                        WindowsNative.tiling?.expectBarSpace(barLoader.modelData.name, !Config.options.bar.bottom, barRoot.reservedZone);
+                    zoneDelay.restart();
+                }
+                Component.onCompleted: reservationWindow.expectZone()
+                Timer {
+                    id: zoneDelay
+                    interval: 150
+                    repeat: false
+                    onTriggered: reservationWindow.appliedZone = barRoot.reservedZone
+                }
+                Connections {
+                    target: barRoot
+                    function onReservedZoneChanged() {
+                        reservationWindow.expectZone();
+                    }
+                }
+                WlrLayershell.namespace: "quickshell:bar-reservation"
+                color: "transparent"
+                implicitHeight: 1
+                implicitWidth: 1
+                exclusiveZone: reservationWindow.appliedZone
+                mask: Region {}
+                anchors {
+                    top: !Config.options.bar.bottom
+                    bottom: Config.options.bar.bottom
+                    left: true
+                    right: true
+                }
+            }
+        }
+    }
+    }
+
+    IpcHandler {
+        target: "bar"
+
+        function toggle(): void {
+            bar.setOpen(!bar.requestedOpen)
+        }
+
+        function close(): void {
+            bar.setOpen(false)
+        }
+
+        function open(): void {
+            bar.setOpen(true)
+        }
+    }
+
+    GlobalShortcut {
+        name: "barToggle"
+        description: "Toggles bar on press"
+
+        onPressed: {
+            bar.setOpen(!bar.requestedOpen);
+        }
+    }
+
+    GlobalShortcut {
+        name: "barOpen"
+        description: "Opens bar on press"
+
+        onPressed: {
+            bar.setOpen(true);
+        }
+    }
+
+    GlobalShortcut {
+        name: "barClose"
+        description: "Closes bar on press"
+
+        onPressed: {
+            bar.setOpen(false);
+        }
+    }
+}
