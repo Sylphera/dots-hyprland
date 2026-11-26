@@ -304,12 +304,23 @@ FloatingWindow {
 
                     StyledText {
                         Layout.leftMargin: 6
-                        Layout.bottomMargin: 2
                         text: Translation.tr("Environments").toUpperCase()
                         font.pixelSize: Appearance.font.pixelSize.smallest
                         font.weight: Font.DemiBold
                         font.letterSpacing: 1.5
                         color: Appearance.colors.colSubtext
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 6
+                        Layout.rightMargin: 6
+                        Layout.bottomMargin: 4
+                        text: Translation.tr("Each environment keeps its own settings")
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: Appearance.colors.colSubtext
+                        opacity: 0.8
                     }
 
                     Repeater {

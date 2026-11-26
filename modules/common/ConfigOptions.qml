@@ -675,6 +675,7 @@ JsonAdapter {
 
     property JsonObject windowsPort: JsonObject {
         property int pinsVersion: 0
+        property bool sharedWallpaper: false
         property bool taskbarHoverOnly: true
         property bool nativeTaskbar: false
         property bool hideDesktopPopup: true

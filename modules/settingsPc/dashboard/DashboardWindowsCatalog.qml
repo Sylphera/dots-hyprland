@@ -122,6 +122,7 @@ QtObject {
         "windows:Peripheral critical warning": { type: "spin", get: () => Config.options.battery.peripheralCritical, set: v => { Config.options.battery.peripheralCritical = v; }, from: 0, to: 100, stepSize: 5 },
         "windows:Show date": { type: "switch", get: () => Config.options.time.showDate, set: v => { Config.options.time.showDate = v; } },
         "windows:Background behind icons": { type: "switch", get: () => Config.options.windowsPort.backgroundBehindIcons, set: v => { Config.options.windowsPort.backgroundBehindIcons = v; } },
+        "windows:Shared wallpaper": { type: "switch", get: () => Config.options.windowsPort.sharedWallpaper, set: v => { Config.options.windowsPort.sharedWallpaper = v; } },
         "windows:Draw own wallpaper": { type: "switch", get: () => Config.options.windowsPort.ownWallpaper, set: v => { Config.options.windowsPort.ownWallpaper = v; } },
         "windows:Tiling": { type: "switch", get: () => Config.options.windowsPort.tiling.enable, set: v => { Config.options.windowsPort.tiling.enable = v; } },
         "windows:Tiling Layout": {
@@ -381,6 +382,7 @@ QtObject {
         {
             page: "global:desktop", title: Translation.tr("Windows desktop"), icon: "desktop_windows", when: "windows", cards: [
                 { type: "toggle", w: 2, key: "windows:Background behind icons", title: Translation.tr("Put the background behind the desktop icons"), icon: "layers", kw: "desktop icons background behind wallpaper widgets show desktop" },
+                { type: "toggle", w: 2, key: "windows:Shared wallpaper", title: Translation.tr("Same wallpaper in every environment"), icon: "wallpaper_slideshow", kw: "same shared wallpaper every all environments ii end4-pc" },
                 { type: "toggle", w: 2, key: "windows:Wallpaper per desktop", title: Translation.tr("A different wallpaper for each desktop"), icon: "view_carousel", kw: "wallpaper per desktop virtual desktops different each" },
                 { type: "toggle", w: 2, when: "winbehindicons", key: "windows:Draw own wallpaper", title: Translation.tr("Draw ii's own wallpaper"), icon: "wallpaper", kw: "own wallpaper draw blur centered transitions parallax effects native windows" }
             ]

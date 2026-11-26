@@ -168,7 +168,8 @@ Singleton {
     }
 
     function applyOptions(next, current, target) {
-        for (const path of EnvironmentKeys.globalPaths) {
+        const shared = root.readPath(current, "windowsPort.sharedWallpaper") ? ["background.wallpaperPath", "background.thumbnailPath"] : [];
+        for (const path of EnvironmentKeys.globalPaths.concat(shared)) {
             const value = root.readPath(current, path);
             if (value !== undefined)
                 root.writePath(next, path, value);
