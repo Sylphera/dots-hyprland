@@ -7,7 +7,6 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
-import qs.modules.ii.wallpaperSelector as WP
 
 Item {
     id: root
@@ -684,8 +683,9 @@ Item {
             visible: active
             active: root.currentPage === root.wallpapersPage
 
-            sourceComponent: WP.WallpaperSelectorContent {
-                shown: root.currentPage === root.wallpapersPage
+            sourceComponent: DashboardWallpapersPage {
+                pager: root
+                staggerMs: root.staggerMs
             }
         }
 

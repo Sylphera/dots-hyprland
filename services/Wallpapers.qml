@@ -26,6 +26,30 @@ Singleton {
     property bool _folderModelFresh: false
     readonly property var folderModel: root._folderModel ?? emptyFolderModel
     property string searchQuery: ""
+    property list<string> wallpapers: []
+    onFolderModelChanged: root.rebuildWallpaperList()
+
+    function rebuildWallpaperList() {
+        const model = root.folderModel;
+        const paths = [];
+        for (let i = 0; i < model.count; i++) {
+            if (model.get(i, "fileIsDir")) continue;
+            const path = FileUtils.trimFileProtocol(String(model.get(i, "filePath") ?? ""));
+            if (path.length > 0) paths.push(path);
+        }
+        root.wallpapers = paths;
+    }
+
+    Connections {
+        target: root.folderModel
+        ignoreUnknownSignals: true
+        function onCountChanged() {
+            root.rebuildWallpaperList();
+        }
+        function onStatusChanged() {
+            root.rebuildWallpaperList();
+        }
+    }
     readonly property list<string> imageExtensions: ["jpg", "jpeg", "png", "webp", "avif", "bmp", "svg"]
     readonly property list<string> videoExtensions: ["mp4", "webm", "mkv", "avi", "mov"]
     readonly property list<string> extensions: Platform.isWindows ? root.imageExtensions.concat(root.videoExtensions) : root.imageExtensions
