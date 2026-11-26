@@ -10,6 +10,7 @@ Singleton {
     property int hops: 0
     property var pending: []
     property bool drained: false
+    property bool bulk: false
 
     function add(loader) {
         root.pending.push(loader);

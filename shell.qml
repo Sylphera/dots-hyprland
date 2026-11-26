@@ -360,9 +360,129 @@ ShellRoot {
 
     readonly property string wantedEnvironmentFamily: Config.options.appearance.visualStyle === "end4pc" ? "end4pc" : "ii"
     property string environmentFamily: root.wantedEnvironmentFamily
+    property bool environmentSwapping: false
+    property string pendingEnvironment: ""
     onWantedEnvironmentFamilyChanged: {
+        if (!Config.ready || root.environmentFamily === "") {
+            root.environmentFamily = root.wantedEnvironmentFamily;
+            return;
+        }
+        if (environmentCurtain.covering && root.pendingEnvironment === "") {
+            root.swapEnvironmentFamily();
+            return;
+        }
+        environmentCurtain.environment = root.wantedEnvironmentFamily;
+        root.coverApplied = false;
+        environmentCurtain.shown = true;
+        curtainCoverTimer.restart();
+    }
+
+    Connections {
+        target: Config
+        function onRequestedEnvironmentChanged() {
+            const target = Config.requestedEnvironment;
+            if (target === "")
+                return;
+            Config.requestedEnvironment = "";
+            if (!Config.ready || target === Config.options.appearance.visualStyle || environmentCurtain.shown)
+                return;
+            root.pendingEnvironment = target;
+            environmentCurtain.environment = target;
+            root.coverApplied = false;
+            environmentCurtain.shown = true;
+            curtainCoverTimer.restart();
+        }
+    }
+
+    IpcHandler {
+        target: "environment"
+
+        function switchTo(name: string): void {
+            Config.requestedEnvironment = name;
+        }
+    }
+
+    Binding {
+        target: Config
+        property: "environmentSwitchDelay"
+        value: environmentCurtain.covering ? 0 : environmentCurtain.coverMs + 20
+    }
+
+    EnvironmentCurtain {
+        id: environmentCurtain
+    }
+
+    Connections {
+        target: environmentCurtain
+        function onCovered() {
+            curtainCoverTimer.stop();
+            root.applyCoveredEnvironment();
+        }
+    }
+
+    Timer {
+        id: curtainCoverTimer
+        interval: environmentCurtain.coverMs + 300
+        onTriggered: root.applyCoveredEnvironment()
+    }
+
+    property bool coverApplied: false
+
+    function applyCoveredEnvironment() {
+        if (root.coverApplied || !environmentCurtain.shown)
+            return;
+        root.coverApplied = true;
+        const pending = root.pendingEnvironment;
+        if (pending !== "") {
+            root.pendingEnvironment = "";
+            Config.options.appearance.visualStyle = pending;
+            return;
+        }
+        root.swapEnvironmentFamily();
+    }
+
+    function swapEnvironmentFamily() {
+        root.environmentSwapping = true;
+        PanelLoaderQueue.bulk = true;
         root.environmentFamily = "";
-        Qt.callLater(() => root.environmentFamily = root.wantedEnvironmentFamily);
+        Qt.callLater(() => {
+            Config.followEnvironment();
+            root.environmentFamily = root.wantedEnvironmentFamily;
+            curtainQuiet.since = Date.now();
+            curtainQuiet.last = Date.now();
+            curtainQuiet.start();
+            curtainLimitTimer.restart();
+        });
+    }
+
+    Timer {
+        id: curtainQuiet
+        property real last: 0
+        property real since: 0
+        interval: 16
+        repeat: true
+        onTriggered: {
+            const now = Date.now();
+            if (now - curtainQuiet.last > 40 || !PanelLoaderQueue.drained)
+                curtainQuiet.since = now;
+            curtainQuiet.last = now;
+            if (now - curtainQuiet.since >= 300)
+                root.finishEnvironmentSwap();
+        }
+    }
+
+    Timer {
+        id: curtainLimitTimer
+        interval: 4000
+        onTriggered: root.finishEnvironmentSwap()
+    }
+
+    function finishEnvironmentSwap() {
+        curtainQuiet.stop();
+        curtainLimitTimer.stop();
+        root.environmentSwapping = false;
+        PanelLoaderQueue.bulk = false;
+        environmentCurtain.shown = false;
     }
 
     component PanelFamilyLoader: LazyLoader {

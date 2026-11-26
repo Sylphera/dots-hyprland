@@ -62,6 +62,8 @@ Singleton {
     }
 
     property string activeEnvironment: ""
+    property int environmentSwitchDelay: 0
+    property string requestedEnvironment: ""
     property bool switchingEnvironment: false
 
     function environmentFilePath(environment) {
@@ -201,9 +203,16 @@ Singleton {
     Connections {
         target: configOptionsJsonAdapter.appearance
         function onVisualStyleChanged() {
-            if (root.ready && !root.switchingEnvironment)
-                Qt.callLater(root.followEnvironment);
+            if (root.ready && !root.switchingEnvironment) {
+                environmentSwitchTimer.interval = root.environmentSwitchDelay;
+                environmentSwitchTimer.restart();
+            }
         }
+    }
+
+    Timer {
+        id: environmentSwitchTimer
+        onTriggered: root.followEnvironment()
     }
 
     Component {

@@ -20,7 +20,7 @@ LazyLoader {
 
     onWantedChanged: loadSource()
     Component.onCompleted: {
-        if (deferred)
+        if (deferred && !PanelLoaderQueue.bulk)
             PanelLoaderQueue.add(root);
         else
             released = true;

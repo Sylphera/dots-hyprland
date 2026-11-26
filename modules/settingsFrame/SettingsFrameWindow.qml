@@ -79,7 +79,7 @@ FloatingWindow {
     function pickEnvironment(value) {
         root.tab = "environment";
         if (Config.options.appearance.visualStyle !== value)
-            Config.options.appearance.visualStyle = value;
+            Config.requestedEnvironment = value;
     }
 
     visible: true

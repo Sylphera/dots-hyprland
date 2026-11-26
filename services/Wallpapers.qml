@@ -122,12 +122,16 @@ Singleton {
     function _applyEnvironmentWallpaper() {
         const main = Config.options.background.wallpaperPath;
         if (!main) return;
-        if (!root.isVideoPath(main)) {
-            root._retheme(main, Appearance.m3colors.darkmode, true);
-            return;
-        }
-        const still = Config.options.background.thumbnailPath;
-        if (still && !root.isVideoPath(still)) root._retheme(still, Appearance.m3colors.darkmode, true, main);
+        const video = root.isVideoPath(main);
+        const still = video ? Config.options.background.thumbnailPath : main;
+        if (!still || root.isVideoPath(still)) return;
+        root._retheme(still, Appearance.m3colors.darkmode, false, video ? main : "");
+        const wn = WindowsNative.wallpaper;
+        const desktopKeepsOwn = root.desktopWallpapersActive && root.systemDrawsWallpaper && root.currentDesktopWallpaper !== "";
+        if (!wn || desktopKeepsOwn || root.normalizedPath(still) === root.normalizedPath(root._systemWallpaper)) return;
+        root._systemWallpaper = still;
+        root._systemShowsOwn = false;
+        wn.setWallpaperInBackground(still);
     }
 
     signal changed()
