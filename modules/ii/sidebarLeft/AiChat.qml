@@ -76,6 +76,14 @@ Item {
             }
         },
         {
+            name: "refresh",
+            description: Translation.tr("Refresh local models (Ollama, vLLM)"),
+            execute: () => {
+                Ai.refreshLocalModels();
+                Ai.addMessage(Translation.tr("Refreshing local models..."), Ai.interfaceRole);
+            }
+        },
+        {
             name: "model",
             description: Translation.tr("Choose model"),
             execute: args => {

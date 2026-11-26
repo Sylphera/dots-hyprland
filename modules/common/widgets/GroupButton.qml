@@ -36,6 +36,8 @@ Button {
     implicitWidth: (root.down && bounce) ? clickedWidth : baseWidth
     implicitHeight: (root.down && bounce) ? clickedHeight : baseHeight
 
+    property bool glass: false
+    readonly property bool glassActive: glass && !toggled && (Config.options?.background.widgets.glass?.enable ?? false)
     property color colBackground: ColorUtils.transparentize(colBackgroundHover, 1) || "transparent"
     property color colBackgroundHover: Appearance?.colors.colLayer1Hover ?? "#E5DFED"
     property color colBackgroundActive: Appearance?.colors.colLayer1Active ?? "#D6CEE2"
@@ -99,6 +101,7 @@ Button {
         }
     }
 
+    readonly property color paintedColor: root.glassActive ? (root.hovered || root.down ? ColorUtils.transparentize(root.color, 0.6) : "transparent") : root.color
     property alias mouseArea: buttonMouseArea
     MouseArea {
         id: buttonMouseArea
@@ -146,7 +149,7 @@ Button {
         bottomRightRadius: root.rightRadius
         implicitHeight: 50
 
-        color: root.color
+        color: root.paintedColor
         Behavior on color {
             ColorAnimation {
                 duration: Appearance.animation.elementMoveFast.duration

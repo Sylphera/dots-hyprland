@@ -219,7 +219,7 @@ Item {
         }
         Component {
             id: translator
-            Translator {}
+            TranslatorPc {}
         }
         Component {
             id: media

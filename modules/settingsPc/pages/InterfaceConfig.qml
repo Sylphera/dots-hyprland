@@ -284,6 +284,27 @@ ContentPage {
                     }
                 }
             }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                implicitHeight: footballCol.implicitHeight + 24
+                radius: Appearance.rounding.normal
+                color: Appearance.colors.colLayer1
+
+                ColumnLayout {
+                    id: footballCol
+                    anchors { fill: parent; margins: 12 }
+                    spacing: 8
+
+                    ConfigSwitch {
+                        buttonIcon: "sports"
+                        text: Translation.tr("Enable sports tab")
+                        checked: Config.options.sidebar.football.enable
+                        onCheckedChanged: { Config.options.sidebar.football.enable = checked }
+                    }
+                }
+            }
         }
 
         ContentSection {
